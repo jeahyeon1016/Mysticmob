@@ -1,0 +1,53 @@
+# ============================================================
+# 슬라임 / Slime
+# 일반 몹 - 비전투형
+# MythicMobs + BetterModel
+# v1.4
+#
+# 특징:
+# - 낮은 체력
+# - 플레이어를 선공/추적하지 않음
+# - 평상시 돼지 기본 AI 완전 제거
+# - 플레이어에게 피격되면 일정 시간 플레이어에게서 도망감
+# - 도망 상태에서 다시 맞으면 도망 시간이 갱신됨
+# - 공격 행동 없음
+# - 피격/사망 시 슬라임 효과음 재생
+#
+# BetterModel model id: slime_common
+# ============================================================
+
+Slime_Normal:
+  Type: PIG
+  Display: '&a슬라임'
+  Health: 20
+  Damage: 0
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.24
+    FollowRange: 12
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    KnockbackResistance: 0
+
+  # 평상시에는 아무 행동도 하지 않는다.
+  # 피격 시 Skills 파일의 Flee Aura가 일시적으로 fleeplayers AI를 추가한다.
+  AIGoalSelectors:
+    - clear
+
+  # 어떤 대상도 공격 대상으로 지정하지 않는다.
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    # BetterModel
+    - model{mid=slime_common} @self ~onSpawn
+
+    # 피격 시 5초 도망 상태. 다시 맞으면 5초로 갱신.
+    - skill{s=Slime_Normal_FleeAura} @self ~onDamaged
+
+    # 피격 시 슬라임 피격음
+    - sound{s=entity.slime.hurt;v=1;p=1.25} @self ~onDamaged
+
+    # 사망 시 슬라임 사망음
+    - sound{s=entity.slime.death;v=1;p=1.25} @self ~onDeath

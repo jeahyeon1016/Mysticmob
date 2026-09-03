@@ -1,0 +1,20 @@
+# ============================================================
+# Slime Normal Skills
+# v1.4
+#
+# 피격 시 5초간 fleeplayers AI 활성화.
+# 같은 Aura가 다시 적용되면 지속시간을 새로 5초로 갱신한다.
+# ============================================================
+
+Slime_Normal_FleeAura:
+  Skills:
+    - aura{auraName=SlimeNormalFlee;d=100;ms=1;rd=true;msc=true;onStart=Slime_Normal_FleeStart;onEnd=Slime_Normal_FleeEnd} @self
+
+Slime_Normal_FleeStart:
+  Skills:
+    - runaigoalselector{goal=clear} @self
+    - runaigoalselector{goal="fleeplayers{d=12;s=1.25;ss=1}"} @self
+
+Slime_Normal_FleeEnd:
+  Skills:
+    - runaigoalselector{goal=clear} @self

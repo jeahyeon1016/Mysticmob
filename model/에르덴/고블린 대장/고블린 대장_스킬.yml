@@ -1,0 +1,2718 @@
+# ============================================================
+# 고블린 킹 라이더 - ModelEngine 4 Skills
+# Development v5.61
+#
+# Fallen Devastator식 전투 상태 설계를 1페 라이더 + 2페 하차 상태에 적용.
+# v5.61: BOAR hoglin 계열 SFX 볼륨 추가 40% 감소.
+# - angry 0.35 -> 0.21
+# - attack 0.54 -> 0.32
+# - death 0.50 -> 0.30
+# - BOAR 이동/판정/Threat/VFX 구조 변경 없음
+# v5.60: BOAR 공격 이동/방향 및 공격 VFX 정리.
+# - GORE 시작 시 goto speed=0으로 기존 navigation 덮어쓰기
+# - velocity SET 0으로 남은 이동량 즉시 제거
+# - 공격 시작 + 실제 타점 직전 inherited target을 다시 바라보도록 look 적용
+# - BOAR GORE 준비/충돌 cloud/crit 파티클 전부 제거
+# - BOAR 공격 SFX / 80도 3블럭 판정 / Threat / direct-origin 추격 구조 유지
+# v5.59: KUR Spin 텔레그래프 / Range Slash VFX 정리.
+# - Spin: 기존 몸 주변 crit/cloud 연출 제거
+# - Spin: 실제 공격 반경 5.5블럭을 바닥 cloud ring으로 표시하는 플레이어용 텔레그래프 적용
+# - Spin 타격 진입 시 동일 반경을 한 번 더 표시
+# - Range Slash: #66CCFF / #BFEFFF blue dust 전부 제거
+# - Range Slash는 sweep 궤적 + crit 충돌만 유지
+# - 공격 판정/데미지/Threat/타이밍/SFX는 변경하지 않음
+# v5.58: 실제 전투 VFX를 '모델/애니메이션 중심 + 파티클 보조' 구조로 재정리.
+# - 일반 평타: sweep/crit 최소화, 애니메이션 중심
+# - Shove/Charge: 이동 중 trail 절제, 실제 충돌 순간에만 밀도 집중
+# - Slam/A3/Jump/페이즈 전환: 강공격/큰 이벤트답게 타점 중심 VFX 강화
+# - Spin: 큰 링 난사를 줄이고 짧은 회전 궤적 중심
+# - Range Slash: 푸른 검기 본체/잔광 중심, 주변 crit 최소화
+# - Runner: 화려함보다 상태 변화 인지용 짧은 VFX
+# - 개발용 사거리 표시 파티클은 v5.57에서 제거된 상태 유지
+# - 공격 판정/Threat/타겟팅/타이밍/SFX 구조는 변경하지 않음
+# v5.57: 실제 전투 SFX 청감 조정 + 개발용 사거리 표시 이펙트 제거.
+# - BOAR hoglin 계열 소리 볼륨을 v5.56 대비 약 60%로 감소
+# - 공격/피격/충돌 계열 SFX는 과하게 날카롭거나 큰 볼륨을 낮춰 장시간 전투 청감 완화
+# - GK_Debug_* / GK2_Debug_* 사거리·각도 표시 파티클 호출 및 정의 전부 제거
+# - REAL VFX/SFX는 유지하며 공격 판정/Threat/타겟팅/타이밍은 변경하지 않음
+# v5.56: 라이더 / KUR / BOAR 각 전투 패턴에 실제 플레이어용 VFX/SFX 추가.
+# - 실제 연출용 요소는 REAL VFX/SFX 주석으로 구분
+# - 라이더: A1/A2/Shove/Slam/Charge/Charge Slash/1->2페 전환
+# - KUR: A1/A2/A3/Spin/Jump Impact/Range Slash/Runner 발동/Death
+# - BOAR: GORE windup/impact/Death
+# - 공격 범위, 피해, Threat, 타겟 context, 패턴 타이밍은 변경하지 않음
+# v5.55: 1페 고블린 라이더 Threat/Hit 판정을 Fallen Devastator/Defender식으로 재정리.
+# - Runner Swap: changedThreat Aura(40t) -> clearThreat -> inherited 공격자 Threat 100
+# - clearTarget/setTarget 강제 고정 제거, ThreatTable에 실제 target 갱신 위임
+# - A1/A2/Shove HitOnce 내부 @target 제거
+# - LivingInCone이 넘겨준 inherited target에만 damage/throw 적용
+# - 패턴 도중 Threat target이 바뀌어도 범위 밖 새 target으로 기존 타격이 전이되지 않도록 분리
+# - Runner Stack 확률 구조(15/30/45/60/75%) 유지
+# - BOAR v5.54 goto/공격 범위 구조 유지
+# v5.54: BOAR 접근 및 1페 라이더 Runner 강제 타겟 전환 수정.
+# - BOAR goto sh=0 -> sh=2.0: 플레이어 정확한 위치까지 파고드는 현상 완화
+# - 라이더 Runner Swap: clearTarget + clearThreat + threat(mode=set) + setTarget @Trigger
+# - Runner 확률 성공 후 target 미정 -> 기존 A 재획득 문제 수정
+# v5.53: BOAR GORE 공격 판정 조정.
+# - 공격 시작 거리 3.0블럭
+# - 실제 타점 좌우 40도 = 총 80도
+# - 피해/밀치기 범위 3블럭
+# - direct-origin / Threat / setTarget / goto 추격 구조는 v5.52 그대로 유지
+# v5.52: BOAR 추격을 검증 완료된 goto @target 방식으로 교체.
+# - 더미 테스트 v1.4에서 ThreatTOP/current target 정상 + goto 이동 성공 확인
+# - GK_BOAR_CHASE_TARGET 추가, 5틱마다 goto{speed=1.2} @target
+# - 공격 busy=1 중에는 chase 중지
+# - direct-origin FURTHEST / Threat10000 / setTarget 구조는 v5.51 그대로 유지
+# v5.51: 실제 BOAR에 검증 완료된 direct-origin v1.3 구조 적용.
+# - Parent / setparent 제거
+# - child metaskill로 origin/target context 전달 제거
+# - threat / setTarget / debug mechanic 자체에 origin=@MIR{...KUR...} 직접 지정
+# - @PlayersNearOrigin{sort=FURTHEST;limit=1}로 KUR 기준 직접 선정
+# - BOAR 자신의 ThreatTable/current target에 즉시 저장
+# - GORE는 BOAR actual @target 사용
+# v5.50: Mob 파일의 미정의 BossThreat 호출 제거 대응.
+# - Skills 로직 자체 변경 없음
+# - BOAR Premium origin=@Parent 로직 유지
+# v5.49: DUST particle named-color 로드 오류 수정.
+# - color=AQUA/RED/BLUE/LIME/ORANGE/PURPLE/YELLOW -> HEX color 코드로 통일
+# - MythicMobs 5.13 공식 Dust 문법(color=#RRGGBB) 기준
+# - BOAR/Premium origin 로직은 v5.48 그대로 유지
+# v5.48: Premium origin=@Parent 구조로 BOAR target system 재작성.
+# - BOAR Parent = nearest KUR (SetParent 공식 방식)
+# - BOAR caster 유지 + skill origin=@Parent(KUR)
+# - @PlayersNearOrigin{sort=FURTHEST;limit=1}로 KUR 기준 직접 선정
+# - 선정 player는 BOAR 자신의 clearThreat -> threat10000 -> setTarget
+# - Aura/variable/tag/SudoSkill/player-reference relay 전부 제거
+# - GORE는 BOAR actual @target을 inherited target으로 사용
+# v5.47: 고수분식 direct target-context relay로 BOAR 구조 재작성.
+# - KUR FURTHEST player -> child inherited target
+# - SudoSkill로 실제 BOAR가 GK_BOAR_ACCEPT_TARGET을 cast
+# - SudoSkill target=@TargetedTarget로 선정 플레이어를 BOAR에게 직접 전달
+# - BOAR가 setparent로 플레이어 Entity reference를 직접 저장
+# - 이후 Threat/setTarget/attack 모두 @Parent만 사용
+# - Aura / target variable / scoreboard tag 기반 identity bridge 전부 제거
+# v5.46: KUR->BOAR 연결을 scoreboard tag 단일키로 재구축.
+# - Aura bridge 폐기
+# - player target-scope variable bridge 폐기
+# - removetag @PlayersInWorld -> addtag @FURTHEST limit1
+# - BOAR Threat/setTarget/GORE 모두 hastag{gk_boar_selected}만 사용
+# - target-scope / inherited-target / Aura caster 중복 문제를 구조적으로 제거
+# - 태그 보유자 본인에게 Target/LINK/ATTACK 확인 메시지 출력
+# v5.45: FURTHEST 선정값이 KUR 기존 target에 고정되던 target-scope 기록 방식 수정.
+# - setvariable{var=target...} 자체에 targeter를 붙이는 방식 제거
+# - 공식 예제처럼 child meta-skill에 플레이어를 inherited target으로 전달 후 target variable 기록
+# - CLEAR: @PlayersInWorld -> child -> target.selected=0
+# - MARK: @PlayersInRadius{sort=FURTHEST;limit=1} -> child -> target.selected=1
+# - BOAR capture도 child inherited target으로 name/found 기록
+# - [Boar Selected VERIFY] 실제 selected=1 대상 전역 검증 추가
+# v5.44: KUR->BOAR 연결키를 Aura에서 player target-scope 변수로 교체.
+# - gk_boar_target Aura를 unique pointer로 사용하는 구조 폐기
+# - 모든 플레이어 target.gk_boar_selected=0 -> KUR FURTHEST 1명만 1
+# - BOAR Threat/setTarget/attack 모두 variableequals target.gk_boar_selected=1 사용
+# - stale/multiple same-name Aura에 따른 서로 다른 플레이어 선택 가능성 제거
+# - 과거 gk_boar_target Aura는 selection 때 purge만 하고 더 이상 참조하지 않음
+# v5.43: BOAR Aura/Threat/current-target 연결 단절의 실제 원인 수정.
+# - clearThreat는 current target을 지우지 않으므로 clearTarget @self 추가
+# - KUR 기준 선택 후 BOAR 기준 Radius 재검색하던 구조 제거
+# - BOAR는 @PlayersInWorld에서 gk_boar_target Aura 보유자 1명을 직접 조회
+# - AuraHolder / ThreatTOP / CurrentTarget을 동시에 출력해 실제 연결 검증
+# - FollowRange 256
+# v5.42: BOAR Aura 대상과 실제 공격 대상 불일치 구조 제거.
+# - gk_boar_target 이전 Aura를 @PlayersInWorld로 전부 제거해 stale Aura 차단
+# - BOAR Aura 검색 범위 64 -> 128
+# - BOAR core target lock은 inherited target 미사용
+# - clearThreat -> Aura holder Threat100 -> setTarget 모두 같은 direct targeter 사용
+# - GORE look/damage/throw도 타점 순간 gk_boar_target Aura 보유자를 직접 재검색
+# - BOAR FollowRange 128 대응
+# v5.41: v5.40 이후 KUR 공격 정지 원인 수정.
+# - RANGED_PRE_RUNNER_HOLD_APPLY의 clearThreat 뒤 @target 재조회 버그 수정
+# - inherited gk_king_target을 @TargetedTarget으로 Threat100 + setTarget 복원
+# - Runner Threat Lock / Runner Leap에도 동일 inherited-target 수정
+# - Runner Activate 시 Threat100 + setTarget 명시
+# - [KUR STATE] busy/runner/stack/ThreatTOP 1초 디버그 추가
+# v5.40: 핵심 hasaura 대상조건 문법 오류 수정.
+# - 잘못된 `@PIR ... ?hasaura`는 caster(몹) 조건이었음
+# - 공식 targeter inline conditions=[ - hasaura true ] 방식으로 교체
+# - BOAR target capture / Threat100 / setTarget / attack router 전부 수정
+# - Runner Target / gk_king_target 검색도 동일 오류 수정
+# - [Boar Aura OK] 검증 로그 추가
+# v5.39: BOAR 실제 target state/공격 경로 전면 점검 및 수정.
+# - 실제 BOAR 변수 boar_target_found / boar_target_name 추가
+# - 매초 [Boar STATE]로 found/saved/busy/ThreatTOP 출력
+# - Threat 적용 순서: clearThreat -> Threat SET100 -> setTarget LAST
+# - vanilla ~onAttack 의존 제거 (BOAR Damage=0 대응)
+# - ~onTimer:2가 3.2블럭 내 Aura 대상에게 GORE 직접 실행
+# - GORE damage/throw도 Aura 선정 한 명에게 직접 적용
+# v5.38: 메타스킬 inherited target 덮어쓰기 버그 수정.
+# - KUR FURTHEST 선정 후 COMMIT 내부 @target -> @TargetedTarget
+# - 이전에는 @target 때문에 KUR 현재 전투 타겟이 Aura를 받아버렸음
+# - BOAR Aura 감지 후 APPLY도 @target -> @TargetedTarget
+# - setTarget / Threat100이 실제 gk_boar_target Aura 보유자에게 적용
+# - GORE look도 inherited target 사용
+# v5.37: BOAR Aura 선정 알고리즘 완전 단순화.
+# - KUR 기준 64블럭 내 FURTHEST + limit=1 한 명만 선정
+# - BOAR 선정에서 gk_king_target / recent / FAR-MID / P1~P7 의존 제거
+# - 선정 대상에게 gk_boar_target Aura 100틱 부착
+# - 보어는 Aura 보유자 -> setTarget -> clearThreat -> Threat100 구조 유지
+# - 오해를 만들던 전역 <target.name> Threat 디버그 제거
+# v5.36: BOAR 선정/실제 공격 타겟 불일치 수정.
+# - inline target conditions + FURTHEST + limit=1로 priority마다 정확히 한 명만 선택
+# - 여러 후보를 순회하며 마지막 가까운 사람이 Aura를 먹는 문제 제거
+# - BOAR Threat lock 시 setTarget + clearThreat + Threat100 동시 적용
+# - ~onAttack 발생 시 generic @target 대신 gk_boar_target Aura 보유자에게만 GORE
+# - BOAR 자동 AITargetSelectors players 제거, ThreatTable은 유지
+# v5.35: BOAR 타겟/공격을 ThreatTable 방식으로 롤백.
+# - v5.34 KUR Runner 수정은 그대로 유지
+# - BOAR ThreatTable=true / AITargetSelectors players 복원
+# - gk_boar_target -> clearThreat + Threat100 방식 복원
+# - vanilla meleeattack + ~onAttack -> GK_BOAR_GORE 방식 복원
+# - script target lock을 1틱마다 재적용 + 피격 후 delay1 재고정
+# - KUR-side FURTHEST / incombat 제거 수정은 유지
+# v5.34: 2페 Runner Mode Leap 미실행 수정.
+# - Runner THREAT_LOCK / ROUTER mob hook의 ?incombat 제거
+# - RUNNER_ROUTER / RUNNER_LEAP 내부 incombat 조건 제거
+# - runner_mode=1 + busy=0만으로 Runner Leap 실행
+# - WAIT / ROUTER FIRE / LEAP START 전역 디버그 추가
+# v5.33: 보어 공격을 vanilla ~onAttack에서 완전 분리.
+# - gk_boar_target 3.2블럭 이내면 ~onTimer:2가 GK_BOAR_GORE 직접 실행
+# - GK_BOAR_GORE는 TargetConditions distance<3.21로 script target 판정
+# - goto는 3.2블럭 밖에서만 실행해 근접 공격 타이밍 방해 제거
+# - 실제 공격 시작 시 [Boar ATTACK] 전역 로그
+# v5.32: 보어 무반응 핵심 수정.
+# - 본 파일에 남아 있던 잘못된 거리 정렬값을 공식 FURTHEST로 수정
+# - KUR 보어 Target Select/King Target Mark의 ?incombat 의존 제거
+# - [Boar SELECT] / [Boar LOCK] + target CRIT 디버그 추가
+# - setTarget + goto 구조는 공식 문서 기준 유지
+# v5.31: 분리 보어를 ThreatTable에서 완전히 분리.
+# - 보어 clearThreat/threat100 방식 제거
+# - gk_boar_target 대상에게 setTarget + goto 직접 적용
+# - 플레이어가 보어를 때려도 공격자가 보어 타겟 결정에 관여하지 않음
+# - 보어 피격 시 [Boar HIT] 전역 디버그만 출력
+# v5.30: 2페 원거리 공격은 Runner 7스택 전까지 타겟 전환 금지.
+# - BIG HIT / SIDE-BACK Threat Swap을 7블럭 이내 근거리 전용으로 제한
+# - >7블럭 피격 시 기존 gk_king_target을 Threat100으로 복원해 자연 Threat 탈취 차단
+# - 7번째 원거리 피격에서는 Hold 후 Runner Activate가 Shooter Threat100으로 최종 덮어씀
+# - 새 변수 추가 없음, 기존 gk_king_target Aura 재사용
+# v5.29: 1페 원거리 피격 Threat를 1틱 후 재측정.
+# - BEFORE ROLL + AFTER 1T를 비교해 자연 Threat 반영 시점 확인
+# - FORCED 로그가 없는데 AFTER에서 TOP이 Shooter로 바뀌면 자연 Threat 전환
+# - 전투 로직/확률/수치 변경 없음
+# v5.28: 1페 ThreatTable 실시간 디버그 추가.
+# - 원거리 피격 시 Shooter 이름 / 실제 <trigger.threat> / <caster.tt.top> 전역 표시
+# - 확률형 강제 Swap 성공 시 FORCED 로그로 명확히 구분
+# - ~onChangeTarget로 실제 현재 Threat Target 변경을 전역 표시
+# - P1 Runner display wrapper를 @self로 정리
+# - 전투 로직/확률/수치 변경 없음
+# v5.27: 1페/2페 Runner Stack 전역 게이지 디버그 추가.
+# - P1 Combat Stack nested message도 @PlayersInWorld로 수정
+# - P1 Runner 1~5+ 게이지 + Threat Swap 확률 전역 표시
+# - P2 Runner 1~7 게이지 전역 표시, 6/7 ONE MORE, 7/7 READY
+# - 전투 로직/수치 변경 없음
+# v5.26: 멀티 실전 테스트용 디버그 메시지 전역화.
+# - P2 Combo / Runner Stack / Threat / Boar AI 등 message 로그를 @PlayersInWorld로 변경
+# - 전투/타겟/스킬 로직은 v5.25 그대로 유지
+# v5.25: 2페 분리 멧돼지 AI 추가.
+# - 1페 death 후 KUR + GOBLIN_KING_BOAR 동시 분리 소환
+# - KUR 기준 FAR/MID 거리 우선 + KUR 현재 타겟 제외 + recent 후순위
+# - 4초마다 target rotation / recent 6초
+# - 돼지는 script target만 Threat100으로 추적, 자연 Threat 영향 차단
+# - kur_rot_boar 모델 + shove 몸박 사용
+# v5.24: Runner Mode 동안 자연 Threat Target 변경까지 잠금.
+# - 7번째 Stack 공격자를 kur2_runner_target Aura로 표시
+# - runner_mode=1 동안 매 tick clearThreat -> Runner Target Threat100 재고정
+# - Runner Leap도 generic @target 대신 Runner Target Aura 보유자에게 직접 실행
+# - Leap 종료/Death 시 Aura 제거 후 일반 ThreatTable 복귀
+# v5.23: Jump Impact를 타점+착지 양방향 재시도 구조로 복구.
+# - 1.80초 미착지 즉시 MISS 종료 제거
+# - jump_armed 0/1/2 상태값 확장, 새 변수 없음
+# - 1.80초 도달 또는 실제 착지 중 늦게 온 순간 Impact 실행
+# v5.22: 일반 Jump를 접근기로 재배치.
+# - Normal Jump 5.5~11블럭
+# - Range Slash 7~18블럭
+# - Special 가중치 Spin 2 / Jump 3 / Range Slash 2 / NOOP 2
+# - Runner Leap은 거리 제한 없는 강제 추격 유지
+# v5.21: 2페 변수/AI 정리 + Threat Reaction + Runner 7스택 Leap.
+# - p2_ready / jump_active / jump_damage_ready / jump_done 제거
+# - 2페 AI OFF / caster velocity=0 제거, SLOW 중심 제어
+# - GroundBreak 전방 3블럭
+# - Combo Step / Runner Stack 채팅 디버그
+# - Side/Back + Big Hit Threat Swap 100, 공용 Aura Lock 40t
+# - 7블럭 밖 피격 7회 -> runner_mode=1 -> Trigger Threat100 -> Runner Leap -> reset
+# v5.20: 2페 하차 소환 직후 초기 대기 제거. look/idle/SLOW/Missile 즉시 시작.
+# v5.19: 2페 하차 Missile 디버그 강화 / fromorigin=true / sfo=0.
+# v5.18: 1/2페 공용 busy lock 통합. busy=2는 죽음/페이즈 전환 전용.
+# v5.0: 2페이즈 ON FOOT 패턴 1차 구현.
+# v4.2: 행동 진입 스킬에 inCombat 2차 필터 추가
+# - MeleeRouter / COMBO_START / SpecialRouter / Ground Slam / Charge
+# - 이미 시작된 콤보 단계/히트/cleanup에는 inCombat을 넣지 않음
+#   (전투 종료 순간 cleanup이 씹혀 busy가 남는 문제 방지)
+#
+# v4.1: 피격 시 combat_stack 누적 활성화
+# - 패턴 실행 중(busy=1)이어도 피격은 combat_stack +1
+# - 원거리 투사체 피격은 combat_stack +1 + runner_stack +1
+# - runner_stack은 Charge 조건에 사용하지 않음
+# - 7블럭 밖 PROJECTILE 피격마다 runner_stack +1
+# - Threat 강제전환 확률: 1=15%, 2=30%, 3=45%, 4=60%, 5+=75%
+# - Threat 전환 성공 시 runner_stack=0
+# - Charge는 현재 Threat Target이 7블럭 밖이면 combat_stack/runner_stack 없이 발동
+# - Charge에서 AI Goal clear / FollowPath 제거
+# - Charge 시작 시 AI를 명시적으로 ON
+# - SetSpeed 완전 제거: 평상시 MovementSpeed 0.32를 절대 덮어쓰지 않음
+# - Charge 중 2틱마다 goto(speed modifier)로만 가속 추적
+# - delay 기반 TIMEOUT 제거, charge_watch 카운터로 현재 Charge만 감시
+# - 기존 추적 AI를 유지하고 SetSpeed로 이동속도만 올려 타겟을 계속 추적
+# - charge 애니메이션은 Slash가 나올 때까지 LOOP 유지
+# - Charge 시작/Slash/Timeout/Runner Stack을 디버그 메시지로 표시
+#
+# 핵심 구조
+# 1) 패턴 격리
+#    - busy=1인 동안 다른 신규 패턴 진입 차단
+#    - 일반 공격도 ATTACKsync -> COMBO_START Router를 통해서만 진입
+#    - ChargeAttack은 Charge 내부 하위 패턴이므로 busy=1 상태에서만 동작
+#
+# 2) 콤보 시스템
+#    - Attack1 -> Attack2 -> Shove
+#    - 각 단계 사이에 플레이어가 사거리에서 벗어나면 즉시 콤보 종료/AI 복구
+#    - 각 타격 성공 시 combat_stack +1
+#
+# 3) 전투 스택
+#    - combat_stack >= 4 : Ground Slam 후보 / 사용 시 4 소비
+#    - Charge는 전투스택과 완전히 독립
+#
+# 4) Charge = 거리 좁히기 전용 돌진
+#    - 현재 Target이 7블럭 밖이면 후보
+#    - 현재 Target을 짧게 조준 후 즉시 돌진
+#    - charge 모델링은 LOOP 상태로 유지
+#    - Target이 5.2블럭 안에 들어오면 달리는 상태 위에 Slash를 겹침
+#    - 접근하지 못하면 10초 후 failsafe 종료
+#
+# 기존 공식 mob 파일 Skill ID 호환:
+# - kurrot_ATTACKsync @self ~onAttack
+# - kurrot_groundslam @target ~onTimer:20
+# - kurrot_charge @self ~onTimer:20
+# - kurrot_charge_attack @self ~onTimer:5
+# - kurrot_DEATH
+# ============================================================
+
+
+# ============================================================
+# INIT / ENTER COMBAT
+# ============================================================
+
+kurrot_INIT:
+  Skills:
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charging;value=0;type=INTEGER} @self
+    - setvariable{var=caster.combo_step;value=0;type=INTEGER} @self
+    - setvariable{var=caster.combat_stack;value=0;type=INTEGER} @self
+    - setvariable{var=caster.runner_stack;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_used;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_armed;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_watch;value=0;type=INTEGER} @self
+
+aggro:
+  Skills:
+    - skill{s=kurrot_INIT} @self
+
+
+
+# ============================================================
+# COMBAT STACK VISUAL DEBUG
+#
+# 전투스택이 변할 때 주변 플레이어에게 7칸 게이지를 표시한다.
+# 4+ = SLAM READY / Charge는 거리 조건으로 별도 관리
+# ============================================================
+
+kurrot_STACK_DISPLAY:
+  Skills:
+    - skill{s=kurrot_STACK_0} @PlayersInRadius{r=32}
+    - skill{s=kurrot_STACK_1} @PlayersInRadius{r=32}
+    - skill{s=kurrot_STACK_2} @PlayersInRadius{r=32}
+    - skill{s=kurrot_STACK_3} @PlayersInRadius{r=32}
+    - skill{s=kurrot_STACK_4} @PlayersInRadius{r=32}
+    - skill{s=kurrot_STACK_5} @PlayersInRadius{r=32}
+    - skill{s=kurrot_STACK_6} @PlayersInRadius{r=32}
+    - skill{s=kurrot_STACK_7PLUS} @PlayersInRadius{r=32}
+
+kurrot_STACK_0:
+  Conditions:
+    - variableEquals{var=caster.combat_stack;value=0} true
+  Skills:
+    - message{m="&8[P1 Combat] &7□□□□□□□ &f0/7"} @PlayersInWorld
+
+kurrot_STACK_1:
+  Conditions:
+    - variableEquals{var=caster.combat_stack;value=1} true
+  Skills:
+    - message{m="&8[P1 Combat] &e■&7□□□□□□ &f1/7"} @PlayersInWorld
+
+kurrot_STACK_2:
+  Conditions:
+    - variableEquals{var=caster.combat_stack;value=2} true
+  Skills:
+    - message{m="&8[P1 Combat] &e■■&7□□□□□ &f2/7"} @PlayersInWorld
+
+kurrot_STACK_3:
+  Conditions:
+    - variableEquals{var=caster.combat_stack;value=3} true
+  Skills:
+    - message{m="&8[P1 Combat] &e■■■&7□□□□ &f3/7"} @PlayersInWorld
+
+kurrot_STACK_4:
+  Conditions:
+    - variableEquals{var=caster.combat_stack;value=4} true
+  Skills:
+    - message{m="&8[P1 Combat] &6■■■■&7□□□ &f4+ &6[SLAM READY]"} @PlayersInWorld
+
+kurrot_STACK_5:
+  Conditions:
+    - variableEquals{var=caster.combat_stack;value=5} true
+  Skills:
+    - message{m="&8[P1 Combat] &6■■■■■&7□□ &f5+ &6[SLAM READY]"} @PlayersInWorld
+
+kurrot_STACK_6:
+  Conditions:
+    - variableEquals{var=caster.combat_stack;value=6} true
+  Skills:
+    - message{m="&8[P1 Combat] &6■■■■■■&7□ &f6+ &6[SLAM READY]"} @PlayersInWorld
+
+kurrot_STACK_7PLUS:
+  Conditions:
+    - variableInRange{var=caster.combat_stack;value=>7} true
+  Skills:
+    - message{m="&8[P1 Combat] &c■■■■■■■ &f<caster.var.combat_stack>+ &6[SLAM READY]"} @PlayersInWorld
+
+
+# ============================================================
+# RANGED THREAT RESPONSE / RUNNER STACK
+#
+# runner_stack의 역할:
+# - Charge 해금용 아님
+# - 원거리 공격을 반복해서 받을수록 '그 공격자에게 관심을 돌릴 확률'을 올리는 기억값
+#
+# 7블럭 밖 PROJECTILE 피격:
+#   stack 1 = 15%
+#   stack 2 = 30%
+#   stack 3 = 45%
+#   stack 4 = 60%
+#   stack 5+ = 75%
+#
+# Threat 전환 성공:
+# - 기존 Threat clear
+# - 방금 쏜 플레이어 Threat 100
+# - runner_stack 0으로 초기화
+# ============================================================
+
+kurrot_RANGED_PROJECTILE_HIT:
+  Conditions:
+    - damagecause{c=PROJECTILE} true
+  TargetConditions:
+    - distance{d=>7} true
+  Skills:
+    - variableadd{var=caster.runner_stack;amount=1} @self
+    - skill{s=kurrot_RUNNER_STACK_DISPLAY} @self
+
+    # 이 시점은 확률형 강제 Swap을 굴리기 전.
+    # <trigger.threat> = 방금 활을 맞힌 공격자의 실제 Threat
+    # <caster.tt.top> = 현재 ThreatTable 1위 플레이어 이름
+    - message{m="&8[P1 Threat BEFORE ROLL] &fShooter=&e<trigger.name> &7| Threat=&e<trigger.threat> &7| TOP=&c<caster.tt.top> &7| Runner=&f<caster.var.runner_stack>"} @PlayersInWorld
+
+    - skill{s=kurrot_RANGE_THREAT_ROLL} @Trigger
+
+    # 자연 Threat 반영 시점을 확인하기 위한 1틱 후 재측정.
+    # FORCED 로그 없이 여기서 Shooter Threat가 올라가고 TOP이 Shooter로 바뀌면
+    # 자연 ThreatTable 전환으로 확정 가능.
+    - delay 1
+    - message{m="&8[P1 Threat AFTER 1T] &fShooter=&e<trigger.name> &7| Threat=&e<trigger.threat> &7| TOP=&c<caster.tt.top> &7| Runner=&f<caster.var.runner_stack>"} @PlayersInWorld
+
+
+# ------------------------------------------------------------
+# Runner Stack Debug
+# ------------------------------------------------------------
+
+kurrot_RUNNER_STACK_DISPLAY:
+  Skills:
+    - skill{s=kurrot_RUNNER_DBG_1} @self
+    - skill{s=kurrot_RUNNER_DBG_2} @self
+    - skill{s=kurrot_RUNNER_DBG_3} @self
+    - skill{s=kurrot_RUNNER_DBG_4} @self
+    - skill{s=kurrot_RUNNER_DBG_5PLUS} @self
+
+kurrot_RUNNER_DBG_1:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=1} true
+  Skills:
+    - message{m="&8[P1 Runner] &e■&7□□□□ &f1/5+ &7| Threat Swap &e15%"} @PlayersInWorld
+
+kurrot_RUNNER_DBG_2:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=2} true
+  Skills:
+    - message{m="&8[P1 Runner] &e■■&7□□□ &f2/5+ &7| Threat Swap &e30%"} @PlayersInWorld
+
+kurrot_RUNNER_DBG_3:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=3} true
+  Skills:
+    - message{m="&8[P1 Runner] &6■■■&7□□ &f3/5+ &7| Threat Swap &645%"} @PlayersInWorld
+
+kurrot_RUNNER_DBG_4:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=4} true
+  Skills:
+    - message{m="&8[P1 Runner] &6■■■■&7□ &f4/5+ &7| Threat Swap &660%"} @PlayersInWorld
+
+kurrot_RUNNER_DBG_5PLUS:
+  Conditions:
+    - variableInRange{var=caster.runner_stack;value=>5} true
+  Skills:
+    - message{m="&8[P1 Runner] &c■■■■■ &f<caster.var.runner_stack>/5+ &7| Threat Swap &c75%"} @PlayersInWorld
+
+
+# ------------------------------------------------------------
+# Threat Swap probability tiers
+# ------------------------------------------------------------
+
+kurrot_RANGE_THREAT_ROLL:
+  Skills:
+    - skill{s=kurrot_RANGE_THREAT_ROLL_1} @Trigger
+    - skill{s=kurrot_RANGE_THREAT_ROLL_2} @Trigger
+    - skill{s=kurrot_RANGE_THREAT_ROLL_3} @Trigger
+    - skill{s=kurrot_RANGE_THREAT_ROLL_4} @Trigger
+    - skill{s=kurrot_RANGE_THREAT_ROLL_5PLUS} @Trigger
+
+kurrot_RANGE_THREAT_ROLL_1:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=1} true
+  Skills:
+    - skill{s=kurrot_RANGE_THREAT_SWAP} @Trigger 0.15
+
+kurrot_RANGE_THREAT_ROLL_2:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=2} true
+  Skills:
+    - skill{s=kurrot_RANGE_THREAT_SWAP} @Trigger 0.30
+
+kurrot_RANGE_THREAT_ROLL_3:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=3} true
+  Skills:
+    - skill{s=kurrot_RANGE_THREAT_SWAP} @Trigger 0.45
+
+kurrot_RANGE_THREAT_ROLL_4:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=4} true
+  Skills:
+    - skill{s=kurrot_RANGE_THREAT_SWAP} @Trigger 0.60
+
+kurrot_RANGE_THREAT_ROLL_5PLUS:
+  Conditions:
+    - variableInRange{var=caster.runner_stack;value=>5} true
+  Skills:
+    - skill{s=kurrot_RANGE_THREAT_SWAP} @Trigger 0.75
+
+
+kurrot_RANGE_THREAT_SWAP:
+  Conditions:
+    # Charge 도중에는 현재 추격 대상을 중간에 갈아끼우지 않는다.
+    - variableEquals{var=caster.charging;value=0} true
+
+    # Fallen Devastator / Defender식 Threat 변경 lock.
+    # 성공 직후 짧은 시간 동안 다른 원거리 공격으로 Threat가 연속 초기화되는 것을 막는다.
+    - hasaura{n=kurrot_changedThreat} false
+
+  TargetConditions:
+    - distance{d=>7} true
+
+  Skills:
+    # v5.55 - Fallen Devastator / Defender style
+    #
+    # 부모 skill이 @Trigger를 target context로 넘긴 상태.
+    # 실제 target을 setTarget으로 강제 고정하지 않고,
+    # ThreatTable만 공격자 100으로 재구성한 뒤 AI/ThreatTable의 target 갱신에 맡긴다.
+    - Aura{auraName=kurrot_changedThreat;duration=40} @self
+    - clearThreat{} @self
+    - threat{amount=100}
+    - setvariable{var=caster.runner_stack;value=0;type=INTEGER} @self
+
+    # 강제 Threat 재지정 성공 시점.
+    - message{m="&c[P1 Threat FORCED] &e<trigger.name> &f-> Threat=&c<trigger.threat> &7| TOP=&c<caster.tt.top> &7| Runner -> 0 &8[LOCK 2s]"} @PlayersInWorld
+
+# ------------------------------------------------------------
+# P1 THREAT TARGET CHANGE DEBUG
+#
+# ~onChangeTarget에서 호출.
+# 강제 Swap 메시지가 없이 이것만 뜨면 자연 Threat 누적/기타 Threat 로직으로
+# 현재 TOP 타겟이 바뀐 것으로 판단할 수 있다.
+# ------------------------------------------------------------
+
+kurrot_THREAT_TARGET_CHANGED:
+  Skills:
+    - message{m="&4[P1 Threat TARGET CHANGE] &fCurrent TOP -> &c<caster.tt.top> &7| Runner=<caster.var.runner_stack> | Charging=<caster.var.charging>"} @PlayersInWorld
+
+
+# ============================================================
+# TIMER ROUTERS
+#
+# 최근 mob 파일의 타이머 호출과 v3.x 스킬을 다시 연결.
+# 바닐라 ~onAttack 이벤트에 의존하지 않고 주기적으로 패턴 진입을 검사한다.
+# ============================================================
+
+kurrot_MeleeRouter:
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.charging;value=0} true
+    - targetwithin{d=4.0} true
+  Skills:
+    - skill{s=kurrot_COMBO_START} @target
+
+kurrot_SpecialRouter:
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.charging;value=0} true
+  Skills:
+    # Charge는 거리 축, Slam은 combat_stack/근접 축.
+    # Target이 7블럭 밖이면 Charge를 먼저 검사하고 busy로 격리한다.
+    - skill{s=kurrot_charge} @self
+    - skill{s=kurrot_groundslam} @target
+
+
+# ============================================================
+# COMMON LOCK / CLEANUP
+# ============================================================
+
+kurrot_COMBAT_UNLOCK:
+  Conditions:
+    # 일반 패턴(busy=1)만 lock 해제 가능.
+    # Death/Phase Transition은 busy=2이므로 과거 delay cleanup이 와도 해제 불가.
+    - variableEquals{var=caster.busy;value=1} true
+  Skills:
+    - setvariable{var=caster.combo_step;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charging;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_used;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_armed;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+
+kurrot_COMBO_END:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.charging;value=1} false
+  Skills:
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.combo_step;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# NORMAL ATTACK ROUTER
+# 공식 mob: kurrot_ATTACKsync @self ~onAttack
+#
+# 중요:
+# - busy 중에도 바닐라 공격 이벤트는 항상 취소
+# - 실제 콤보 진입 여부는 kurrot_COMBO_START가 판단
+# ============================================================
+
+kurrot_ATTACKsync:
+  Skills:
+    - cancelevent
+    - skill{s=kurrot_COMBO_START} @target
+
+
+# ============================================================
+# COMBO START
+# Attack1 -> Attack2 -> Shove
+# ============================================================
+
+kurrot_COMBO_START:
+  Cooldown: 1.0
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.charging;value=0} true
+    - targetwithin{d=4.0} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.combo_step;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=kurrot_COMBO_ATTACK1} @target
+
+    # Attack1 종료 후 2타 진입 시도
+    - delay 30
+    - skill{s=kurrot_COMBO_STAGE2} @target
+    # Stage2가 실패했다면 combo_step은 여전히 1 -> 즉시 종료
+    - skill{s=kurrot_COMBO_ABORT_STAGE1} @self
+
+
+# ------------------------------------------------------------
+# COMBO 1 - ATTACK 1
+# ------------------------------------------------------------
+
+kurrot_COMBO_ATTACK1:
+  Skills:
+    - setvariable{var=target.gk_a1_hit;value=0;type=INTEGER} @PlayersInRadius{r=6}
+    - meg:state{mid=kur_rot;s=attack1;priority=2;override=false;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # Attack1 최초 타점 0.75초 = 15틱.
+    - delay 15
+
+    # REAL VFX / SFX - 일반 평타는 애니메이션이 주체.
+    # 파티클은 궤적/속도감만 짧게 보조한다.
+    - sound{s=entity.player.attack.sweep;v=0.62;p=1.08} @self
+    - effect:particles{particle=sweep_attack;amount=1;hS=0.20;vS=0.14;speed=0.008} @Forward{f=2.0;rot=-15;lockpitch=true;y=1.05}
+    - effect:particles{particle=crit;amount=3;hS=0.24;vS=0.18;speed=0.018} @Forward{f=2.1;rot=-18;lockpitch=true;y=1.00}
+
+    - skill{s=kurrot_A1_HitOnce} @LivingInCone{a=210;r=4;rot=-15;target=players}
+    # 실제 이동/핑 오차를 위한 짧은 후속 판정. HitOnce라 중복 피해는 없음.
+    - delay 2
+    - skill{s=kurrot_A1_HitOnce} @LivingInCone{a=210;r=4;rot=-15;target=players}
+    - delay 2
+    - skill{s=kurrot_A1_HitOnce} @LivingInCone{a=210;r=4;rot=-15;target=players}
+
+kurrot_A1_HitOnce:
+  TargetConditions:
+    - variableEquals{var=target.gk_a1_hit;value=0} true
+  Skills:
+    # 부모 @LivingInCone이 넘겨준 실제 타격 대상 context를 그대로 사용.
+    # current @target을 다시 조회하지 않는다.
+    - damage{a=7}
+    - setvariable{var=target.gk_a1_hit;value=1;type=INTEGER}
+    - variableadd{var=caster.combat_stack;amount=1} @self
+    - skill{s=kurrot_STACK_DISPLAY} @self
+    - sound{s=entity.player.attack.sweep;v=0.52;p=0.86} @origin
+
+
+# ------------------------------------------------------------
+# COMBO 2 - ATTACK 2
+# ------------------------------------------------------------
+
+kurrot_COMBO_STAGE2:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.combo_step;value=1} true
+    # 실제 피격 반경 4.5보다 짧게 잡아 발동 후 헛치는 상황 방지
+    - targetwithin{d=3.8} true
+  Skills:
+    - setvariable{var=caster.combo_step;value=2;type=INTEGER} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setvariable{var=target.gk_a2_hit;value=0;type=INTEGER} @PlayersInRadius{r=6}
+    - meg:state{mid=kur_rot;s=attack2;priority=2;override=false;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # Attack2 원래 타점: 약 0.65s ~ 0.80s
+    - delay 13
+
+    # REAL VFX / SFX - 두 번째 평타도 모델 동작 중심.
+    - sound{s=entity.player.attack.sweep;v=0.62;p=0.96} @self
+    - effect:particles{particle=sweep_attack;amount=1;hS=0.22;vS=0.16;speed=0.008} @Forward{f=2.15;rot=35;lockpitch=true;y=1.05}
+    - effect:particles{particle=crit;amount=3;hS=0.26;vS=0.20;speed=0.018} @Forward{f=2.2;rot=38;lockpitch=true;y=1.0}
+
+    - skill{s=kurrot_A2_HitOnce} @LivingInCone{a=130;r=4.5;rot=55;target=players}
+    - delay 3
+    - skill{s=kurrot_A2_HitOnce} @LivingInCone{a=130;r=4.5;rot=55;target=players}
+
+    # Attack2 종료 후 피니셔 진입 시도
+    - delay 14
+    - skill{s=kurrot_COMBO_STAGE3} @target
+    - skill{s=kurrot_COMBO_ABORT_STAGE2} @self
+
+kurrot_A2_HitOnce:
+  TargetConditions:
+    - variableEquals{var=target.gk_a2_hit;value=0} true
+  Skills:
+    # 부모 Cone의 inherited target context 사용.
+    - damage{a=8}
+    - setvariable{var=target.gk_a2_hit;value=1;type=INTEGER}
+    - variableadd{var=caster.combat_stack;amount=1} @self
+    - skill{s=kurrot_STACK_DISPLAY} @self
+    - sound{s=entity.player.attack.sweep;v=0.52;p=0.76} @origin
+
+
+# ------------------------------------------------------------
+# COMBO 3 - SHOVE FINISHER
+# ------------------------------------------------------------
+
+kurrot_COMBO_STAGE3:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.combo_step;value=2} true
+    - targetwithin{d=3.0} true
+  Skills:
+    - setvariable{var=caster.combo_step;value=3;type=INTEGER} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setvariable{var=target.gk_shove_hit;value=0;type=INTEGER} @PlayersInRadius{r=5}
+
+    - meg:state{mid=kur_rot;s=shove;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    - delay 10
+
+    # REAL VFX / SFX - Shove는 충돌 순간에만 힘을 보여준다.
+    - effect:particles{particle=cloud;amount=6;hS=0.34;vS=0.20;speed=0.03} @Forward{f=1.30;rot=-15;lockpitch=true;y=0.72}
+    - effect:particles{particle=crit;amount=4;hS=0.28;vS=0.20;speed=0.03} @Forward{f=1.45;rot=-15;lockpitch=true;y=0.82}
+    - skill{s=kurrot_SHOVE_HitOnce} @LivingInCone{a=90;r=3;rot=-15;target=players}
+    - sound{s=entity.ravager.attack;v=0.50;p=0.96} @self
+
+    - delay 12
+    - skill{s=kurrot_COMBO_END} @self
+
+kurrot_SHOVE_HitOnce:
+  TargetConditions:
+    - variableEquals{var=target.gk_shove_hit;value=0} true
+  Skills:
+    # 부모 Cone의 inherited target context 사용.
+    - damage{a=5}
+
+    # 수평 넉백 강도 테스트.
+    # throw의 velocity는 시전자 -> 실제 Cone 피격 대상 방향.
+    - throw{velocity=4;velocityY=1}
+    - setvariable{var=target.gk_shove_hit;value=1;type=INTEGER}
+    - variableadd{var=caster.combat_stack;amount=1} @self
+    - skill{s=kurrot_STACK_DISPLAY} @self
+
+
+# ------------------------------------------------------------
+# COMBO ABORTS
+# 단계 진입 실패 시 busy가 남지 않게 확실히 종료
+# ------------------------------------------------------------
+
+kurrot_COMBO_ABORT_STAGE1:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.combo_step;value=1} true
+  Skills:
+    - skill{s=kurrot_COMBO_END} @self
+
+kurrot_COMBO_ABORT_STAGE2:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.combo_step;value=2} true
+  Skills:
+    - skill{s=kurrot_COMBO_END} @self
+
+
+# ============================================================
+# LEGACY DIRECT SKILL IDS
+# 다른 파일이 직접 호출해도 격리 규칙을 깨지 않도록 Router로 연결.
+# ============================================================
+
+kurrot_ATTACK1:
+  Skills:
+    - skill{s=kurrot_COMBO_START} @target
+
+kurrot_ATTACK2:
+  Skills:
+    - skill{s=kurrot_COMBO_START} @target
+
+kurrot_SHOVE:
+  Skills:
+    - skill{s=kurrot_COMBO_START} @target
+
+
+# ============================================================
+# GROUND SLAM
+# 공식 mob: kurrot_groundslam @target ~onTimer:20
+#
+# combat_stack >=4에서 진입.
+# Charge는 거리 조건을 사용하므로 combat_stack은 Slam 자원으로 계속 소비한다.
+# ============================================================
+
+kurrot_groundslam:
+  Cooldown: 7
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.charging;value=0} true
+    - variableInRange{var=caster.combat_stack;value=>4} true
+    - targetwithin{d=5.0} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - variablesubtract{var=caster.combat_stack;amount=4} @self
+    - skill{s=kurrot_STACK_DISPLAY} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    - meg:state{mid=kur_rot;s=groundslam;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # REAL VFX / SFX - Slam 준비는 소리와 애니메이션 중심.
+    # 파티클은 발밑 먼지 정도만 두고, 화려함은 실제 타점에 집중한다.
+    - sound{s=entity.ravager.roar;v=0.44;p=0.76} @self
+    - effect:particles{particle=cloud;amount=4;hS=0.38;vS=0.10;speed=0.012} @self
+
+    # 1.79s -> 약 36 ticks
+    - delay 36
+    - damage{a=20} @LivingInCone{a=60;r=5;rot=0;target=players}
+    - velocity{mode=SET;x=0;y=0;z=0} @LivingInCone{a=60;r=5;rot=0;target=players}
+    - potion{type=SLOWNESS;duration=30;level=10} @LivingInCone{a=60;r=5;rot=0;target=players}
+
+    - summon{type=KUR_GROUNDBREAK;amount=1;radius=0} @Forward{f=1;lockpitch=true}
+    - sound{s=entity.generic.explode;v=0.62;p=0.78} @self
+    - sound{s=block.stone.break;v=0.56;p=0.76} @self
+
+    # REAL VFX - Slam은 타점 순간에 시각 밀도를 집중.
+    - effect:particlering{particle=cloud;radius=2.6;points=28;amount=1;y=0.16;speed=0.045} @Forward{f=1;lockpitch=true}
+    - effect:particles{particle=crit;amount=8;hS=0.65;vS=0.28;speed=0.04} @Forward{f=1;lockpitch=true;y=0.25}
+    - particle{particle=block_crack;material=STONE;amount=36;hS=1.8;vS=0.34;speed=0.11} @Forward{f=1;lockpitch=true}
+    - effect:particles{particle=large_smoke;amount=6;hS=0.65;vS=0.28;speed=0.025} @Forward{f=1;lockpitch=true;y=0.25}
+
+    - delay 24
+    - skill{s=kurrot_ACTION_END} @self
+
+
+# ============================================================
+# CHARGE / DISTANCE CLOSER
+#
+# 실행 조건:
+# - busy=0 / charging=0
+# - 현재 Threat Target이 7블럭 밖
+#
+# v3.8 핵심:
+# - AI Goal을 clear하지 않는다.
+# - FollowPath를 사용하지 않는다.
+# - 기존 meleeattack / movetowardstarget AI가 현재 Threat Target을 계속 추적한다.
+# - Charge 동안 SetSpeed만 올리고 charge 애니메이션을 LOOP 유지한다.
+# - 5.2블럭 이내 진입 시 charge_attack을 겹쳐 재생한다.
+# ============================================================
+
+kurrot_charge:
+  Cooldown: 10
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.charging;value=0} true
+    - targetwithin{d=7} false
+  Skills:
+    # 이전 패턴이 AI=false를 남겼더라도 Charge 진입 시 강제로 복구
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.charging;value=1;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_used;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_armed;value=0;type=INTEGER} @self
+
+    # 현재 Threat Target 방향을 짧게 보정.
+    - look{headOnly=false;force=true;immediately=true;repeat=5;repeatInterval=1} @target
+    - message{m="&b[CHARGE START] &fTarget > 7 &7| AI 유지 / goto 가속"} @PlayersInWorld
+
+    # REAL VFX / SFX - 돌진 출발.
+    - sound{s=entity.ravager.roar;v=0.48;p=0.94} @self
+    - sound{s=entity.ravager.step;v=0.52;p=0.86} @self
+    - effect:particles{particle=cloud;amount=12;hS=0.48;vS=0.14;speed=0.035} @self
+    - delay 5
+
+    # 평상시 MovementSpeed 속성은 건드리지 않는다.
+    # 실제 Charge 가속은 아래 CHARGE_CHASE의 goto speed modifier로만 적용.
+    - meg:state{mid=kur_rot;s=charge;priority=2;override=true;loop=LOOP;force=true;li=1;lo=1} @self
+
+    # 오발 방지 후 Slash Detector 활성화
+    - delay 5
+    - setvariable{var=caster.charge_attack_armed;value=1;type=INTEGER} @self
+
+
+# ============================================================
+# CHARGE CHASE PULSE
+#
+# Charge 중 2틱마다 현재 Threat Target의 '현재 위치'로 pathfind를 갱신한다.
+# goto speed modifier=1.65를 Charge 동안에만 사용하므로 엔티티 MovementSpeed 속성은 변하지 않는다.
+# ============================================================
+
+kurrot_CHARGE_CHASE:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.charging;value=1} true
+    - variableEquals{var=caster.charge_attack_used;value=0} true
+  TargetConditions:
+    - distance{d=>5.2} true
+  Skills:
+    - goto{s=1.65;sh=0;sv=0} @target
+
+    # REAL VFX - 돌진 중에는 아주 약한 발밑 먼지만 남긴다.
+    - effect:particles{particle=cloud;amount=1;hS=0.22;vS=0.04;speed=0.012} @self
+
+
+# ============================================================
+# CHARGE WATCHDOG
+#
+# mob에서 2틱마다 호출.
+# 현재 Charge가 살아있는 동안만 charge_watch +1.
+# 50회 = 약 100틱 = 약 5초, 100회 = 약 10초.
+# 여기서는 100회(10초) 이상이면 현재 Charge만 종료한다.
+# delay 예약을 쓰지 않으므로 이전 Charge가 다음 Charge를 끊지 않는다.
+# ============================================================
+
+kurrot_CHARGE_WATCHDOG:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.charging;value=1} true
+    - variableEquals{var=caster.charge_attack_used;value=0} true
+  Skills:
+    - variableadd{var=caster.charge_watch;amount=1} @self
+    - skill{s=kurrot_CHARGE_TIMEOUT} @self
+
+
+# ============================================================
+# CHARGE ATTACK DETECTOR
+# mob에서 2틱마다 현재 Threat Target과 거리를 검사.
+# ============================================================
+
+kurrot_charge_attack:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.charging;value=1} true
+    - variableEquals{var=caster.charge_attack_armed;value=1} true
+    - variableEquals{var=caster.charge_attack_used;value=0} true
+  TargetConditions:
+    - distance{d=<5.21} true
+  Skills:
+    - skill{s=kurrot_CHARGEATTACK_FINISH} @target
+
+
+# ============================================================
+# CHARGE SLASH
+# charge LOOP를 유지한 상태에서 charge_attack만 상위 레이어로 겹친다.
+# ============================================================
+
+kurrot_CHARGEATTACK_FINISH:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.charging;value=1} true
+    - variableEquals{var=caster.charge_attack_armed;value=1} true
+    - variableEquals{var=caster.charge_attack_used;value=0} true
+  TargetConditions:
+    - distance{d=<5.21} true
+  Skills:
+    - setvariable{var=caster.charge_attack_used;value=1;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_armed;value=0;type=INTEGER} @self
+
+    - message{m="&a[CHARGE SLASH] &f5.2블럭 진입 감지"} @PlayersInWorld
+    - meg:state{mid=kur_rot;s=charge_attack;priority=3;override=false;loop=ONCE;force=true;li=0;lo=1} @self
+
+    # 베기 타점까지 AI 추적은 계속 살아있다.
+    - delay 6
+    - damage{a=14} @LivingInCone{a=170;r=5.2;rot=0;target=players}
+    - sound{s=entity.player.attack.sweep;v=0.64;p=0.80} @self
+    - sound{s=entity.ravager.attack;v=0.52;p=0.90} @self
+
+    # REAL VFX - 돌진 중은 절제하고, 마지막 충돌에서만 밀도를 올린다.
+    - effect:particles{particle=sweep_attack;amount=2;hS=0.42;vS=0.28;speed=0.015} @Forward{f=2.25;lockpitch=true;y=1.0}
+    - effect:particles{particle=crit;amount=8;hS=0.46;vS=0.34;speed=0.04} @Forward{f=2.15;lockpitch=true;y=1.0}
+    - effect:particles{particle=cloud;amount=6;hS=0.34;vS=0.16;speed=0.035} @Forward{f=1.35;lockpitch=true;y=0.58}
+
+    - delay 6
+
+    # Charge 종료: 모델/락/AI를 무조건 정상 복구
+    - setAI{ai=true} @self
+    - setvariable{var=caster.charging;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_watch;value=0;type=INTEGER} @self
+    - meg:state{mid=kur_rot;s=charge;remove=true;priority=2} @self
+
+    - delay 6
+    - meg:state{mid=kur_rot;s=charge_attack;remove=true;priority=3} @self
+    - setvariable{var=caster.charge_attack_used;value=0;type=INTEGER} @self
+    - skill{s=kurrot_ACTION_END} @self
+    - message{m="&7[CHARGE END] &f정상 종료 / 기본 이속 유지"} @PlayersInWorld
+
+
+# ============================================================
+# CHARGE FAILSAFE
+# 10초 동안 5.2블럭 안으로 못 들어간 경우에도 반드시 정상 복구.
+# ============================================================
+
+kurrot_CHARGE_TIMEOUT:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.charging;value=1} true
+    - variableEquals{var=caster.charge_attack_used;value=0} true
+    - variableInRange{var=caster.charge_watch;value=>99} true
+  Skills:
+    - message{m="&c[CHARGE TIMEOUT] &f현재 Charge 10초 추격 실패 -> 강제 복구"} @PlayersInWorld
+    - setAI{ai=true} @self
+    - setvariable{var=caster.charging;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_used;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_armed;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_watch;value=0;type=INTEGER} @self
+    - meg:state{mid=kur_rot;s=charge;remove=true;priority=2} @self
+    - meg:state{mid=kur_rot;s=charge_attack;remove=true;priority=3} @self
+    - skill{s=kurrot_ACTION_END} @self
+
+
+
+# 1페 일반 패턴 종료 공통 처리.
+# Death/Transition busy=2에서는 절대 실행되지 않는다.
+kurrot_ACTION_END:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+  Skills:
+    - setAI{ai=true} @self
+    - skill{s=kurrot_COMBAT_UNLOCK} @self
+
+
+# ============================================================
+# COMBAT STACK / ON DAMAGED
+#
+# Fallen Devastator식 상태 업데이트:
+# - 다른 공격 패턴 실행 중이어도 피격 정보는 버리지 않는다.
+# - busy / charging 상태와 무관하게 피격 1회당 combat_stack +1.
+# - 행동 패턴 자체는 busy로 격리되지만 전투 스택은 계속 누적된다.
+# ============================================================
+
+kurrot_COMBATSTACK_DAMAGED:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} false
+  Skills:
+    - variableadd{var=caster.combat_stack;amount=1} @self
+    - skill{s=kurrot_STACK_DISPLAY} @self
+
+
+# ============================================================
+# DEATH
+# ============================================================
+
+# 죽음/페이즈 전환 중 추가 피격은 무시.
+# 공용 busy=2 사용.
+kurrot_TRANSITION_DAMAGE_GUARD:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} true
+  Skills:
+    - cancelevent
+
+
+# ============================================================
+# 1P -> 2P DEATH TRANSITION
+#
+# 중요:
+# - 이 진입점에는 busy=0/1 조건을 절대 걸지 않는다.
+# - 일반 패턴 중(busy=1) 죽어도 무조건 실행.
+# - 첫 진입 즉시 busy=2로 덮어서 모든 일반 패턴을 중단.
+# ============================================================
+
+kurrot_DEATH:
+  Skills:
+    - cancelevent
+    - skill{s=kurrot_DEATH_SEQUENCE} @self
+
+
+kurrot_DEATH_SEQUENCE:
+  Conditions:
+    # busy=2가 아니면 어떤 상태에서든 죽음 전환 허용.
+    # busy=0 대기 중 사망 / busy=1 패턴 중 사망 모두 포함.
+    - variableEquals{var=caster.busy;value=2} false
+  Skills:
+    # 가장 먼저 공용 lock을 Death/Transition 상태로 전환.
+    - setvariable{var=caster.busy;value=2;type=INTEGER} @self
+
+    # 진행 중 패턴 상태 무효화.
+    - setvariable{var=caster.charging;value=0;type=INTEGER} @self
+    - setvariable{var=caster.combo_step;value=0;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_used;value=1;type=INTEGER} @self
+    - setvariable{var=caster.charge_attack_armed;value=0;type=INTEGER} @self
+
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - auraremove{aura=GoblinKingChargePath} @self
+
+    # 일반 액션 state 잔여 제거.
+    - meg:state{mid=kur_rot;s=charge;remove=true;priority=2} @self
+    - meg:state{mid=kur_rot;s=charge_attack;remove=true;priority=3} @self
+
+    # death는 가장 높은 priority로 강제 1회 재생.
+    - meg:state{mid=kur_rot;s=death;priority=5;override=true;loop=ONCE;force=true;li=0;lo=0} @self
+
+    # REAL VFX / SFX - 전환은 큰 이벤트이므로 상대적으로 화려하게 유지.
+    - sound{s=entity.ravager.death;v=0.86;p=0.82} @self
+    - effect:particles{particle=large_smoke;amount=10;hS=0.60;vS=0.50;speed=0.03} @self
+    - effect:particles{particle=cloud;amount=7;hS=0.60;vS=0.24;speed=0.035} @self
+
+    # kur_rot death 정확히 3.0초
+    - delay 60
+
+    # busy=2 상태는 끝까지 유지.
+    # death 종료 후 고블린 킹(KUR) + 멧돼지를 각각 독립 개체로 분리 소환.
+    - meg:state{mid=kur_rot;s=death;remove=true;priority=5} @self
+
+    # REAL VFX - KUR + BOAR 분리는 보스 전환 포인트라 밀도를 높게 유지.
+    - effect:particles{particle=poof;amount=14;hS=0.62;vS=0.48;speed=0.035} @self
+    - effect:particles{particle=cloud;amount=10;hS=0.68;vS=0.28;speed=0.03} @self
+    - summon{type=KUR;amount=1;radius=0} @self
+    - summon{type=GOBLIN_KING_BOAR;amount=1;radius=0} @self
+    - remove @self
+
+
+# ============================================================
+# GROUND FX
+# ============================================================
+
+kurrot_groundbreak:
+  Skills:
+    - meg:state{mid=kurrot_groundbreak;s=idle;loop=ONCE;force=true} @self
+    - summon{type=KUR_GROUNDROCKS;amount=1;radius=0} @self
+    - remove{delay=78} @self
+
+kurrot_groundrocks:
+  Skills:
+    - meg:state{mid=kurrot_groundrocks;s=idle;loop=ONCE;force=true} @self
+
+kurrot_groundrocksremove:
+  Skills:
+    - remove{delay=60} @self
+
+
+# ============================================================
+# 2 PHASE - ON FOOT / kur
+# v5.7
+#
+# v5.7
+# - Attack2 기본 damage 넉백 차단: pkb=true
+# - Attack2 Airborne을 Fallen Defender Upper Wave 방식으로 변경
+#   LEVITATION Lv4(5t) -> Lv2(5t) -> Lv1(5t) -> SLOW_FALLING(5t)
+#   초기 Throw: horizontal=0 / Y=2.2 (아주 약하게 보스 쪽으로 당김 + 높은 에어본)
+# - 1페 Shove 밀치기 테스트: velocity=4 / velocityY=1
+#
+# v5.6
+#
+# v5.6 - Fallen Devastator Leap1 line-by-line core correction
+# 1) lunge target: @target -> @Self (critical)
+# 2) setAI false 제거. 원본처럼 SLOW로 자율 이동만 억제
+# 3) missile stage1/stage2 Aura 복원
+# 4) modifyProjectile를 Aura 조건부로만 적용
+# 5) JUMP potion / spin 보조도 원본 구조에 맞춰 복원
+#
+# v5.5
+#
+# v5.5
+# - Fallen Devastator Leap1 원본 구조로 교체
+# - ArmorStand Guide 완전 제거
+# - invisible missile이 이동 가이드가 되고 onTick callback에서
+#   pull{velocity=7;to=true} @Self 로 원래 KUR 본체를 missile 위치로 끌어감
+# - 출발 순간 lunge로 실제 엔티티를 먼저 공중에 띄움
+# - 실제 onGround + 1.79s 타점 이중 확인 유지
+#
+# v5.4
+#
+# v5.4
+# - Jump Attack의 leap{} 완전 제거
+# - 투명 KUR_JUMP_GUIDE Marker를 궤도상에 순차 소환
+# - 각 Guide가 주변 KUR 본체를 자기 위치로 pull
+# - 실제 몹 이동과 애니메이션을 분리해 점프 궤도를 시간축으로 제어
+# - 0.50s 출발 -> 약 2블럭 상승 -> 1.30~1.45s 착지 유도 -> 1.79s Impact
+#
+# v5.3
+#
+# v5.3
+# - Jump Attack: 단순 Y velocity 제거 -> 실제 leap @target 도약
+# - 0.50s 도약 / onGround 착지 확인 / 1.79s 이후 Impact 구조 유지
+# - 2페 Attack1/2/3, Spin, Jump, Range Slash DEBUG 범위 표시 추가
+#
+# v5.2
+#
+# v5.2 FIX
+# - 'idle' 이름이 ModelEngine 기본 idle 타입에 자동 매칭되는 문제 해결
+# - 기본 idle 타입을 idle_default로 remap(DefaultState)
+# - kur:idle은 이제 수동 전환 모션으로만 2.0초 1회 재생
+# - idle -> land -> idle_default 연결 유지
+# - 1페 death 3.0초가 끝난 뒤에만 KUR 생성
+#
+# v5.1
+#
+# v5.1 FIX
+# - idle(2.0s)는 하차/회전 전환 모션이므로 LOOP 금지, 정확히 1회 재생
+# - spawn onGround 의존 제거: idle 40틱 -> land 30틱 -> 전투 활성화
+# - land 종료 후에만 busy=0으로 전투 활성화
+# - 1페 사망 모델은 KUR 소환 직후 제거해 모델 겹침 방지
+#
+# v5.0
+#
+# 모델 애니메이션:
+# - idle          : 1페 종료 후 탑승물에서 뛰어내리는 공중 모션
+# - land          : 착지 모션
+# - idle_default  : 이후 기본 대기 모션
+# - attack1 / attack2 / attack3 : 연계 콤보
+# - spin_attack
+# - leap_attack
+# - slide_attack  : 현재 공격 연결 미정 -> 비활성
+# - ranged_slash
+#
+# NOTE:
+# - 아래 Damage 값은 1차 전투 테스트용 임시값.
+# - 사용자가 지정한 범위/애니메이션 타점은 우선 고정.
+# ============================================================
+
+
+# ============================================================
+# PHASE 2 INIT / TRANSITION
+# ============================================================
+
+kur2_INIT:
+  Skills:
+    # 공용 Action Lock
+    # 0 = Free / 1 = Action / 2 = Death
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+
+    # 하차 전환
+    - setvariable{var=caster.spawn_ready;value=0;type=INTEGER} @self
+
+    # A1 -> A2 -> A3
+    - setvariable{var=caster.combo_step;value=0;type=INTEGER} @self
+    - setvariable{var=caster.idle_default_playing;value=0;type=INTEGER} @self
+
+    # Jump Attack
+    # jump_armed:
+    #   0 = 점프 아님
+    #   1 = 점프 중 / 1.80초 타점 전
+    #   2 = 1.80초 타점 도달 완료
+    # jump_landed:
+    #   0 = 공중
+    #   1 = 실제 착지
+    - setvariable{var=caster.jump_armed;value=0;type=INTEGER} @self
+    - setvariable{var=caster.jump_landed;value=0;type=INTEGER} @self
+
+    # Runner Protocol
+    - setvariable{var=caster.runner_stack;value=0;type=INTEGER} @self
+    - setvariable{var=caster.runner_mode;value=0;type=INTEGER} @self
+
+    # Fallen Defender의 damage-amount-post 비교 방식을 사용.
+    # TEST100에서는 10 damage, 이후 MaxHP가 바뀌어도 자동 10%.
+    - setvariable{var=caster.big_damage_threshold;val=<caster.mhp>*0.10;type=DOUBLE} @self
+
+
+# ------------------------------------------------------------
+# 1페 종료 -> 하차 점프
+#
+# user spec:
+# idle = 탑승물에서 점프해 내려오는 모션
+# land = 바닥 착지
+# idle_default = 이후 기본 대기
+# ------------------------------------------------------------
+
+kurSPAWN:
+  Skills:
+    # ========================================================
+    # DEBUG 0: kurSPAWN 진입 즉시 표시
+    # 이 cloud/end_rod조차 안 보이면 Missile 문제가 아니라
+    # KUR ~onSpawn -> kurSPAWN 호출 자체가 안 탄 것.
+    # ========================================================
+    - effect:particlering{particle=cloud;radius=0.8;points=24;amount=1;hS=0.05;vS=0.05;speed=0} @self
+    - effect:particles{particle=end_rod;amount=20;hS=0.25;vS=0.7;speed=0.01} @self
+
+    # 기존 공용 busy 사용.
+    # kur2_INIT에서 busy=1이므로 이 하차 연출 중 다른 패턴은 실행 불가.
+    - skill{s=kur2_INIT} @self
+
+    # Fallen Defender Leap1처럼 AI 자체는 유지하고 SLOW로 자율 보행만 억제.
+    # 소환 즉시 기본 idle 매핑.
+    - meg:defaultstate{mid=kur;type=idle;state=idle_default;li=2;lo=2} @self
+
+    # --------------------------------------------------------
+    # 플레이어 바라보기
+    #
+    # Fallen Defender Leap1:
+    # look{headOnly=false;immediately=false;repeat=100;repeatinterval=1} @target
+    #
+    # 2페 KUR은 생성 직후 Threat target이 아직 확정되지 않을 수 있으므로
+    # 가장 가까운 플레이어를 대상으로 같은 100틱 Look 설정을 사용.
+    # --------------------------------------------------------
+    - look{headOnly=false;immediately=false;repeat=100;repeatinterval=1} @NearestPlayer{r=64}
+
+    # idle = 하차/공중 회전 모션.
+    # DefaultState는 이미 idle_default로 바꿔 두었으므로 자동 무한반복되지 않음.
+    - meg:state{mid=kur;s=idle;priority=4;override=true;loop=ONCE;force=true;li=0;lo=0} @self
+
+    # 하차는 공격 준비동작이 아니므로 소환 즉시 감속 + 도약 시작.
+    # Fallen Defender의 SLOW 강도만 참고하고 준비 delay는 사용하지 않음.
+    - potion{type=SLOW;duration=15;level=8;p=false;force=true} @Self
+
+    # ========================================================
+    # DISMOUNT BACK LEAP
+    #
+    # 목적지:
+    # - KUR은 1페가 죽은 정확한 위치에 소환됨.
+    # - 플레이어를 바라본 상태에서 rot=180, f=3
+    # - 따라서 '죽은 1페 몹 위치 기준 뒤쪽 3블럭'이 Missile 도착 지점.
+    #
+    # Fallen Defender Leap1 core values:
+    # v=18 / g=1.4 / syo=1 / in=4 / vO=80
+    # stage1 7t / stage2 20t
+    # pull 7 / 근접 시 pull 14
+    # ========================================================
+
+    - effect:particlering{particle=cloud;radius=0.5;points=20;amount=1;hS=0.2;vS=0.2;speed=0} @Origin
+    - effect:particlering{particle=cloud;radius=0.6;points=25;amount=1;hS=0.2;vS=0.2;speed=0;delay=1} @Origin
+    - effect:particlering{particle=cloud;radius=0.8;points=30;amount=1;hS=0.2;vS=0.2;speed=0;delay=2} @Origin
+
+    # 보스를 살짝 공중에 띄우는 초기 kick.
+    # 수평 이동은 Missile Guide가 뒤쪽으로 담당하므로 Y만 원본 0.3 사용.
+    - lunge{velocity=0;velocityY=0.3} @Self
+
+    # Fallen Defender처럼 비행 중 몸 방향 흔들림 억제.
+    - spin{auraName=kur2_jump_spin;d=35;v=0} @self
+
+    # DEBUG 0.5: 소환 즉시 Missile 발사 직전까지 도달.
+    - effect:particles{particle=cloud;amount=30;hS=0.45;vS=0.25;speed=0.02} @self
+
+    # --------------------------------------------------------
+    # DEBUG 1: 뒤 3블럭 Missile 목적지 표시
+    # cloud + end_rod가 뒤쪽에 보이면 @Forward 목표 계산 성공.
+    # 색상 dust 문법 영향을 배제하기 위해 기본 파티클만 사용.
+    # --------------------------------------------------------
+    - effect:particlering{particle=cloud;radius=0.65;points=28;amount=1;hS=0.03;vS=0.03;speed=0} @Forward{f=3;rot=180;lockpitch=true}
+    - effect:particles{particle=end_rod;amount=24;hS=0.12;vS=0.55;speed=0.01} @Forward{f=3;rot=180;lockpitch=true}
+
+    # Invisible Missile = 실제 이동 Guide.
+    # 목표는 현재 정면의 반대쪽 정확히 3블럭.
+    - missile{
+        onStart=kur2_SPAWN_MISSILE_START;
+        onTick=kur2_SPAWN_MISSILE_TICK;
+        onEnd=kur2_SPAWN_MISSILE_END;
+        v=18;
+        i=1;
+        hR=1;
+        vR=1;
+        g=1.4;
+        syo=1;
+        sfo=0;
+        sB=true;
+        sE=false;
+        HitNonPlayers=false;
+        hp=false;
+        in=4;
+        fromorigin=true;
+        tyo=0;
+        vO=80
+      } @Forward{f=3;rot=180;lockpitch=true}
+
+    # Fallen Defender Leap1 stage physics.
+    - Aura{auraName=kur2_stage1_projectile;duration=7;delay=0} @self
+    - Aura{auraName=kur2_stage2_projectile;duration=20;delay=7} @self
+
+    - delay 1
+    - potion{type=JUMP;duration=30;lvl=30;p=true} @Self
+
+    # 첫 tick onGround 오검출 방지.
+    - delay 1
+    - setvariable{var=caster.spawn_ready;value=1;type=INTEGER} @self
+
+
+# ============================================================
+# SPAWN / DISMOUNT MISSILE GUIDE
+#
+# Fallen Defender Leap1 advancetick 구조를 그대로 축소 적용.
+# Missile의 현재 위치가 이동 레일이고, 원래 KUR @Self를 매 tick 끌어당김.
+# ============================================================
+
+kur2_SPAWN_MISSILE_START:
+  Skills:
+    # DEBUG 2: Missile 객체가 실제 생성된 순간.
+    - effect:particlering{particle=crit;radius=0.75;points=30;amount=1;hS=0.05;vS=0.05;speed=0.01} @Origin
+    - effect:particles{particle=end_rod;amount=30;hS=0.20;vS=0.20;speed=0.015} @Origin
+
+
+kur2_SPAWN_MISSILE_TICK:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+  Skills:
+    # --------------------------------------------------------
+    # DEBUG 3: 실제 Missile 비행 궤적
+    # end_rod가 선처럼 이동하면 onTick 정상.
+    # --------------------------------------------------------
+    - effect:particles{particle=end_rod;amount=12;hS=0.06;vS=0.06;speed=0.004} @Origin
+    - effect:particles{particle=crit;amount=5;hS=0.04;vS=0.04;speed=0.01} @Origin
+
+    # Fallen Defender 원본:
+    # 멀리 있으면 pull 7, Guide와 0.5블럭 이내면 pull 14.
+    - pull{velocity=7;to=true} @Self{conditions=[  - distance{d=0to0.5} false ]}
+    - pull{velocity=14;to=true} @Self{conditions=[  - distance{d=0to0.5} true ]}
+
+    # Stage 1
+    - modifyProjectile{trait=VELOCITY;action=MULTIPLY;value=0.88} ?hasaura{n=kur2_stage1_projectile}
+    - modifyProjectile{trait=GRAVITY;action=MULTIPLY;value=1.14} ?hasaura{n=kur2_stage1_projectile}
+
+    # Stage 2
+    - modifyProjectile{trait=VELOCITY;action=MULTIPLY;value=1.05} ?hasaura{n=kur2_stage2_projectile}
+    - modifyProjectile{trait=GRAVITY;action=MULTIPLY;value=1.05} ?hasaura{n=kur2_stage2_projectile}
+    - modifyProjectile{trait=INERTIA;action=MULTIPLY;value=1.25} ?hasaura{n=kur2_stage2_projectile}
+
+
+kur2_SPAWN_MISSILE_END:
+  Skills:
+    # DEBUG 4: Missile 종료 지점
+    - effect:particlering{particle=cloud;radius=0.9;points=34;amount=1;hS=0.05;vS=0.05;speed=0} @Origin
+    - effect:particles{particle=end_rod;amount=35;hS=0.30;vS=0.30;speed=0.02} @Origin
+
+
+# ============================================================
+# 실제 착지 -> land
+#
+# 새 락 변수 없음.
+# 기존 spawn_ready는 원래부터 있던 스폰 전환 상태값이고,
+# 패턴 중첩 방지는 계속 공용 caster.busy=1이 담당.
+# ============================================================
+
+kurSPAWNLAND:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.spawn_ready;value=1} true
+    - onground true
+  Skills:
+    # 재실행 방지
+    - setvariable{var=caster.spawn_ready;value=2;type=INTEGER} @self
+
+    - auraremove{aura=kur2_stage1_projectile} @self
+    - auraremove{aura=kur2_stage2_projectile} @self
+    - auraremove{aura=kur2_jump_spin} @self
+
+    # 실제 착지 순간 idle 제거 -> land 시작.
+    - meg:state{mid=kur;s=idle;remove=true;priority=4} @self
+    - meg:state{mid=kur;s=land;priority=4;override=true;loop=ONCE;force=true;li=0;lo=0} @self
+
+    # Fallen Defender land1과 같은 감속 흐름.
+    - potion{type=SLOW;duration=14;level=7;p=false;force=true} @self
+    - potion{type=SLOW;duration=8;level=0;p=false;force=true;delay=14} @self
+    - potion{type=SLOW;duration=8;level=1;p=false;force=true;delay=22} @self
+
+    # Fallen Defender처럼 착지 후 다시 플레이어 쪽으로 시선 복귀.
+    - look{headOnly=false;immediately=true;repeat=25;repeatinterval=1;delay=12} @NearestPlayer{r=64}
+
+    - delay 4
+    - sound{s=entity.player.small_fall;v=0.90;p=0.72} @self
+    - effect:particles{particle=block;material=DIRT;amount=10;hS=0.3;vS=0.4;y=0.1} @self
+    - effect:particles{particle=block;material=DIRT;amount=16;hS=0.4;vS=0.5;y=0.1;delay=1} @self
+
+    # kur:land = 1.5초 / 30틱
+    - delay 26
+
+    - meg:state{mid=kur;s=land;remove=true;priority=4} @self
+    - meg:state{mid=kur;s=idle;remove=true;priority=4} @self
+
+    # 여기서만 공용 lock 해제.
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+
+
+# ------------------------------------------------------------
+# idle_default는 '멈춰 있을 때만' 재생.
+# 이동 중에는 제거하여 ModelEngine 기본 locomotion과 충돌 방지.
+# ------------------------------------------------------------
+
+# ------------------------------------------------------------
+# v5.2:
+# idle_default는 더 이상 YAML timer로 수동 재생/정지하지 않는다.
+# ModelEngine DefaultState가 이동/대기 상태를 직접 관리한다.
+# 아래 ID들은 기존 스킬 참조 호환용 no-op.
+# ------------------------------------------------------------
+
+kur2_IDLE_START:
+  Skills: []
+
+kur2_IDLE_STOP:
+  Skills: []
+
+kur2_CLEAR_IDLE:
+  Skills: []
+
+
+kur2_END_ACTION:
+  Conditions:
+    # 일반 패턴(busy=1)의 정상 종료에서만 lock 해제.
+    # Death Pattern은 busy=2이므로 과거 delay cleanup이 와도 해제 불가.
+    - variableEquals{var=caster.busy;value=1} true
+  Skills:
+    - message{m="&8[P2 Combo] &7RESET &8(<caster.var.combo_step> -> 0)"} @PlayersInWorld ?variableInRange{var=caster.combo_step;value=>0}
+    - setvariable{var=caster.combo_step;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# VANILLA ATTACK CANCEL
+# 실제 공격은 Timer Router만 사용.
+# ============================================================
+
+kurATTACKsync:
+  Skills:
+    - cancelevent
+
+
+# ============================================================
+# MELEE COMBO ROUTER
+#
+# Attack1의 실제 부채꼴 안에 플레이어가 있을 때만 시작.
+# Attack1 -> Attack2 -> Attack3는 하나의 busy 락 안에서 연결.
+# ============================================================
+
+kur2_MeleeRouter:
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.runner_mode;value=0} true
+  Skills:
+    - skill{s=kur_ATTACK1} @LivingInCone{a=150;r=5;rot=-15;target=players;limit=1;sort=NEAREST}
+
+
+# ------------------------------------------------------------
+# ATTACK 1
+# 좌 90 / 우 60 = 총 150°, 중심 -15°
+# 사거리 5
+# 타점 0.25s = 5틱
+# ------------------------------------------------------------
+
+kur_ATTACK1:
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+  TargetConditions:
+    - distance{d=<5.01} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.combo_step;value=1;type=INTEGER} @self
+    - message{m="&8[P2 Combo] &f1/3 &7Attack1"} @PlayersInWorld
+    - potion{type=SLOW;duration=24;level=8;p=false;force=true} @self
+    - skill{s=kur2_CLEAR_IDLE} @self
+
+    # 고수분 방식처럼 공격 초반만 짧게 조준.
+    - look{headOnly=false;force=true;immediately=false;repeat=5;repeatInterval=1} @target
+    - meg:state{mid=kur;s=attack1;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - message{m="&8[P2] &fAttack1 &7(-90° ~ +60°, r=5)"} @PlayersInWorld
+
+    # 0.25s
+    - delay 5
+
+    # REAL VFX / SFX - KUR 평타도 애니메이션이 주체.
+    - effect:particles{particle=sweep_attack;amount=1;hS=0.18;vS=0.14;speed=0.008} @Forward{f=2.15;rot=-15;lockpitch=true;y=1.05}
+    - effect:particles{particle=crit;amount=3;hS=0.22;vS=0.18;speed=0.018} @Forward{f=2.2;rot=-18;lockpitch=true;y=1.0}
+    - damage{a=12} @LivingInCone{a=150;r=5;rot=-15;target=players}
+    - sound{s=entity.player.attack.sweep;v=0.62;p=1.04} @self
+
+    # attack1 약 1.0s까지 재생 후 Attack2 실제 범위를 다시 검사
+    - delay 15
+    - skill{s=kur_ATTACK2} @LivingInCone{a=150;r=5;rot=15;target=players;limit=1;sort=NEAREST}
+
+    # Attack2가 시작되면 combo_step=2가 됨.
+    # 대상이 없었다면 1틱 뒤 step=1을 보고 콤보 종료.
+    - delay 1
+    - skill{s=kur2_ABORT_STEP1} @self
+
+
+kur2_ABORT_STEP1:
+  Conditions:
+    - variableEquals{var=caster.combo_step;value=1} true
+  Skills:
+    - skill{s=kur2_END_ACTION} @self
+
+
+# ------------------------------------------------------------
+# ATTACK 2
+# 좌 60 / 우 90 = 총 150°, 중심 +15°
+# 사거리 5
+# 타점 0.25s = 5틱
+# 적중 시 Fallen Defender식 단계형 Airborne. 초기 velocityY=2 테스트
+# ------------------------------------------------------------
+
+kur_ATTACK2:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.combo_step;value=1} true
+  TargetConditions:
+    - distance{d=<5.01} true
+  Skills:
+    - setvariable{var=caster.combo_step;value=2;type=INTEGER} @self
+    - message{m="&8[P2 Combo] &f2/3 &7Attack2"} @PlayersInWorld
+    - potion{type=SLOW;duration=24;level=8;p=false;force=true} @self
+    - look{headOnly=false;force=true;immediately=false;repeat=5;repeatInterval=1} @target
+
+    # 이번 A2에 맞은 플레이어만 A3 연계 후보가 되게 플래그 초기화.
+    - setvariable{var=target.gk2_a2_hit;value=0;type=INTEGER} @PlayersInRadius{r=8}
+
+    - meg:state{mid=kur;s=attack2;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - message{m="&8[P2] &fAttack2 &7(-60° ~ +90°, r=5 / Launch)"} @PlayersInWorld
+
+    # 0.25s
+    - delay 5
+
+    # REAL VFX / SFX - 올려치기는 방향성만 보조.
+    - sound{s=entity.player.attack.sweep;v=0.62;p=0.96} @self
+    - effect:particles{particle=sweep_attack;amount=1;hS=0.20;vS=0.20;speed=0.008} @Forward{f=2.0;rot=15;lockpitch=true;y=1.18}
+    - effect:particles{particle=crit;amount=3;hS=0.22;vS=0.30;speed=0.02} @Forward{f=2.05;rot=15;lockpitch=true;y=1.24}
+
+    - skill{s=kur2_ATTACK2_HIT} @LivingInCone{a=150;r=5;rot=15;target=players}
+
+    # attack2 약 1.0s 종료 후 중앙 ±30° 영역을 다시 검사.
+    # A2로 공중에 띄운 높이를 고려해 연계 체크 반경은 7,
+    # 실제 A3 데미지는 사용자가 지정한 r=4 그대로.
+    - delay 15
+    - skill{s=kur_ATTACK3} @LivingInCone{a=60;r=7;rot=0;target=players;limit=1;sort=NEAREST}
+
+    - delay 1
+    - skill{s=kur2_ABORT_STEP2} @self
+
+
+kur2_ATTACK2_HIT:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+  TargetConditions:
+    - variableEquals{var=target.gk2_a2_hit;value=0} true
+  Skills:
+    # 기본 마인크래프트 피격 넉백 차단.
+    # 이후 이동은 아래 throw 값만 담당.
+    - damage{a=12;pkb=true} @target
+
+    # ========================================================
+    # FALLEN DEFENDER STYLE AIRBORNE
+    #
+    # 원본 Upper Wave:
+    # LEVITATION Lv4 5t
+    # + Throw Y=2
+    # -> Lv2 5t
+    # -> Lv1 5t
+    # -> SLOW_FALLING 5t
+    #
+    # 원본은 horizontal velocity도 12~25로 강하게 날리지만,
+    # 우리 A2 -> A3 연계 유지 목적상 horizontal=0으로 변경.
+    # ========================================================
+    - potion{type=LEVITATION;duration=5;level=4;p=false;force=true} @target
+    - throw{velocity=0;velocityY=2.2} @target
+    - potion{type=LEVITATION;duration=5;level=2;p=false;force=true;delay=5} @target
+    - potion{type=LEVITATION;duration=5;level=1;p=false;force=true;delay=10} @target
+    - potion{type=SLOW_FALLING;duration=5;level=0;p=false;force=true;delay=15} @target
+
+    - setvariable{var=target.gk2_a2_hit;value=1;type=INTEGER} @target
+
+    # REAL VFX - 에어본 피격점은 짧고 명확하게.
+    - effect:particles{particle=cloud;amount=4;hS=0.22;vS=0.30;speed=0.02} @target
+    - effect:particles{particle=crit;amount=4;hS=0.22;vS=0.30;speed=0.028} @target
+    - sound{s=entity.player.attack.knockback;v=0.52;p=1.04} @origin
+
+
+kur2_ABORT_STEP2:
+  Conditions:
+    - variableEquals{var=caster.combo_step;value=2} true
+  Skills:
+    - skill{s=kur2_END_ACTION} @self
+
+
+# ------------------------------------------------------------
+# ATTACK 3
+# 중앙 좌우 30° = 총 60°
+# 실제 사거리 4
+# 타점 1.17s -> 23틱(1.15s, 20TPS에서 가장 근접)
+# 3블럭 앞에 기존 지형파괴 VFX 소환.
+# ------------------------------------------------------------
+
+kur_ATTACK3:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.combo_step;value=2} true
+  TargetConditions:
+    # A2를 실제로 맞고 뜬 플레이어만 연계.
+    - variableEquals{var=target.gk2_a2_hit;value=1} true
+  Skills:
+    - setvariable{var=caster.combo_step;value=3;type=INTEGER} @self
+    - message{m="&8[P2 Combo] &f3/3 &7Attack3"} @PlayersInWorld
+    - potion{type=SLOW;duration=52;level=8;p=false;force=true} @self
+    - look{headOnly=false;force=true;immediately=false;repeat=5;repeatInterval=1} @target
+
+    - meg:state{mid=kur;s=attack3;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - message{m="&8[P2] &fAttack3 &7(-30° ~ +30°, r=4 / GroundBreak)"} @PlayersInWorld
+
+    # 1.17s ~= 23틱
+    - delay 23
+    - damage{a=18} @LivingInCone{a=60;r=4;rot=0;target=players}
+    - summon{type=KUR_GROUNDBREAK;amount=1;radius=0} @Forward{f=3;rot=0;lockpitch=true}
+
+    # REAL VFX / SFX - A3는 콤보 피니셔이므로 타점 순간만 강하게.
+    - sound{s=entity.player.attack.strong;v=0.60;p=0.84} @self
+    - sound{s=block.deepslate.break;v=0.54;p=0.80} @Forward{f=3;rot=0;lockpitch=true}
+    - effect:particles{particle=block;material=DIRT;amount=24;hS=0.95;vS=0.36;speed=0.08} @Forward{f=3;rot=0;lockpitch=true}
+    - effect:particles{particle=cloud;amount=8;hS=0.58;vS=0.18;speed=0.035} @Forward{f=3;rot=0;lockpitch=true;y=0.15}
+    - effect:particles{particle=crit;amount=6;hS=0.40;vS=0.26;speed=0.035} @Forward{f=2.8;rot=0;lockpitch=true;y=0.42}
+
+    # attack3 모델 약 2.5s
+    - delay 27
+    - skill{s=kur2_END_ACTION} @self
+
+
+# ============================================================
+# SPECIAL ROUTER
+#
+# Spin / Jump / Range Slash만 활성.
+# Slide Attack은 연결할 공격 모션이 정해질 때까지 제외.
+# ============================================================
+
+kur2_SpecialRouter:
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.runner_mode;value=0} true
+    - targetwithin{d=18} true
+  Skills:
+    # 일부 선택은 거리조건 실패로 no-op이 될 수 있게 둬서
+    # 특수기 난사를 방지.
+    - randomskill{skills=kur_SPIN 2,kur_leapattack 3,kur_rangedslash 2,kur2_SPECIAL_NOOP 2} @target
+
+
+kur2_SPECIAL_NOOP:
+  Skills: []
+
+
+# ============================================================
+# SPIN ATTACK
+#
+# r=5.5
+# 검 끝 각도:
+# 0.58s  +180°(우측 후방)
+# 0.71s   +75°
+# 0.83s   -15°
+# 1.00s  -180°
+# 1.08s   +90° (= -270° 연속 회전의 끝)
+#
+# 1틱 단위로 보간한 좁은 Cone을 순차 판정.
+# 플레이어별 1회만 데미지.
+# ============================================================
+
+kur_SPIN:
+  Cooldown: 7
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+  TargetConditions:
+    - distance{d=<5.51} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - potion{type=SLOW;duration=35;level=8;p=false;force=true} @self
+    - skill{s=kur2_CLEAR_IDLE} @self
+    - look{headOnly=false;force=true;immediately=false;repeat=4;repeatInterval=1} @target
+
+    - setvariable{var=target.gk2_spin_hit;value=0;type=INTEGER} @PlayersInRadius{r=7}
+    - meg:state{mid=kur;s=spin_attack;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - message{m="&8[P2] &dSpin Attack &7(r=5.5 / Sequential Arc)"} @PlayersInWorld
+
+    # REAL TELEGRAPH / SFX - Spin은 범위가 큰 공격이므로 실제 공격 반경을 바닥에 표시.
+    # 개발용 범위 디버그가 아니라 플레이어가 회전베기 위험 범위를 읽기 위한 실제 텔레그래프.
+    - sound{s=entity.player.attack.sweep;v=0.56;p=0.86} @self
+    - effect:particlering{particle=cloud;radius=5.5;points=42;amount=1;y=0.10;speed=0.002} @self
+
+    # 0.58s ~= 12틱
+    - delay 12
+    # REAL TELEGRAPH - 타격 진입 순간에도 동일 반경을 한 번 더 보여준다.
+    - effect:particlering{particle=cloud;radius=5.5;points=42;amount=1;y=0.10;speed=0.002} @self
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=180;target=players}
+
+    # 0.65s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=128;target=players}
+
+    # 0.70s ~= user 0.71s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=75;target=players}
+
+    # 0.75s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=45;target=players}
+
+    # 0.80s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=15;target=players}
+
+    # 0.85s ~= user 0.83s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=-15;target=players}
+
+    # 0.90s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=-70;target=players}
+
+    # 0.95s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=-125;target=players}
+
+    # 1.00s
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=-180;target=players}
+
+    # 1.05s: -225° == +135°
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=135;target=players}
+
+    # 1.10s ~= user 1.08s: -270° == +90°
+    - delay 1
+    - skill{s=kur2_SPIN_HIT_ONCE} @LivingInCone{a=60;r=5.5;rot=90;target=players}
+
+    - sound{s=entity.player.attack.sweep;v=0.62;p=0.96} @self
+
+    # spin_attack 약 1.67s
+    - delay 11
+    - skill{s=kur2_END_ACTION} @self
+
+
+kur2_SPIN_HIT_ONCE:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+  TargetConditions:
+    - variableEquals{var=target.gk2_spin_hit;value=0} true
+  Skills:
+    - damage{a=14} @target
+    - setvariable{var=target.gk2_spin_hit;value=1;type=INTEGER} @target
+    - effect:particles{particle=sweep_attack;amount=1;hS=0.10;vS=0.10;speed=0.01} @target
+
+
+# ============================================================
+# JUMP / LEAP ATTACK
+#
+# user spec:
+# - 0.50s 실제 점프, 지면 기준 약 2블럭
+# - 0.50 ~ 1.46s 강공격 차지
+# - 이 구간이 끝날 때 반드시 실제 엔티티가 착지한 상태
+# - 1.79s 실제 데미지, r=5
+#
+# 구현 v5.3:
+# - v5.4부터 leap{} 미사용
+# - 0.50s부터 투명 Guide Marker를 순차 생성하고 KUR 본체를 각 지점으로 pull
+# - onGround를 별도로 감지
+# - 1.80s(36틱)가 되어도 미착지면 데미지 보류
+# - 착지 + 1.80s 두 조건을 모두 만족한 순간 Impact
+# ============================================================
+
+kur_leapattack:
+  Cooldown: 8
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.runner_mode;value=0} true
+  TargetConditions:
+    # 일반 Jump = 접근기.
+    # 5.5블럭 안쪽은 평타/Spin 영역.
+    # 5.5~11블럭에서 타겟에게 도약해 거리를 좁힌다.
+    - distance{d=>5.5} true
+    - distance{d=<11.01} true
+  Skills:
+    - skill{s=kur2_JUMP_CORE} @target
+
+
+# Runner Stack 7 전용 Leap.
+# 거리 제한 없이 7번째 Stack을 만든 현재 Threat Target에게 실행.
+kur2_RUNNER_LEAP:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.runner_mode;value=1} true
+  Skills:
+    # 부모 RUNNER_ROUTER가 찾아 넘긴 Aura 보유자를 그대로 Jump Core target으로 사용.
+    - message{m="&8[P2 Runner] &cRUNNER LEAP START"} @PlayersInWorld
+    - skill{s=kur2_JUMP_CORE} @TargetedTarget
+
+
+# ============================================================
+# SHARED JUMP CORE
+#
+# Normal Jump / Runner Jump 모두 같은 물리와 애니메이션 사용.
+#
+# 상태 최소화:
+# busy=1      : Action Lock
+# jump_armed  : 점프가 실제 발사되어 착지 감지 가능
+# jump_landed : 실제 onGround 확인
+#
+# jump_active / jump_damage_ready / jump_done 제거.
+# ============================================================
+
+kur2_JUMP_CORE:
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.jump_armed;value=0;type=INTEGER} @self
+    - setvariable{var=caster.jump_landed;value=0;type=INTEGER} @self
+
+    - skill{s=kur2_CLEAR_IDLE} @self
+
+    # Fallen Devastator 방식: AI를 끄지 않고 강한 SLOW로 자율 이동 억제.
+    - potion{type=SLOW;duration=45;level=8;p=false;force=true} @Self
+
+    - look{headOnly=false;force=true;immediately=false;repeat=35;repeatInterval=1} @TargetLocation
+    - meg:state{mid=kur;s=leap_attack;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - message{m="&8[P2] &bJump Attack &7(FD Missile Guide)"} @PlayersInWorld
+
+    # 0.50s - 실제 점프 시작
+    - delay 10
+
+    - effect:particlering{particle=cloud;radius=0.5;points=18;amount=1;hS=0.16;vS=0.16;speed=0} @Origin
+    - effect:particlering{particle=cloud;radius=0.8;points=26;amount=1;hS=0.16;vS=0.16;speed=0;delay=1} @Origin
+    - sound{s=entity.horse.jump;v=0.60;p=1.15} @self
+
+    # Fallen Devastator 원본 핵심.
+    - lunge{velocity=1.5;velocityY=0.3} @Self
+    - spin{auraName=kur2_jump_spin;d=20;v=0} @self
+
+    - missile{
+        onTick=kur2_JUMP_MISSILE_TICK;
+        onEnd=kur2_JUMP_MISSILE_END;
+        v=22;
+        i=1;
+        hR=1;
+        vR=1;
+        g=1.4;
+        syo=1;
+        sB=true;
+        HitNonPlayers=false;
+        hp=true;
+        in=4;
+        fromorigin=true;
+        tyo=1.5;
+        vO=80
+      } @TargetLocation
+
+    - delay 1
+    - potion{type=JUMP;duration=30;lvl=30;p=true} @Self
+
+    - Aura{auraName=kur2_stage1_projectile;duration=7;delay=0} @self
+    - Aura{auraName=kur2_stage2_projectile;duration=20;delay=7} @self
+
+    # 같은 tick onGround 오검출 방지.
+    - delay 1
+    - setvariable{var=caster.jump_armed;value=1;type=INTEGER} @self
+
+    # 1.80s 타점 도달을 '기억'.
+    # 아직 미착지여도 패턴을 실패 처리하지 않는다.
+    - delay 24
+    - setvariable{var=caster.jump_armed;value=2;type=INTEGER} @self
+    - skill{s=kur2_JUMP_IMPACT_TRY} @self
+
+
+kur2_JUMP_MISSILE_TICK:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+  Skills:
+    - effect:particles{particle=dust;color=#00FF00;size=0.90;amount=3;hS=0.035;vS=0.035;speed=0.001} @Origin
+
+    - pull{velocity=7;to=true} @Self
+
+    - modifyProjectile{trait=VELOCITY;action=MULTIPLY;value=0.88} ?hasaura{n=kur2_stage1_projectile}
+    - modifyProjectile{trait=GRAVITY;action=MULTIPLY;value=1.14} ?hasaura{n=kur2_stage1_projectile}
+
+    - modifyProjectile{trait=VELOCITY;action=MULTIPLY;value=1.05} ?hasaura{n=kur2_stage2_projectile}
+    - modifyProjectile{trait=GRAVITY;action=MULTIPLY;value=1.05} ?hasaura{n=kur2_stage2_projectile}
+    - modifyProjectile{trait=INERTIA;action=MULTIPLY;value=1.25} ?hasaura{n=kur2_stage2_projectile}
+
+
+kur2_JUMP_MISSILE_END:
+  Skills:
+    - effect:particles{particle=dust;color=#FFFF00;size=1.15;amount=10;hS=0.12;vS=0.08;speed=0.005} @Origin
+
+
+kur2_JUMP_LAND_CHECK:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableInRange{var=caster.jump_armed;value=>0} true
+    - variableEquals{var=caster.jump_landed;value=0} true
+    - onground true
+  Skills:
+    - setvariable{var=caster.jump_landed;value=1;type=INTEGER} @self
+
+    # 착지 후 걸어가 버리지 않게 SLOW만 재강화.
+    - potion{type=SLOW;duration=30;level=8;p=false;force=true} @self
+    - effect:particles{particle=cloud;amount=8;hS=0.50;vS=0.10;speed=0.025} @self
+
+    # 착지가 1.80초보다 늦었을 경우 여기서 바로 Impact 재시도.
+    - skill{s=kur2_JUMP_IMPACT_TRY} @self
+
+
+kur2_JUMP_IMPACT_TRY:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.jump_armed;value=2} true
+    - variableEquals{var=caster.jump_landed;value=1} true
+  Skills:
+    # 이 시점부터 onGround watcher 재진입 차단.
+    - setvariable{var=caster.jump_armed;value=0;type=INTEGER} @self
+
+    - potion{type=SLOW;duration=26;level=8;p=false;force=true} @self
+    - damage{a=24} @PlayersInRadius{r=5}
+    - sound{s=entity.generic.explode;v=0.60;p=0.88} @self
+    - sound{s=entity.player.attack.strong;v=0.60;p=0.82} @self
+    - sound{s=block.stone.break;v=0.52;p=0.82} @self
+
+    # REAL VFX - Jump Impact는 KUR의 대표 강공격.
+    # 준비/비행 중은 절제하고 착지 순간에만 충격파와 파편을 집중한다.
+    - effect:particlering{particle=cloud;radius=5;points=36;amount=1;y=0.22;speed=0.04} @self
+    - effect:particles{particle=block;material=DIRT;amount=28;hS=1.55;vS=0.32;speed=0.09} @self
+    - effect:particles{particle=large_smoke;amount=8;hS=0.75;vS=0.30;speed=0.025} @self
+    - effect:particles{particle=crit;amount=8;hS=0.62;vS=0.28;speed=0.04} @self
+
+    - delay 24
+
+    - auraremove{aura=kur2_stage1_projectile} @self
+    - auraremove{aura=kur2_stage2_projectile} @self
+    - auraremove{aura=kur2_jump_spin} @self
+
+    - setvariable{var=caster.jump_landed;value=0;type=INTEGER} @self
+
+    # Runner Leap이었다면 여기서 Runner Protocol 종료.
+    - skill{s=kur2_RUNNER_RESET} @self
+    - skill{s=kur2_END_ACTION} @self
+
+
+# ============================================================
+# RANGED SLASH
+#
+# user spec:
+# - 준비 모션
+# - 0.75s 1차 검기
+# - 1.25s 2차 검기
+#
+# 현재 별도 VFX 모델 지정 전이므로 projectile + particle로 임시 구현.
+# ============================================================
+
+kur_rangedslash:
+  Cooldown: 6
+  Conditions:
+    - incombat true
+    - variableEquals{var=caster.busy;value=0} true
+    # 7~18블럭 중~원거리 견제.
+    # 7~11은 Jump와 겹치지만 Router 가중치는 Jump가 더 높다.
+    - targetwithin{d=18} true
+    - targetwithin{d=7} false
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - potion{type=SLOW;duration=45;level=8;p=false;force=true} @self
+    - skill{s=kur2_CLEAR_IDLE} @self
+    - look{headOnly=false;force=true;immediately=false;repeat=8;repeatInterval=1} @target
+
+    - meg:state{mid=kur;s=ranged_slash;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - message{m="&8[P2] &eRange Slash &7(0.75s / 1.25s)"} @PlayersInWorld
+
+    # 0.75s
+    - delay 15
+    - skill{s=kur2_RANGESLASH_SHOT} @target
+    - sound{s=entity.player.attack.sweep;v=0.60;p=1.16} @self
+
+    # 1.25s
+    - delay 10
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=kur2_RANGESLASH_SHOT} @target
+    - sound{s=entity.player.attack.sweep;v=0.60;p=1.00} @self
+
+    # ranged_slash 약 2.0s
+    - delay 15
+    - skill{s=kur2_END_ACTION} @self
+
+
+kur2_RANGESLASH_SHOT:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+  Skills:
+    - projectile{
+        onTick=kur2_RANGESLASH_TICK;
+        onHit=kur2_RANGESLASH_HIT;
+        v=18;
+        i=1;
+        hR=0.90;
+        vR=1.20;
+        mr=22;
+        syo=1.15;
+        sfo=1.30
+      } @target
+
+
+kur2_RANGESLASH_TICK:
+  Skills:
+    # REAL VFX - Range Slash는 검기 자체만 보이게 단순화.
+    # 파란 dust 잔광은 제거하고 sweep 궤적만 유지한다.
+    - effect:particles{particle=sweep_attack;amount=1;hS=0.08;vS=0.08;speed=0.008} @origin
+
+
+kur2_RANGESLASH_HIT:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+  Skills:
+    - damage{a=12} @target
+
+    # REAL VFX / SFX - 검기 충돌은 기본 crit만 남긴다.
+    - effect:particles{particle=crit;amount=6;hS=0.28;vS=0.28;speed=0.04} @origin
+    - sound{s=entity.player.attack.crit;v=0.46;p=1.12} @origin
+
+
+# ============================================================
+# SLIDE ATTACK
+#
+# slide_attack 애니메이션은 존재하지만,
+# 현재 사용자가 "어떤 공격 모션과 연결할지 미정"으로 지정.
+# 패턴 Router에서는 호출하지 않음.
+# ============================================================
+
+kur_slide:
+  Skills: []
+
+
+# ============================================================
+# PHASE 2 THREAT REACTION / RUNNER PROTOCOL
+#
+# ThreatTable 자체는 그대로 사용.
+#
+# 강제 Threat Swap 우선순위:
+# Runner Stack 7 > Big Damage / Side-Back Hit > Normal ThreatTable
+#
+# Side/Back + Big Damage는 같은 Aura lock(kur2_changedThreat)을 공유해
+# 두 플레이어가 양쪽에서 번갈아 때려도 보스가 매 hit마다 핑퐁 회전하지 않음.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# PRE-RUNNER RANGED THREAT HOLD
+#
+# 7블럭 밖 공격자는 Runner 7스택 전까지 KUR의 현재 타겟을 빼앗지 못함.
+# gk_king_target Aura는 기존 BOAR orchestration이 2틱마다
+# KUR의 현재 Threat Target에게 붙여주는 표식을 그대로 재사용.
+#
+# 새 변수 없음.
+# ------------------------------------------------------------
+
+kur2_RANGED_PRE_RUNNER_HOLD:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} false
+    - variableEquals{var=caster.runner_mode;value=0} true
+  TriggerConditions:
+    - distance{d=>7} true
+  Skills:
+    # 기존 킹 타겟 표식 보유자가 존재할 때만 실행.
+    - skill{s=kur2_RANGED_PRE_RUNNER_HOLD_APPLY;sync=true} @PlayersInRadius{r=64;conditions=[  - hasaura{aura=gk_king_target} true ];limit=1}
+
+
+kur2_RANGED_PRE_RUNNER_HOLD_APPLY:
+  Skills:
+    # 부모 targeter가 찾아 넘긴 gk_king_target Aura 보유자를 그대로 사용.
+    # clearThreat 뒤 @target을 다시 조회하면 현재 KUR target이 사라져 복원이 실패할 수 있음.
+    - clearThreat{} @self
+    - threat{amount=100;mode=set} @TargetedTarget
+    - setTarget @TargetedTarget
+
+    # 수신자 기준 <target.name> 혼동을 피하고 상태만 전역 출력.
+    - message{m="&8[P2 Ranged HOLD] &aRESTORED &7| TOP=<caster.tt.top>"} @PlayersInWorld
+
+
+# ------------------------------------------------------------
+# 7블럭 밖에서 피격 -> Runner Stack +1
+# 공격 종류(PROJECTILE 한정 아님)와 무관하게 Trigger 거리 기준.
+# ------------------------------------------------------------
+
+kur2_RUNNER_STACK_HIT:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} false
+    - variableEquals{var=caster.runner_mode;value=0} true
+  TriggerConditions:
+    - distance{d=>7} true
+  Skills:
+    - variableadd{var=caster.runner_stack;amount=1} @self
+    - skill{s=kur2_RUNNER_STACK_DISPLAY} @self
+    - skill{s=kur2_RUNNER_ACTIVATE;sync=true} @Trigger
+
+
+# ------------------------------------------------------------
+# P2 Runner Stack Global Debug
+# ------------------------------------------------------------
+
+kur2_RUNNER_STACK_DISPLAY:
+  Skills:
+    - skill{s=kur2_RUNNER_DBG_1} @self
+    - skill{s=kur2_RUNNER_DBG_2} @self
+    - skill{s=kur2_RUNNER_DBG_3} @self
+    - skill{s=kur2_RUNNER_DBG_4} @self
+    - skill{s=kur2_RUNNER_DBG_5} @self
+    - skill{s=kur2_RUNNER_DBG_6} @self
+    - skill{s=kur2_RUNNER_DBG_7PLUS} @self
+
+
+kur2_RUNNER_DBG_1:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=1} true
+  Skills:
+    - message{m="&8[P2 Runner] &e■&7□□□□□□ &f1/7"} @PlayersInWorld
+
+
+kur2_RUNNER_DBG_2:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=2} true
+  Skills:
+    - message{m="&8[P2 Runner] &e■■&7□□□□□ &f2/7"} @PlayersInWorld
+
+
+kur2_RUNNER_DBG_3:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=3} true
+  Skills:
+    - message{m="&8[P2 Runner] &e■■■&7□□□□ &f3/7"} @PlayersInWorld
+
+
+kur2_RUNNER_DBG_4:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=4} true
+  Skills:
+    - message{m="&8[P2 Runner] &6■■■■&7□□□ &f4/7"} @PlayersInWorld
+
+
+kur2_RUNNER_DBG_5:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=5} true
+  Skills:
+    - message{m="&8[P2 Runner] &6■■■■■&7□□ &f5/7"} @PlayersInWorld
+
+
+kur2_RUNNER_DBG_6:
+  Conditions:
+    - variableEquals{var=caster.runner_stack;value=6} true
+  Skills:
+    - message{m="&8[P2 Runner] &c■■■■■■&7□ &f6/7 &c[ONE MORE]"} @PlayersInWorld
+
+
+kur2_RUNNER_DBG_7PLUS:
+  Conditions:
+    - variableInRange{var=caster.runner_stack;value=>7} true
+  Skills:
+    - message{m="&8[P2 Runner] &4■■■■■■■ &f7/7 &4[RUNNER READY]"} @PlayersInWorld
+
+
+kur2_RUNNER_ACTIVATE:
+  Conditions:
+    - variableEquals{var=caster.runner_mode;value=0} true
+    - variableInRange{var=caster.runner_stack;value=>6} true
+  Skills:
+    # 7을 만든 마지막 공격자를 Runner 전용 고정 Target으로 지정.
+    - setvariable{var=caster.runner_stack;value=7;type=INTEGER} @self
+    - setvariable{var=caster.runner_mode;value=1;type=INTEGER} @self
+
+    # 기존 Side/Back Threat Lock은 Runner가 우선이므로 제거.
+    - auraremove{aura=kur2_changedThreat} @self
+
+    # 이전 Runner Target 표식이 남아있을 경우 정리 후,
+    # 이번 7번째 Stack을 만든 Trigger에게만 표식 부여.
+    - auraremove{aura=kur2_runner_target} @PlayersInRadius{r=128}
+    - Aura{auraName=kur2_runner_target;duration=200} @Trigger
+
+    # Runner 진입 즉시 현재 Threat / current target 모두 해당 Trigger로 확정.
+    - clearThreat{} @self
+    - threat{amount=100;mode=set} @Trigger
+    - setTarget @Trigger
+
+    # REAL VFX / SFX - Runner 발동은 화려함보다 '상태 변화' 전달이 목적.
+    - sound{s=entity.husk.ambient;v=0.44;p=0.80} @self
+    - effect:particlering{particle=crit;radius=1.0;points=12;amount=1;y=1.10;speed=0.018} @self
+    - effect:particles{particle=dust;color=#FF3300;size=1.00;amount=6;hS=0.28;vS=0.48;speed=0.008} @self
+
+    - message{m="&8[P2 Runner] &c■■■■■■■ 7/7 &4RUNNER MODE &7| Target LOCK + Natural Threat LOCK"} @PlayersInWorld
+
+
+# ------------------------------------------------------------
+# RUNNER TARGET / NATURAL THREAT LOCK
+#
+# runner_mode=1 동안 매 tick 실행.
+# 7번째 Stack을 만든 플레이어(kur2_runner_target Aura 보유자)만
+# Threat 100으로 재고정한다.
+#
+# 다른 플레이어의 자연 Threat가 생겨도 다음 tick에 전부 제거되므로
+# Runner Leap 종료 전까지 실질적으로 자연 Threat Target 변경이 불가능.
+# ------------------------------------------------------------
+
+kur2_RUNNER_THREAT_LOCK:
+  Conditions:
+    - variableEquals{var=caster.runner_mode;value=1} true
+    - variableEquals{var=caster.busy;value=2} false
+  Skills:
+    # Aura Target이 실제 존재할 때만 APPLY가 호출되므로,
+    # Runner Target이 사라진 경우 무작정 ThreatTable을 비우지 않는다.
+    - skill{s=kur2_RUNNER_THREAT_LOCK_APPLY} @PlayersInRadius{r=128;conditions=[  - hasaura{aura=kur2_runner_target} true ];limit=1}
+
+
+kur2_RUNNER_THREAT_LOCK_APPLY:
+  Skills:
+    # kur2_runner_target Aura 보유자를 inherited target으로 그대로 유지.
+    - clearThreat{} @self
+    - threat{amount=100;mode=set} @TargetedTarget
+    - setTarget @TargetedTarget
+
+
+# Runner Mode인데 다른 패턴이 아직 끝나지 않은 경우 확인용.
+kur2_RUNNER_WAIT_DEBUG:
+  Conditions:
+    - variableEquals{var=caster.runner_mode;value=1} true
+    - variableInRange{var=caster.busy;value=>0} true
+  Skills:
+    - message{m="&8[P2 Runner DEBUG] &eWAIT &7| busy=<caster.var.busy> | target=<caster.tt.top>"} @PlayersInWorld
+
+
+# busy=0이 되는 즉시 일반 Router보다 우선해서 Runner Leap을 시도.
+kur2_RUNNER_ROUTER:
+  Conditions:
+    # Runner Mode 자체가 전용 combat state이므로 incombat에 의존하지 않는다.
+    - variableEquals{var=caster.runner_mode;value=1} true
+    - variableEquals{var=caster.busy;value=0} true
+  Skills:
+    - message{m="&8[P2 Runner DEBUG] &aROUTER FIRE &7| searching runner aura holder"} @PlayersInWorld
+
+    # 일반 현재 Threat Target이 아니라 7번째 Stack을 만든 Runner Target에게 실행.
+    - skill{s=kur2_RUNNER_LEAP} @PlayersInRadius{r=128;conditions=[  - hasaura{aura=kur2_runner_target} true ];limit=1}
+
+
+kur2_RUNNER_RESET:
+  Conditions:
+    - variableEquals{var=caster.busy;value=1} true
+    - variableEquals{var=caster.runner_mode;value=1} true
+  Skills:
+    # Runner 종료 -> 전용 Target 표식 제거 후 일반 ThreatTable 복귀.
+    - auraremove{aura=kur2_runner_target} @PlayersInRadius{r=128}
+    - setvariable{var=caster.runner_mode;value=0;type=INTEGER} @self
+    - setvariable{var=caster.runner_stack;value=0;type=INTEGER} @self
+    - auraremove{aura=kur2_changedThreat} @self
+    - message{m="&8[P2 Runner] &7RESET 0/7 | Natural Threat UNLOCK"} @PlayersInWorld
+
+
+# ------------------------------------------------------------
+# 큰 단일 피해 -> 공격자 Threat 100
+#
+# Fallen Defender가 실제로 사용하는 event damage 변수:
+# <skill.var.damage-amount-post{default=<skill.var.damage-amount>}>
+#
+# 기준 = MaxHP 10%.
+# TEST100에서는 10 damage.
+# ------------------------------------------------------------
+
+kur2_THREAT_BIG_DAMAGE:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} false
+    - variableEquals{var=caster.runner_mode;value=0} true
+    - hasaura{n=kur2_changedThreat} false
+    - comparevalues{value1=<skill.var.damage-amount-post{default=<skill.var.damage-amount>}>;type=FLOAT;operator=>=;value2=<caster.var.big_damage_threshold>} true
+  TriggerConditions:
+    # 7블럭 밖 원거리 공격은 Runner 전용.
+    # 큰 피해라도 Runner Mode 전에는 원거리 공격자로 강제 Threat Swap하지 않는다.
+    - distance{d=<7.01} true
+  Skills:
+    - Aura{auraName=kur2_changedThreat;duration=40} @self
+    - clearThreat{} @self
+    - threat{amount=100} @Trigger
+    - message{m="&8[Threat] &cBIG HIT &7(<skill.var.damage-amount-post{default=<skill.var.damage-amount>}>) -> Trigger 100 &8[LOCK 2s]"} @PlayersInWorld
+
+
+# ------------------------------------------------------------
+# 정면 120° 밖(측면/후방)에서 피격 -> 공격자 Threat 100
+#
+# Fallen Devastator/Fallen Defender의 FieldOfView 방식과 동일한 구조.
+# 같은 2초 Aura lock을 공유.
+# ------------------------------------------------------------
+
+kur2_THREAT_BACKSIDE:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} false
+    - variableEquals{var=caster.runner_mode;value=0} true
+    - hasaura{n=kur2_changedThreat} false
+  TriggerConditions:
+    # 측후방 반응도 근거리 전용.
+    # 멀리서 등 뒤를 활로 쏴도 Runner 7스택 전에는 타겟 전환하지 않음.
+    - distance{d=<7.01} true
+    - FieldOfView{angle=120;r=0} false
+  Skills:
+    - Aura{auraName=kur2_changedThreat;duration=40} @self
+    - clearThreat{} @self
+    - threat{amount=100} @Trigger
+    - message{m="&8[Threat] &dSIDE/BACK HIT &7-> Trigger 100 &8[LOCK 2s]"} @PlayersInWorld
+
+
+
+# ============================================================
+# PHASE 2 - SEPARATED BOAR TARGET ROTATION
+#
+# 역할 분담:
+# KUR  = 강한 현재 타겟 압박 / Runner 원거리 응징
+# BOAR = KUR과 다른 후방 플레이어를 계속 바꿔가며 괴롭힘
+#
+# 핵심:
+# - 거리 계산은 BOAR가 아니라 KUR이 수행한다.
+#   => "고블린 킹에게서 먼 플레이어"를 정확히 고를 수 있음.
+# - KUR 현재 Threat Target은 gk_king_target Aura로 짧게 표시.
+# - 선택된 돼지 타겟은 gk_boar_target Aura.
+# - 최근 돼지 타겟은 gk_boar_recent Aura 6초.
+#
+# 거리 구간:
+# FAR  >= 13
+# MID  7 ~ 13
+# NEAR < 7
+#
+# 4초마다 우선순위:
+# 1) FAR + King Target 아님 + Recent 아님
+# 2) FAR + King Target 아님
+# 3) MID + King Target 아님 + Recent 아님
+# 4) MID + King Target 아님
+# 5) 아무 거리 + King Target 아님 + Recent 아님
+# 6) 아무 거리 + King Target 아님
+# 7) 아무 플레이어 (솔플/최종 fallback)
+# ============================================================
+
+
+# ------------------------------------------------------------
+# KUR 현재 Target 표시
+# 2틱마다 갱신. Aura는 6틱이라 짧은 target 변경도 따라간다.
+# Runner Mode에서는 Runner Target이 현재 KUR Target이므로
+# 돼지는 자연스럽게 Runner 대상도 피하게 됨.
+# ------------------------------------------------------------
+
+kur2_BOAR_MARK_KING_TARGET:
+  Skills:
+    - auraremove{aura=gk_king_target} @PlayersInRadius{r=64}
+    - Aura{auraName=gk_king_target;duration=6} @target
+
+
+
+# ============================================================
+# PHASE 2 - BOAR TARGET SELECT
+#
+# KUR 자신(caster) 기준으로 반경 64블럭 플레이어를 검색하고
+# 가장 먼 플레이어 딱 1명에게 gk_boar_target Aura를 부착한다.
+#
+# KUR의 현재 전투 Target / Threat / gk_king_target은 선정에 관여하지 않는다.
+# recent / FAR / MID / P1~P7 우선순위도 사용하지 않는다.
+# ============================================================
+
+# ============================================================
+# BOAR TARGET SELECTION - PREMIUM DIRECT ORIGIN
+#
+# v5.51
+# 더미 테스트 v1.3에서 실제 동작 확인한 구조 그대로 사용.
+#
+# 중요:
+# - Parent 사용 안 함
+# - KUR이 플레이어를 BOAR에게 전달하지 않음
+# - child metaskill로 origin/target context 넘기지 않음
+#
+# BOAR 자신이 caster인 상태에서 각 mechanic 자체에:
+#   origin=@MIR{...KUR...}
+# 를 직접 지정한다.
+#
+# 따라서:
+#   BOAR caster 유지
+#   -> 주변 KUR이 mechanic origin
+#   -> @PlayersNearOrigin FURTHEST
+#   -> BOAR 자신의 Threat / Target 직접 변경
+# ============================================================
+
+GK_BOAR_INITIAL_SELECT:
+  Skills:
+    # KUR/BOAR 동시 소환 등록 순서 여유.
+    - delay 4
+    - skill{s=GK_BOAR_SELECT_TARGET_DIRECT;sync=true} @self
+
+
+GK_BOAR_SELECT_TARGET_DIRECT:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} false
+  Skills:
+    # 이전 BOAR AI target / Threat 초기화.
+    - clearTarget @self
+    - clearThreat{} @self
+
+    # --------------------------------------------------------
+    # 핵심 1: Threat
+    #
+    # v1.3 성공 구조와 동일하게 mechanic 자체에 origin 직접 지정.
+    # caster는 BOAR이므로 이 ThreatTable은 BOAR 자신의 것.
+    # --------------------------------------------------------
+    - threat{amount=10000;mode=set;origin=@MIR{r=64;t=KUR;limit=1;sort=NEAREST}} @PlayersNearOrigin{r=64;sort=FURTHEST;limit=1}
+
+    # --------------------------------------------------------
+    # 핵심 2: 실제 AI current target
+    #
+    # 같은 KUR origin / 같은 FURTHEST targeter를 setTarget에 직접 적용.
+    # --------------------------------------------------------
+    - setTarget{origin=@MIR{r=64;t=KUR;limit=1;sort=NEAREST}} @PlayersNearOrigin{r=64;sort=FURTHEST;limit=1}
+
+    # 테스트 표시도 같은 direct-origin 방식.
+    - message{m="&6[Boar Target] &fKUR 기준 가장 먼 플레이어로 BOAR가 직접 선정함";origin=@MIR{r=64;t=KUR;limit=1;sort=NEAREST}} @PlayersNearOrigin{r=64;sort=FURTHEST;limit=1}
+    - effect:particles{particle=crit;amount=12;hS=0.35;vS=0.8;speed=0.02;origin=@MIR{r=64;t=KUR;limit=1;sort=NEAREST}} @PlayersNearOrigin{r=64;sort=FURTHEST;limit=1}
+
+
+# ============================================================
+# KUR P2 STATE DEBUG
+# ============================================================
+
+kur2_STATE_DEBUG:
+  Skills:
+    - message{m="&8[KUR STATE] &7busy=&e<caster.var.busy> &7| runner=&e<caster.var.runner_mode> &7| stack=&e<caster.var.runner_stack> &7| TOP=&c<caster.tt.top>"} @PlayersInWorld
+
+
+# ============================================================
+# BOAR OWN AI / COMBAT
+# ============================================================
+
+GK_BOAR_INIT:
+  Skills:
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# BOAR STATE DEBUG
+#
+# FURTHEST player가 정상 지정되면 ThreatTOP에 그 이름이 표시됨.
+# ============================================================
+
+GK_BOAR_STATE_DEBUG:
+  Skills:
+    - message{m="&8[Boar STATE] &7ThreatTOP=&c<caster.tt.top> &7| busy=&e<caster.var.busy>"} @PlayersInWorld
+
+
+# ============================================================
+# BOAR CUSTOM ATTACK
+#
+# direct-origin selector가 BOAR의 실제 current target을 지정하므로
+# 공격 시점에는 @target을 그대로 사용.
+# ============================================================
+
+GK_BOAR_CHASE_TARGET:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+  Skills:
+    # 더미 테스트 v1.4에서 실제 이동 성공 확인.
+    # BOAR의 실제 current target(@target)으로 MythicMobs navigation을 직접 명령한다.
+    # AI Goal scheduler의 meleeattack/movetowardstarget 이동에는 의존하지 않는다.
+    - goto{speed=1.2;sh=2.0;sv=0} @target
+
+
+GK_BOAR_ATTACK_ROUTER:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+  Skills:
+    - skill{s=GK_BOAR_GORE;sync=true} @target
+
+
+GK_BOAR_GORE:
+  Cooldown: 1.6
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+  TargetConditions:
+    - distance{d=<3.01} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+
+    # inherited target = 공격 시작 시 BOAR actual current target.
+    - message{m="&6[Boar ATTACK] &f보어 공격 대상"}
+
+    # v5.60:
+    # 공격 시작 순간 기존 추격 navigation을 정지 상태로 덮어쓰고
+    # 남아 있는 실제 이동 속도도 즉시 0으로 만든다.
+    # busy=1 동안 GK_BOAR_CHASE_TARGET도 실행되지 않으므로
+    # 공격 모션 중 플레이어를 지나쳐 등 뒤로 넘어가는 것을 방지한다.
+    - goto{speed=0;sh=2.0;sv=0}
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    # 공격 준비 방향을 실제 inherited target으로 고정.
+    - look{headOnly=false;force=true;immediately=true}
+
+    - potion{type=SLOW;duration=18;level=4;p=false;force=true} @self
+    - meg:state{mid=kur_rot_boar;s=shove;priority=2;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # BOAR 공격 파티클은 제거. 애니메이션 + 낮은 볼륨 SFX만 사용.
+    - sound{s=entity.hoglin.angry;v=0.21;p=1.02} @self
+
+    - delay 10
+
+    # 타점 직전에 다시 한 번 공격 대상을 바라본다.
+    # 아래 Cone 판정은 이 시점의 BOAR 실제 yaw 기준 좌우 40도 / 3블럭.
+    - look{headOnly=false;force=true;immediately=true}
+
+    # v5.53:
+    # BOAR 전방 좌우 40도(총 80도), 3블럭 범위 타격.
+    - damage{a=5} @LivingInCone{a=80;r=3;rot=0;target=players}
+    - throw{velocity=1.15;velocityY=0.12} @LivingInCone{a=80;r=3;rot=0;target=players}
+
+    - sound{s=entity.hoglin.attack;v=0.32;p=0.96} @self
+
+    - delay 10
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+
+
+GK_BOAR_DEATH:
+  Skills:
+    - setvariable{var=caster.busy;value=2;type=INTEGER} @self
+
+    # REAL VFX / SFX
+    - sound{s=entity.hoglin.death;v=0.30;p=0.98} @self
+    - effect:particles{particle=large_smoke;amount=8;hS=0.42;vS=0.40;speed=0.028} @self
+    - effect:particles{particle=poof;amount=8;hS=0.40;vS=0.30;speed=0.025} @self
+    # BOAR 사망 후에는 Threat/current target도 함께 소멸하므로 별도 target cleanup 불필요.
+
+
+# ============================================================
+# PHASE 2 DEATH
+# ============================================================
+
+# ============================================================
+# PHASE 2 DEATH
+#
+# 공용 lock 변수 caster.busy만 사용:
+# busy=0 : Free
+# busy=1 : 일반 패턴 실행 중
+# busy=2 : Death Pattern
+#
+# 별도 사망 전용 변수는 사용하지 않는다.
+# ============================================================
+
+# 죽음 패턴 중 추가 피격 차단.
+# ~onDamaged에서 sync=true로 호출.
+kur2_DEATH_DAMAGE_GUARD:
+  Conditions:
+    - variableEquals{var=caster.busy;value=2} true
+  Skills:
+    - cancelevent
+
+
+# 실제 자연사 이벤트를 취소하고 커스텀 Death Pattern으로 전환.
+kurDEATH:
+  Skills:
+    - cancelevent
+    - skill{s=kur2_DEATH_SEQUENCE} @self
+
+
+kur2_DEATH_SEQUENCE:
+  Conditions:
+    # busy=2면 이미 죽음 패턴 실행 중이므로 재진입 금지.
+    - variableEquals{var=caster.busy;value=2} false
+  Skills:
+    # ========================================================
+    # SHARED BUSY LOCK
+    # ========================================================
+    - setvariable{var=caster.busy;value=2;type=INTEGER} @self
+    - setvariable{var=caster.combo_step;value=0;type=INTEGER} @self
+
+    # Runner도 종료.
+    - auraremove{aura=kur2_runner_target} @PlayersInRadius{r=128}
+    - setvariable{var=caster.runner_mode;value=0;type=INTEGER} @self
+    - setvariable{var=caster.runner_stack;value=0;type=INTEGER} @self
+    - auraremove{aura=kur2_changedThreat} @self
+
+    # 진행 중 Jump/공중 공격 상태 즉시 무효화.
+    - setvariable{var=caster.jump_armed;value=0;type=INTEGER} @self
+    - setvariable{var=caster.jump_landed;value=0;type=INTEGER} @self
+    - auraremove{aura=kur2_stage1_projectile} @self
+    - auraremove{aura=kur2_stage2_projectile} @self
+    - auraremove{aura=kur2_jump_spin} @self
+
+    # ========================================================
+    # DEATH MOVEMENT LOCK
+    #
+    # 요청대로 SLOW만 사용.
+    # AI false / velocity 0 / 매틱 Freeze는 사용하지 않는다.
+    # ========================================================
+    - potion{type=SLOW;duration=100;level=10;p=false;force=true} @self
+
+    - meg:state{mid=kur;s=idle_default;remove=true;priority=1} @self
+    - meg:state{mid=kur;s=death;priority=6;override=true;loop=HOLD;force=true;li=0;lo=0} @self
+
+    # REAL VFX / SFX - KUR 사망.
+    - sound{s=entity.husk.death;v=0.94;p=0.80} @self
+    - effect:particles{particle=large_smoke;amount=10;hS=0.45;vS=0.65;speed=0.03} @self
+    - effect:particles{particle=poof;amount=10;hS=0.42;vS=0.45;speed=0.025} @self
+
+    # 현재 테스트 제거 타이밍 3초.
+    - delay 60
+    - remove @self
+
+
+# ============================================================
+# PHASE 2 DEBUG RANGE VISUALS
+# 실제 데미지 타이밍에 표시.
+# ============================================================
+
+# Attack1: 좌90 / 우60 / r5

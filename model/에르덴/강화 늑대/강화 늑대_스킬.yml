@@ -1,0 +1,258 @@
+# ============================================================
+# 검정 늑대 / Black Direwolf Skills
+# MythicMobs + BetterModel
+# Development v1.5
+#
+# 기본 공격은 갈색 늑대 v2.8의 구조를 계승.
+#
+# 할퀴기:
+# - 0.85초로 가속된 swipe 애니메이션
+# - 타격 약 0.25초
+# - 정면 총 60도 / 3.5블럭
+#
+# 물기:
+# - 0.96초
+# - 타격 약 0.15초
+# - 정면 총 60도 / 2.5블럭
+#
+# Howl:
+# - 전투 중 사용
+# - howl 전체 모션 3.12초
+# - 약 0.85초 지점에 주변 늑대 가속 발동
+# - 반경 8블럭
+# - 갈색 늑대 + 검정 늑대
+# - Speed II(+40%) / 8초
+# - 동일 포션 효과이므로 중첩 대신 지속시간 갱신
+#
+# v1.1 변경
+# - 할퀴기 사거리 3.0 -> 3.5블럭
+# - 물기 사거리 2.0 -> 2.5블럭
+# - 공격 라우터도 새 사거리에 맞게 분리
+#
+# v1.5 변경
+# - howl_buff 변수 방식 제거
+# - haspotioneffect{t=SPEED} false 조건으로 버프 중 하울링 차단
+# - Speed 버프는 @MobsInRadius의 늑대 타입에게 직접 적용
+# - nested @target 메타스킬 제거로 플레이어 Speed 버프 누출 방지
+#
+# v1.4 변경
+# - 하울 이동속도 버프 Speed I(+20%) 5초 -> Speed II(+40%) 8초
+# - 검정 늑대 howl_buff 마커 지속시간 100틱 -> 160틱
+# - 하울 모션 총 길이 7.863초는 그대로 유지
+#
+# v1.3 변경
+# - howl 애니메이션/패턴 총 길이 3.12초 -> 7.863초
+# - direwolf:black_howl 커스텀 사운드를 모션 시작과 동시에 1회 재생
+# - SPEED 포션 효과가 있는 검정 늑대는 HowlCheck/Howl 조건에서 제외
+# - 변수 마커 없이 실제 버프 상태 자체를 하울 차단 조건으로 사용
+# ============================================================
+
+
+# ------------------------------------------------------------
+# 초기화 / Idle / Walk
+# ------------------------------------------------------------
+DirewolfBlack_Init:
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - setAI{ai=false} @self
+
+    # 갈색 늑대와 동일하게 스폰 순간 모델 파츠 누락 방지를 위한 지연 적용
+    - delay 2
+    - model{mid=direwolf;n=false} @self
+
+    - delay 5
+    - state{mid=direwolf;s=idle;f=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setAI{ai=true} @self
+
+
+DirewolfBlack_WalkStart:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.anim_move;value=0} true
+    - moving true
+  Skills:
+    - setvariable{var=caster.anim_move;value=1;type=INTEGER} @self
+    - state{mid=direwolf;s=walk;f=true} @self
+
+
+DirewolfBlack_IdleStart:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.anim_move;value=1} true
+    - moving false
+  Skills:
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=direwolf;s=idle;f=true} @self
+
+
+# ------------------------------------------------------------
+# 기본 공격 라우터
+# - 2.5블럭 안에서 할퀴기 2 : 물기 1
+# - 2.5~3.5블럭에서는 할퀴기만 사용
+# ------------------------------------------------------------
+DirewolfBlack_AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - targetwithin{d=3.5} true
+  Skills:
+    # 2.5블럭 이내에서는 할퀴기 2 : 물기 1
+    - skill{s=DirewolfBlack_CloseAttack} @self
+    # 2.5블럭 밖 ~ 3.5블럭에서는 할퀴기만 사용
+    # CloseAttack이 실행되면 busy=1이 되어 이 스킬은 자동으로 막힌다.
+    - skill{s=DirewolfBlack_Swipe} @self
+
+
+DirewolfBlack_CloseAttack:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - targetwithin{d=2.5} true
+  Skills:
+    - randomskill{skills=DirewolfBlack_Swipe 2,DirewolfBlack_Bite 1} @self
+
+
+# ------------------------------------------------------------
+# 할퀴기
+# ------------------------------------------------------------
+DirewolfBlack_Swipe:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - targetwithin{d=3.5} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    - attribute{attribute=KNOCKBACK_RESISTANCE;a=1;duration=17} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=direwolf;s=swipe;f=true} @self
+
+    - delay 3
+    - sound{s=entity.player.attack.sweep;v=0.32;p=1.18} @self
+
+    # 가속된 swipe 기준 약 0.25초 타점
+    - delay 2
+    - summon{type=Direwolf_Black_SlashFX;amount=1;radius=0} @Forward{f=1}
+    - damage{a=7} @LivingInCone{a=60;r=3.5;rot=0;target=players}
+    - sound{s=entity.player.attack.sweep;v=0.30;p=1.38} @self
+
+    - delay 12
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=direwolf;s=idle;f=true} @self
+
+
+# ------------------------------------------------------------
+# 물기
+# ------------------------------------------------------------
+DirewolfBlack_Bite:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - targetwithin{d=2.5} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    - attribute{attribute=KNOCKBACK_RESISTANCE;a=1;duration=19} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=direwolf;s=bite;f=true} @self
+
+    - delay 3
+    - summon{type=Direwolf_Black_BiteFX;amount=1;radius=0} @Forward{f=1.5}
+    - damage{a=8} @LivingInCone{a=60;r=2.5;rot=0;target=players}
+    - sound{s=entity.wolf.growl;v=0.45;p=0.80} @self
+
+    - delay 16
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=direwolf;s=idle;f=true} @self
+
+
+# ------------------------------------------------------------
+# 하울링 체크
+#
+# 1초마다 전투 상태(타겟 12블럭 내)를 확인하고 18% 확률로 시도.
+# 실제 Howl 스킬에는 14초 쿨다운이 있어 연속 사용 방지.
+# ------------------------------------------------------------
+DirewolfBlack_HowlCheck:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    # 하울 Speed 버프가 남아 있으면 하울링 사용 금지
+    - haspotioneffect{t=SPEED} false
+    - targetwithin{d=12} true
+  Skills:
+    - skill{s=DirewolfBlack_Howl} @self 0.18
+
+
+# ------------------------------------------------------------
+# 하울링 - 사냥 본능 자극
+#
+# 검정 늑대가 리더라서 지휘하는 개념이 아니라,
+# 상위종의 강한 울음에 주변 늑대들이 흥분해 잠시 빨라지는 효과.
+#
+# howl 모션: 3.12초 ~= 62틱
+# 버프 발동: 약 0.85초 = 17틱
+# Speed II: 약 +40% / 8초
+# ------------------------------------------------------------
+DirewolfBlack_Howl:
+  Cooldown: 14
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    # 다른 검정 늑대에게 받은 Speed 버프가 있으면 하울링하지 않는다.
+    - haspotioneffect{t=SPEED} false
+    - targetwithin{d=12} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+
+    # 하울링 동안 공격/이동 및 피격 넉백으로 모션이 흐트러지는 것을 막는다.
+    - attribute{attribute=KNOCKBACK_RESISTANCE;a=1;duration=157} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=direwolf;s=howl;f=true} @self
+
+    # 업로드된 하울 사운드는 7.863초.
+    # 파일 앞쪽에 자연스러운 준비 구간이 있으므로 모션 시작과 동시에 1회 재생한다.
+    - sound{s=direwolf:black_howl;v=0.82;p=1.00;r=24} @self
+
+    # 기존 버프 타이밍 유지: 약 0.85초 지점.
+    - delay 17
+
+    # 자기 자신에게 Speed II(+40%) 8초.
+    - potion{type=SPEED;duration=160;level=1} @self
+
+    # 주변 늑대에게만 직접 적용한다.
+    # @MobsInRadius + types 필터를 사용하며 플레이어는 명시적으로 제외한다.
+    # 중간 메타스킬의 @target 상속을 쓰지 않아 플레이어에게 버프가 새는 경로를 제거.
+    - potion{type=SPEED;duration=160;level=1} @MobsInRadius{r=8;types=Direwolf_Desert_Normal,Direwolf_Black_Normal;ignore=players}
+    - particle{particle=cloud;amount=5;hS=0.25;vS=0.15;speed=0.02} @self
+    - particle{particle=cloud;amount=5;hS=0.25;vS=0.15;speed=0.02} @MobsInRadius{r=8;types=Direwolf_Desert_Normal,Direwolf_Black_Normal;ignore=players}
+
+    # 전체 howl 모션 7.863초 ~= 157틱.
+    # 버프 발동 시점 17틱 이후 남은 140틱 동안 모션을 유지한다.
+    - delay 140
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=direwolf;s=idle;f=true} @self
+
+
+# ------------------------------------------------------------
+# 사망
+# ------------------------------------------------------------
+DirewolfBlack_Death:
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=direwolf;s=death;f=true} @self
+    - sound{s=entity.wolf.death;v=0.80;p=0.86} @self

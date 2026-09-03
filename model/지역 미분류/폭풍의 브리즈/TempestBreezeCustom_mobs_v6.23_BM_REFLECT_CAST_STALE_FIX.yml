@@ -1,0 +1,509 @@
+# ============================================================
+# 폭풍의 브리즈 - BetterModel Port v6.23_BM_ENRAGE_KB_P1BREAK
+# 변경:
+# - 낙하 데미지 완전 제거
+# - 에어슬래시는 플레이어만 피해
+# - 자기 projectile로 자기 자신 피해 금지
+# - 플레이어 주변 랜덤 지점으로 빠르게 연속 점프
+# ============================================================
+
+TempestBreezeCustom:
+  Type: ZOMBIE
+  Display: '&b폭풍의 브리즈 &7[Custom AI]'
+  BossBar:
+    Enabled: true
+    Title: '&b폭풍의 브리즈'
+    Range: 40
+    Color: BLUE
+    Style: SEGMENTED_10
+    CreateFog: false
+    DarkenSky: false
+    PlayMusic: false
+  Health: 40
+  Damage: 0
+
+  Options:
+    MovementSpeed: 0
+    FollowRange: 32
+    KnockbackResistance: 1
+    PreventOtherDrops: true
+    PreventSunburn: true
+    PreventFallDamage: true
+    Silent: true
+
+  AIGoalSelectors:
+    - clear
+
+  AITargetSelectors:
+    - clear
+    - players
+
+  Skills:
+    - model{mid=tempest_breeze} @self ~onSpawn
+    # 상태 초기화
+    - setvariable{var=caster.wind_barrier;value=1;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.reflect_hits;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.enrage_reflect_hits;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.break_hits;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.broken;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.enraged;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.pattern_step;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.storm_casting;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.movement_pause;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.water_lock;value=0;type=INTEGER} @self ~onSpawn
+    - skill{s=TempestBM_InitVisual} @self ~onSpawn
+
+    # 낙하 데미지 이중 차단
+    - skill{s=TempestCustom_CancelFallDamage;sync=true} @self ~onDamaged
+
+    # 아직 실제 반사 가능한 폭풍구슬을 구현하지 않았으므로
+    # ReflectedOrbHit는 onDamaged에서 호출하지 않는다.
+    # 일반 projectile은 모두 무효.
+    # 활/삼지창 등 일반 원거리 공격은 바람장벽이 완전히 차단
+    - skill{s=TempestCustom_BlockRangedDamage;sync=true} @self ~onDamaged
+
+    # 근접 등 나머지 실제 피해는 바람장벽 활성 중 30%만 적용
+    - skill{s=TempestCustom_BarrierDamageReduction;sync=true} @self ~onDamaged
+    - skill{s=TempestCustom_MeleeBarrier;sync=true} @self ~onDamaged
+    # 30% 이하 진입 시 P1 기절 여부와 관계없이 즉시 P2 전환 체크
+    - skill{s=TempestCustom_EnrageCheck;sync=true} @self ~onDamaged
+    # 반사된 전용 돌풍구 감지
+    # onDamaged 시점에는 Wind Charge가 이미 사라질 수 있으므로 매 틱 근접 감지
+    - skill{s=TempestCustom_ReflectedWindProximityCheck} @self ~onTimer:1
+    - skill{s=TempestCustom_BrokenProjectileCleanup} @self ~onTimer:2
+
+    # 물가 감시 / 물에 빠졌을 때 탈출
+    - skill{s=TempestCustom_WaterGuard} @self ~onTimer:5
+    - skill{s=TempestCustom_WaterEmergency} @self ~onTimer:2
+
+    # 가장 가까운 플레이어를 항상 바라봄
+    - skill{s=TempestCustom_FaceNearestPlayer} @self ~onTimer:2
+
+    # 이동은 이 타이머 하나만 사용
+    - skill{s=TempestCustom_MovementRouter} @NearestPlayer{r=24} ~onTimer:20
+    # 공격 패턴
+    - skill{s=TempestCustom_PatternRouter} @NearestPlayer{r=30} ~onTimer:50
+    - skill{s=TempestCustom_ResetPatternStep} @self ~onTimer:10
+
+    - skill{s=TempestCustom_EnrageCheck} @self ~onTimer:1
+    - skill{s=TempestCustom_EnrageAura} @self ~onTimer:6
+
+
+# ============================================================
+# 돌풍구 전용 Helper 1~5 - 격리 테스트 검증 완료
+# ============================================================
+    - skill{s=TempestCustom_Death} @self ~onDeath
+
+TempestWindVectorHelper1:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestStormTest_Helper1} @self ~onSpawn
+
+TempestWindVectorHelper2:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestStormTest_Helper2} @self ~onSpawn
+
+TempestWindVectorHelper3:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestStormTest_Helper3} @self ~onSpawn
+
+TempestWindVectorHelper4:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestStormTest_Helper4} @self ~onSpawn
+
+TempestWindVectorHelper5:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestStormTest_Helper5} @self ~onSpawn
+
+
+# ============================================================
+# 분노 회전 탄막 전용 방향 Helper (12각 x 2줄기)
+# ============================================================
+
+TempestEnrageVectorHelper_0_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_0_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_0_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_0_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_1_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_1_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_1_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_1_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_2_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_2_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_2_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_2_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_3_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_3_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_3_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_3_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_4_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_4_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_4_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_4_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_5_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_5_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_5_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_5_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_6_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_6_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_6_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_6_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_7_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_7_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_7_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_7_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_8_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_8_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_8_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_8_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_9_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_9_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_9_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_9_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_10_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_10_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_10_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_10_B} @self ~onSpawn
+
+TempestEnrageVectorHelper_11_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_11_A} @self ~onSpawn
+
+TempestEnrageVectorHelper_11_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_Helper_11_B} @self ~onSpawn
+
+
+# ============================================================
+# 분노 탄막 - 플레이어 확정 조준 Helper
+# ============================================================
+
+TempestEnrageAimedVectorHelper_A:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_AimedHelper_A} @self ~onSpawn
+
+TempestEnrageAimedVectorHelper_B:
+  Type: ARMOR_STAND
+  Options:
+    Invisible: true
+    Marker: true
+    Small: true
+    Silent: true
+    Invincible: true
+    HasGravity: false
+    Despawn: true
+  Skills:
+    - skill{s=TempestEnrage_AimedHelper_B} @self ~onSpawn

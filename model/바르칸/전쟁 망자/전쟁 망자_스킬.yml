@@ -1,0 +1,87 @@
+# ============================================================
+# MUMMY - SKILLS
+# Development v1.0
+# MythicMobs 5.13.0 + ModelEngine 4
+#
+# 특징
+# - 느린 추격형
+# - attack 0.80초(16t)에 타격
+# - 사거리 2.5
+# - 공격 범위 정면 -40 ~ +40 (총 80도)
+# - 적중 시 구속 디버프
+#
+# count
+#   0 = 기본
+#   1 = 공격 중
+# ============================================================
+
+
+# ============================================================
+# ATTACK ROUTER
+# ============================================================
+
+Mummy_AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2.5}
+  Skills:
+    - skill{s=Mummy_Attack} @target
+
+
+# ============================================================
+# ATTACK
+# - hit timing: 16t = 0.80s
+# - range: 2.5
+# - FOV: -40 ~ +40 = angle 80 / rotation 0
+# ============================================================
+
+Mummy_Attack:
+  Cooldown: 1.8
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2.5}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+
+    # 공격 방향 고정
+    - look{headOnly=false;force=true;immediately=true} @target
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - stun{d=32;f=false;stopai=true} @self
+
+    - meg:state{mid=mummy;s=attack;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - sound{s=entity.husk.ambient;v=0.45;p=0.75} @self
+
+    # 0.8초에 실제 타격
+    - delay 16
+    - skill{s=Mummy_Attack_Hit} @PlayersInRadius{r=2.5}
+
+    # 공격 종료 후 행동 해제
+    - delay 16
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+
+Mummy_Attack_Hit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - fieldofview{angle=80;rotation=0}
+  Skills:
+    - damage{amount=8}
+
+    # 구속 디버프
+    # 40t = 2초 / amplifier 1 = Slowness II
+    - potion{type=SLOW;duration=40;level=1}
+
+    - sound{s=entity.husk.hurt;v=0.4;p=0.8} @target
+
+
+# ============================================================
+# VANILLA ATTACK CANCEL
+# ============================================================
+
+Mummy_CancelVanillaAttack:
+  Skills:
+    - cancelevent

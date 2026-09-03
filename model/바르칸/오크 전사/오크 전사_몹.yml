@@ -1,0 +1,87 @@
+# ============================================================
+# ORC WARRIOR - MOBS
+# Development v1.3
+# MythicMobs 5.13.0 + ModelEngine 4
+#
+# BetterModel ID: orc_warrior
+# ============================================================
+
+Orc_Warrior:
+  Type: HUSK
+  Display: '&2오크 전사'
+
+  # 테스트용 임시 밸런스값
+  Health: 100
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.24
+    FollowRange: 32
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.35
+    NoDamageTicks: 0
+
+  AIGoalSelectors:
+    - clear
+    - float
+    - meleeattack
+    - movetowardstarget
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+    - players
+
+  Skills:
+    # --------------------------------------------------------
+    # MODEL
+    # --------------------------------------------------------
+    - meg:model{mid=orc_warrior;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onSpawn
+    - meg:model{mid=orc_warrior;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onLoad
+
+    - meg:defaultstate{mid=orc_warrior;type=idle;state=idle;li=2;lo=2} @self ~onSpawn
+    - meg:defaultstate{mid=orc_warrior;type=walk;state=walk;li=2;lo=2} @self ~onSpawn
+    - meg:defaultstate{mid=orc_warrior;type=death;state=death;li=1;lo=1} @self ~onSpawn
+
+    - meg:defaultstate{mid=orc_warrior;type=idle;state=idle;li=2;lo=2} @self ~onLoad
+    - meg:defaultstate{mid=orc_warrior;type=walk;state=walk;li=2;lo=2} @self ~onLoad
+    - meg:defaultstate{mid=orc_warrior;type=death;state=death;li=1;lo=1} @self ~onLoad
+
+    # --------------------------------------------------------
+    # RUNTIME
+    # count
+    #   0 = 기본 상태
+    #   1 = attack 진행 중
+    #   2 = attack2 진행 중
+    #
+    # phase2=1 + count=0 이면 항상 방어 자세 / 피해 무효
+    # --------------------------------------------------------
+    - skill{s=OrcWarrior_Init} @self ~onSpawn
+    - skill{s=OrcWarrior_Init} @self ~onLoad
+
+    # HP 40% 이하 -> 2페이즈, 기본자세 자체가 방어로 전환
+    - skill{s=OrcWarrior_Phase2Check} @self ~onTimer:2
+
+    # 공격 판단
+    - skill{s=OrcWarrior_AttackRouter} @target ~onTimer:2 ?incombat
+
+    # 1페이즈 전용 일반 추격
+    - skill{s=OrcWarrior_RunStart} @target ~onTimer:5 ?incombat
+    - skill{s=OrcWarrior_RunStop} @target ~onTimer:5 ?incombat
+
+    # 2페이즈 기본 방어 상태에서 정면 -90~+90 피해 무효
+    - skill{s=OrcWarrior_BlockDamage;sync=true} @trigger ~onDamaged
+
+    # 바닐라 HUSK 자체 평타 제거
+    - skill{s=OrcWarrior_CancelVanillaAttack;sync=true} @self ~onAttack
+
+    - skill{s=OrcWarrior_CombatDrop} @self ~onDropCombat
+    - skill{s=OrcWarrior_Death} @self ~onDeath

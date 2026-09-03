@@ -1,0 +1,2082 @@
+# 폭풍의 브리즈 - BetterModel Port v6.23_BM_REFLECT_CAST_STALE_FIX
+
+# ============================================================
+# 0C. 항상 가장 가까운 플레이어 바라보기
+#
+# 2틱마다 가장 가까운 서바이벌 플레이어를 향해 yaw/pitch를 갱신.
+# 현재 위치는 그대로 유지하고 시선만 변경한다.
+# ============================================================
+
+
+
+# ============================================================
+# BETTERMODEL PART VISIBILITY STATES
+#
+# 외형 상태(남아있는 판 수)는 animation clip이 아니라 partvisibility로 관리.
+# 행동 animation은 같은 storm_cast/jump/barrier_repel 클립을 그대로 사용.
+# ============================================================
+
+TempestBM_Vis_P1_Base:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+TempestBM_Vis_P1_Hit1:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+TempestBM_Vis_P1_Broken:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+TempestBM_Vis_P2_Base:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=true} @self
+
+TempestBM_Vis_P2_Hit1:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+TempestBM_Vis_P2_Hit2:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+TempestBM_Vis_P2_Hit3:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+TempestBM_Vis_P2_Hit4:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=true} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+TempestBM_Vis_P2_Broken:
+  Skills:
+    - partvisibility{modelid=tempest_breeze;partid=U1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=U2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=U3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=M3;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L1;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L2;visibility=false} @self
+    - partvisibility{modelid=tempest_breeze;partid=L3;visibility=false} @self
+
+# ============================================================
+# BETTERMODEL PORT HELPERS
+# - BetterModel용 state 호출은 최소 문법(mid/s)만 사용
+# - one-shot 종료 뒤 페이즈 idle을 명시적으로 복귀
+# ============================================================
+
+
+TempestBM_InitVisual:
+  Skills:
+    - skill{s=TempestBM_InitVisualP2} @self
+    - skill{s=TempestBM_InitVisualP1} @self
+
+TempestBM_InitVisualP1:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} false
+  Skills:
+    - skill{s=TempestBM_Vis_P1_Base} @self
+    - state{mid=tempest_breeze;s=idle_phase1} @self
+
+TempestBM_InitVisualP2:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - skill{s=TempestBM_Vis_P2_Base} @self
+    - state{mid=tempest_breeze;s=idle_phase2} @self
+
+TempestBM_SyncIdle:
+  Conditions:
+    # 기절 중에는 stunned를, 돌풍구 캐스팅 중에는 storm_cast_p1/p2를
+    # 지연된 이동/피격 callback이 덮어쓰지 못하게 한다.
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - skill{s=TempestBM_IdleP2} @self
+    - skill{s=TempestBM_IdleP1} @self
+TempestBM_IdleP1:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=idle_phase1} @self
+
+TempestBM_IdleP2:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - state{mid=tempest_breeze;s=idle_phase2} @self
+
+TempestBM_StunnedP1:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=stunned_p1} @self
+
+TempestBM_StunnedP2:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - state{mid=tempest_breeze;s=stunned_p2} @self
+
+TempestCustom_FaceNearestPlayer:
+  Conditions:
+    # 무력화 6초 동안은 시선 추적도 정지.
+    # stunned 상태의 head/root 포즈만 유지한다.
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    # BetterModel에서는 base entity 방향 갱신을 확실히 전달하기 위해
+    # 짧은 주기로 즉시 nearest-player 방향을 바라보게 한다.
+    # teleport는 사용하지 않으므로 velocity 점프에는 간섭하지 않는다.
+    - look{headOnly=false;force=true;immediately=true} @NearestPlayer{r=32}
+
+TempestAnim_Idle:
+  Skills:
+    - skill{s=TempestBM_SyncIdle} @self
+TempestCustom_CancelFallDamage:
+  Conditions:
+    - damagecause{cause=FALL} true
+  Skills:
+    - cancelevent
+
+
+# ============================================================
+# 1A. 단일 이동 라우터 v4.5
+#
+# - 플레이어가 24블럭 안에 있을 때만
+# - 지상에 있을 때만 새 점프
+# - 최대 2회 기동 후 5초 대기
+# - 돌풍구/다른 패턴 중 이동 금지
+# ============================================================
+
+TempestCustom_MovementRouter:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - insurvivalmode true
+  Conditions:
+    # 돌풍구 패턴 대기(step 7) 중에는 새 점프를 시작하지 않음
+    - variableEquals{var=caster.pattern_step;value=7} false
+    - targetwithin{d=24} true
+    - onground true
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+    - variableEquals{var=caster.movement_pause;value=1} false
+    - variableEquals{var=caster.water_lock;value=1} false
+  Skills:
+    # 한 번의 이동 사이클 = 지상 첫 점프 + 공중 두 번째 점프
+    - setvariable{var=caster.movement_pause;value=1;type=INTEGER} @self
+
+    # 첫 점프: 거리별 기존 이동
+    - skill{s=TempestCustom_TooCloseReposition} @target
+    - skill{s=TempestCustom_OrbitBand} @target
+    - skill{s=TempestCustom_TooFarApproachRing} @target
+    - skill{s=TempestCustom_FarReturn} @target
+
+    # 공중에서 두 번째 점프
+    - delay 8
+    - skill{s=TempestCustom_AirSecondHop} @target
+
+    # 2연속 기동 후 쿨타임
+    - delay 60
+    - setvariable{var=caster.movement_pause;value=0;type=INTEGER} @self
+
+
+TempestCustom_AirSecondHop:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - insurvivalmode true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+    - variableEquals{var=caster.water_lock;value=1} false
+  Skills:
+    # 공중 2차 점프 시 idle 상태가 풀리는 경우만 다시 보장.
+    # force=false라 이미 idle이 정상 재생 중이면 강제로 처음부터 리셋하지 않음.
+
+    # 공중에서 플레이어 방향 다시 잡고 두 번째 도약
+    - look{headOnly=false;force=true;immediately=true} @target
+    - randomskill{skills=TempestCustom_AirHopLeft,TempestCustom_AirHopRight,TempestCustom_AirHopBack}
+
+
+TempestCustom_AirHopLeft:
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=-0.62;y=0.92;z=0.18;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=7;hS=0.26;vS=0.18;speed=0.03} @self
+
+TempestCustom_AirHopRight:
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=0.62;y=0.92;z=0.18;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=7;hS=0.26;vS=0.18;speed=0.03} @self
+
+TempestCustom_AirHopBack:
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=0;y=0.96;z=-0.38;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=8;hS=0.28;vS=0.20;speed=0.03} @self
+# ============================================================
+# 1. 커스텀 이동
+#
+# 이 스킬 자체가 @NearestPlayer를 inherited target으로 받는다.
+# RLNTE = 그 플레이어 주변 랜덤 위치.
+# r=9 / minr=4 이므로 플레이어 바로 위로만 달려들지 않고
+# 4~9블럭 주변을 이리저리 점프한다.
+# ============================================================
+
+# ============================================================
+# 1. 거리 유지형 이동 컨트롤러 v3.6
+#
+# 핵심 변경:
+# leap로 '플레이어 주변 위치'를 찍는 방식을 버림.
+# 이 방식은 궤적 계산 특성상 플레이어 쪽으로 돌진하는 느낌이 강했음.
+#
+# 이제:
+# 1) 먼저 플레이어를 바라봄
+# 2) 자기 기준 relative velocity를 사용
+#
+# 0~4.5블럭 : 뒤로 + 위로 점프 -> 자연스럽게 거리 벌림
+# 4.5~7블럭 : 좌/우 + 위로 점프 -> 플레이어 주변 횡이동
+# 7블럭 이상: 앞으로 조금 + 위로 점프 -> 천천히 링으로 복귀
+#
+# 전부 순간이동 없음.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# 너무 가까움: 플레이어를 바라본 다음 뒤로 튀기
+# z 음수 = 바라보는 방향의 뒤쪽
+# y 높게 = 브리즈처럼 통통 뜨는 느낌
+# ------------------------------------------------------------
+TempestCustom_TooCloseReposition:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=<4.5} true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - look{headOnly=false;force=true;immediately=true} @target
+
+
+    - randomskill{skills=TempestCustom_BackHopLeft,TempestCustom_BackHopRight}
+
+
+TempestCustom_BackHopLeft:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=-0.38;y=0.96;z=-0.88;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=6;hS=0.25;vS=0.18;speed=0.03} @self
+
+TempestCustom_BackHopRight:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=0.38;y=0.96;z=-0.88;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=6;hS=0.25;vS=0.18;speed=0.03} @self
+
+
+# ------------------------------------------------------------
+# 이상적 거리 4.5~7블럭:
+# 플레이어를 바라본 상태에서 좌/우 횡점프.
+# 앞/뒤 성분을 거의 없애서 거리를 유지한다.
+# ------------------------------------------------------------
+TempestCustom_OrbitBand:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>=4.5} true
+    - distance{d=<7} true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - look{headOnly=false;force=true;immediately=true} @target
+    - randomskill{skills=TempestCustom_OrbitLeft,TempestCustom_OrbitRight,TempestCustom_OrbitLeftHigh,TempestCustom_OrbitRightHigh}
+
+
+TempestCustom_OrbitLeft:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=-0.90;y=1.05;z=0.04;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=5;hS=0.24;vS=0.16;speed=0.025} @self
+
+TempestCustom_OrbitRight:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=0.90;y=1.05;z=0.04;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=5;hS=0.24;vS=0.16;speed=0.025} @self
+
+TempestCustom_OrbitLeftHigh:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=-0.78;y=1.15;z=0.02;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=7;hS=0.28;vS=0.20;speed=0.03} @self
+
+TempestCustom_OrbitRightHigh:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=0.78;y=1.15;z=0.02;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=7;hS=0.28;vS=0.20;speed=0.03} @self
+
+
+# ------------------------------------------------------------
+# 너무 멂: 보수적으로 플레이어 방향으로 접근.
+# 플레이어에게 돌진하지 않게 전진 성분을 낮추고
+# 수직 성분을 높여 '통통 뛰며 조금씩 접근'하게 함.
+# ------------------------------------------------------------
+TempestCustom_TooFarApproachRing:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>=7} true
+    - distance{d=<18} true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - look{headOnly=false;force=true;immediately=true} @target
+    - randomskill{skills=TempestCustom_ApproachLeft,TempestCustom_ApproachRight}
+
+
+TempestCustom_ApproachLeft:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=-0.28;y=1.03;z=0.52;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=6;hS=0.25;vS=0.18;speed=0.03} @self
+
+TempestCustom_ApproachRight:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=0.28;y=1.03;z=0.52;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=6;hS=0.25;vS=0.18;speed=0.03} @self
+
+
+# ============================================================
+# 1B. 물 회피 / 비상 탈출
+#
+# 목적:
+# - 브리즈의 이동은 pathfinding이 아니라 velocity 기반이라
+#   바닐라 AI가 물을 알아서 피하지 못한다.
+# - 주변 2블럭 범위에 물이 감지되면 water_lock=1로 두어
+#   새 점프 및 공중 2차 점프를 막는다.
+# - 이미 물에 빠졌다면 위쪽 + 뒤쪽으로 튀어올라 탈출한다.
+#
+# 주의:
+# - 안전 우선형 구현이라 아주 좁은 물가에서는 잠깐 멈출 수 있다.
+# ============================================================
+
+TempestCustom_WaterGuard:
+  Skills:
+    - setvariable{var=caster.water_lock;value=0;type=INTEGER} @self
+    - command{c="execute as <caster.uuid> if entity @s[tag=tempest_water_near] run tag @s remove tempest_water_near"} @self
+
+    # 발 높이 주변
+    - command{c="execute at <caster.uuid> if block ~2 ~ ~ minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~-2 ~ ~ minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~ ~ ~2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~ ~ ~-2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~2 ~ ~2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~-2 ~ ~2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~2 ~ ~-2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~-2 ~ ~-2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+
+    # 착지 지점 높이(~-1) 주변도 함께 검사
+    - command{c="execute at <caster.uuid> if block ~2 ~-1 ~ minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~-2 ~-1 ~ minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~ ~-1 ~2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~ ~-1 ~-2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~2 ~-1 ~2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~-2 ~-1 ~2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~2 ~-1 ~-2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+    - command{c="execute at <caster.uuid> if block ~-2 ~-1 ~-2 minecraft:water run tag <caster.uuid> add tempest_water_near"} @self
+
+    - skill{s=TempestCustom_WaterLockOn} @self
+
+
+TempestCustom_WaterLockOn:
+  Conditions:
+    - hastag{t=tempest_water_near} true
+  Skills:
+    - setvariable{var=caster.water_lock;value=1;type=INTEGER} @self
+
+
+TempestCustom_WaterEmergency:
+  Skills:
+    - command{c="execute as <caster.uuid> if entity @s[tag=tempest_in_water] run tag @s remove tempest_in_water"} @self
+    - command{c="execute at <caster.uuid> if block ~ ~ ~ minecraft:water run tag <caster.uuid> add tempest_in_water"} @self
+    - command{c="execute at <caster.uuid> if block ~ ~1 ~ minecraft:water run tag <caster.uuid> add tempest_in_water"} @self
+    - skill{s=TempestCustom_WaterEscape} @self
+
+
+TempestCustom_WaterEscape:
+  Conditions:
+    - hastag{t=tempest_in_water} true
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - setvariable{var=caster.water_lock;value=1;type=INTEGER} @self
+    - velocity{mode=SET;x=0;y=1.25;z=-0.42;relative=true} @self
+    - effect:particles{particle=gust;amount=14;hS=0.45;vS=0.35;speed=0.06} @self
+    - sound{s=entity.breeze.jump;v=0.8;p=1.15} @self
+    - command{c="execute as <caster.uuid> if entity @s[tag=tempest_in_water] run tag @s remove tempest_in_water"} @self
+
+
+# ============================================================
+# 2. 패턴 라우터 - 일반 에어슬래시 7회 -> 폭풍구슬 슬롯 1회
+# ============================================================
+
+TempestCustom_PatternRouter:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - insurvivalmode true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - skill{s=TempestCustom_Pattern7} @target
+    - skill{s=TempestCustom_Pattern6} @target
+    - skill{s=TempestCustom_Pattern5} @target
+    - skill{s=TempestCustom_Pattern4} @target
+    - skill{s=TempestCustom_Pattern3} @target
+    - skill{s=TempestCustom_Pattern2} @target
+    - skill{s=TempestCustom_Pattern1} @target
+    - skill{s=TempestCustom_Pattern0} @target
+
+TempestCustom_Pattern0:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=0} true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=1;type=INTEGER} @self
+    - skill{s=TempestCustom_NormalWindShot} @target
+
+TempestCustom_Pattern1:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=1} true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=2;type=INTEGER} @self
+    - skill{s=TempestCustom_NormalWindShot} @target
+
+TempestCustom_Pattern2:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=2} true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=3;type=INTEGER} @self
+    - skill{s=TempestCustom_NormalWindShot} @target
+
+TempestCustom_Pattern3:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=3} true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=4;type=INTEGER} @self
+    - skill{s=TempestCustom_NormalWindShot} @target
+
+TempestCustom_Pattern4:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=4} true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=5;type=INTEGER} @self
+    - skill{s=TempestCustom_NormalWindShot} @target
+
+TempestCustom_Pattern5:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=5} true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=6;type=INTEGER} @self
+    - skill{s=TempestCustom_NormalWindShot} @target
+
+TempestCustom_Pattern6:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=6} true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=7;type=INTEGER} @self
+    - skill{s=TempestCustom_NormalWindShot} @target
+
+TempestCustom_Pattern7:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=7} true
+    - onground true
+  Skills:
+    - setvariable{var=caster.pattern_step;value=8;type=INTEGER} @self
+    - skill{s=TempestCustom_StormPatternByPhase} @target
+
+TempestCustom_StormPatternByPhase:
+  Skills:
+    - skill{s=TempestCustom_EnrageSpiralPattern} @target
+    - skill{s=TempestCustom_StormOrbPattern} @target
+
+TempestCustom_ResetPatternStep:
+  Conditions:
+    - variableEquals{var=caster.pattern_step;value=8} true
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - setvariable{var=caster.pattern_step;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# 3. 일반 에어슬래시
+# ============================================================
+
+TempestCustom_NormalWindShot:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - insurvivalmode true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    # 분노/일반 상태에 따라 서로 다른 에어슬래시 사용
+    - skill{s=TempestCustom_EnragedWindShot} @target
+    - skill{s=TempestCustom_BaseWindShot} @target
+
+
+TempestCustom_BaseWindShot:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} false
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER;duration=10} @self
+    - sound{s=entity.breeze.shoot;v=0.85;p=1.2} @self
+    - projectile{onTick=TempestCustom_NormalWindTick;onHit=TempestCustom_NormalWindHit;v=13;i=1;hR=0.35;vR=0.35;mr=24} @target
+
+
+TempestCustom_EnragedWindShot:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER;duration=12} @self
+    - sound{s=entity.breeze.shoot;v=1.15;p=0.82} @self
+    # 분노: 판정 크기 약 1.6배, P1 대비 속도 50% 증가 / 기존 P2 대비 30% 증가
+    - projectile{onTick=TempestCustom_EnragedWindTick;onHit=TempestCustom_EnragedWindHit;v=19.5;i=1;hR=0.58;vR=0.58;mr=28} @target
+
+
+TempestCustom_NormalWindTick:
+  Skills:
+    - effect:particles{particle=cloud;amount=2;hS=0.12;vS=0.12;speed=0.02} @origin
+    - effect:particles{particle=gust;amount=1;hS=0.10;vS=0.10;speed=0.01} @origin
+
+
+TempestCustom_EnragedWindTick:
+  Skills:
+    - effect:particles{particle=cloud;amount=4;hS=0.22;vS=0.22;speed=0.040} @origin
+    - effect:particles{particle=gust;amount=2;hS=0.18;vS=0.18;speed=0.030} @origin
+    # P2 에어슬래시 자체에만 옅은 파란색 포인트.
+    - effect:particles{particle=dust;color=#72B7FF;size=0.85;amount=2;hS=0.13;vS=0.13;speed=0.002} @origin
+
+
+TempestCustom_NormalWindHit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - damage{amount=5} @target
+    - throw{velocity=0.35;velocityY=0.55} @target
+
+
+TempestCustom_EnragedWindHit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - damage{amount=8} @target
+    - throw{velocity=0.55;velocityY=0.72} @target
+
+
+# ============================================================
+# 4. 폭풍구슬 슬롯 - 실제 반사 가능한 구슬은 다음 단계
+# ============================================================
+
+
+
+TempestStormTest_Helper1:
+  Skills:
+    # 중요:
+    # helper의 eye-height를 이용해 조준하지 않는다.
+    #
+    # execute 위치 자체를 실제 Wind Charge 위치로 옮긴 뒤
+    # 그 실행 위치에서 '현재 시점의 가장 가까운 서바이벌 플레이어 눈'을 바라보게 한다.
+    # 따라서 계산 시작점 = Wind Charge 실제 좌표.
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_1,sort=nearest,limit=1] facing entity @p[gamemode=survival,sort=nearest,limit=1] eyes run tp <caster.uuid> ~ ~ ~ ~ ~"} @self
+
+    # 회전 적용을 확실히 한 뒤 Motion 계산.
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=1.105;relative=true} @self
+
+    # helper의 실제 Motion을 오직 tempest_pending_1 한 발에만 복사.
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_1,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_1,sort=nearest,limit=1] remove tempest_pending_1"} @self
+
+    - remove @self
+
+
+TempestStormTest_Helper2:
+  Skills:
+    # 중요:
+    # helper의 eye-height를 이용해 조준하지 않는다.
+    #
+    # execute 위치 자체를 실제 Wind Charge 위치로 옮긴 뒤
+    # 그 실행 위치에서 '현재 시점의 가장 가까운 서바이벌 플레이어 눈'을 바라보게 한다.
+    # 따라서 계산 시작점 = Wind Charge 실제 좌표.
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_2,sort=nearest,limit=1] facing entity @p[gamemode=survival,sort=nearest,limit=1] eyes run tp <caster.uuid> ~ ~ ~ ~ ~"} @self
+
+    # 회전 적용을 확실히 한 뒤 Motion 계산.
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=1.105;relative=true} @self
+
+    # helper의 실제 Motion을 오직 tempest_pending_2 한 발에만 복사.
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_2,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_2,sort=nearest,limit=1] remove tempest_pending_2"} @self
+
+    - remove @self
+
+
+TempestStormTest_Helper3:
+  Skills:
+    # 중요:
+    # helper의 eye-height를 이용해 조준하지 않는다.
+    #
+    # execute 위치 자체를 실제 Wind Charge 위치로 옮긴 뒤
+    # 그 실행 위치에서 '현재 시점의 가장 가까운 서바이벌 플레이어 눈'을 바라보게 한다.
+    # 따라서 계산 시작점 = Wind Charge 실제 좌표.
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_3,sort=nearest,limit=1] facing entity @p[gamemode=survival,sort=nearest,limit=1] eyes run tp <caster.uuid> ~ ~ ~ ~ ~"} @self
+
+    # 회전 적용을 확실히 한 뒤 Motion 계산.
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=1.105;relative=true} @self
+
+    # helper의 실제 Motion을 오직 tempest_pending_3 한 발에만 복사.
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_3,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_3,sort=nearest,limit=1] remove tempest_pending_3"} @self
+
+    - remove @self
+
+
+TempestStormTest_Helper4:
+  Skills:
+    # 중요:
+    # helper의 eye-height를 이용해 조준하지 않는다.
+    #
+    # execute 위치 자체를 실제 Wind Charge 위치로 옮긴 뒤
+    # 그 실행 위치에서 '현재 시점의 가장 가까운 서바이벌 플레이어 눈'을 바라보게 한다.
+    # 따라서 계산 시작점 = Wind Charge 실제 좌표.
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_4,sort=nearest,limit=1] facing entity @p[gamemode=survival,sort=nearest,limit=1] eyes run tp <caster.uuid> ~ ~ ~ ~ ~"} @self
+
+    # 회전 적용을 확실히 한 뒤 Motion 계산.
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=1.105;relative=true} @self
+
+    # helper의 실제 Motion을 오직 tempest_pending_4 한 발에만 복사.
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_4,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_4,sort=nearest,limit=1] remove tempest_pending_4"} @self
+
+    - remove @self
+
+
+TempestStormTest_Helper5:
+  Skills:
+    # 중요:
+    # helper의 eye-height를 이용해 조준하지 않는다.
+    #
+    # execute 위치 자체를 실제 Wind Charge 위치로 옮긴 뒤
+    # 그 실행 위치에서 '현재 시점의 가장 가까운 서바이벌 플레이어 눈'을 바라보게 한다.
+    # 따라서 계산 시작점 = Wind Charge 실제 좌표.
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_5,sort=nearest,limit=1] facing entity @p[gamemode=survival,sort=nearest,limit=1] eyes run tp <caster.uuid> ~ ~ ~ ~ ~"} @self
+
+    # 회전 적용을 확실히 한 뒤 Motion 계산.
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=1.105;relative=true} @self
+
+    # helper의 실제 Motion을 오직 tempest_pending_5 한 발에만 복사.
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_5,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_pending_5,sort=nearest,limit=1] remove tempest_pending_5"} @self
+
+    - remove @self
+
+
+
+# ============================================================
+# 돌풍구 발사 직전 공간 확보 넉백
+# - P1/P2 공통
+# - 돌풍구가 나오기 바로 직전에 1회만 발동
+# - 분노 진입 넉백과는 별개
+# ============================================================
+
+TempestCustom_PreStormKnockback:
+  Skills:
+    - throw{velocity=1.45;velocityY=0.30} @PlayersInRadius{r=7}
+    - sound{s=entity.breeze.wind_burst;v=1.15;p=0.95} @self
+
+TempestCustom_StormOrbPattern:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - insurvivalmode true
+  Conditions:
+    - onground true
+    - targetwithin{d=30} true
+    - variableEquals{var=caster.enraged;value=1} false
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    # 기믹 중 다른 이동/공격 완전 잠금.
+    # duration은 안전장치이며 정상 종료 시 아래에서 직접 0으로 복구.
+    - setvariable{var=caster.storm_casting;value=1;type=INTEGER;duration=120} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER;duration=120} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # 이전 테스트/실패탄 중 완전히 정지한 Tempest 돌풍구만 정리.
+    # 정상 비행 중인 돌풍구는 건드리지 않음.
+    - command{c="execute at <caster.uuid> run kill @e[type=minecraft:breeze_wind_charge,tag=tempest_wc,distance=..40,nbt={Motion:[0.0d,0.0d,0.0d]}]"} @self
+
+    # 전조
+    - sound{s=entity.breeze.charge;v=1.4;p=0.7} @self
+    - effect:particles{particle=gust;amount=36;hS=0.8;vS=0.7;speed=0.08} @self
+    - message{m="&b[돌풍구] &f받아칠 준비!"} @PlayersInRadius{r=22}
+    # 돌풍구 패턴 전체 동안 발사 자세 유지
+    - state{mid=tempest_breeze;s=storm_cast_p1} @self
+    - delay 30
+
+    # 발사 직전 공간 확보: 플레이어를 한 번 밀어낸 뒤 발사.
+    - skill{s=TempestCustom_PreStormKnockback} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    # ========================================================
+    # 격리 테스트에서 검증 완료된 5/5 발사 구조
+    #
+    # - 각 발마다 고유 pending tag
+    # - 각 발마다 고유 Helper 1~5
+    # - Helper가 자기 발만 처리
+    # - 발 간격 3틱
+    # - 실제 Wind Charge 좌표에서 최신 @p eyes 기준 조준
+    # ========================================================
+
+    # ===== 1발 =====
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_wc_1','tempest_pending_1']}"} @self
+    - summon{type=TempestWindVectorHelper1;amount=1} @self
+    - delay 4
+    # ===== 2발 =====
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_wc_2','tempest_pending_2']}"} @self
+    - summon{type=TempestWindVectorHelper2;amount=1} @self
+    - delay 4
+    # ===== 3발 =====
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_wc_3','tempest_pending_3']}"} @self
+    - summon{type=TempestWindVectorHelper3;amount=1} @self
+    - delay 4
+    # ===== 4발 =====
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_wc_4','tempest_pending_4']}"} @self
+    - summon{type=TempestWindVectorHelper4;amount=1} @self
+    - delay 4
+    # ===== 5발 =====
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_wc_5','tempest_pending_5']}"} @self
+    - summon{type=TempestWindVectorHelper5;amount=1} @self
+
+    # 마지막 Helper가 Motion 복사까지 끝낼 시간 확보
+    - delay 4
+
+    - sound{s=entity.breeze.shoot;v=1.25;p=0.9} @self
+    - message{m="&3[돌풍구] &f5발 순차 발사"} @PlayersInRadius{r=22}
+
+    # 후딜
+    - delay 30
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    # 패턴 종료: 먼저 캐스팅 잠금을 해제한 뒤 idle 복귀.
+    - setvariable{var=caster.storm_casting;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+# ============================================================
+# 4B. 분노 회전 돌풍구 Helper
+# 2줄기가 항상 180도 간격을 유지하며 30도씩 회전
+# ============================================================
+
+TempestEnrage_Helper_0_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_0_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 0 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_0_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_0_a,sort=nearest,limit=1] remove tempest_enrage_pending_0_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_0_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_0_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 180 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_0_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_0_b,sort=nearest,limit=1] remove tempest_enrage_pending_0_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_1_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_1_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 30 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_1_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_1_a,sort=nearest,limit=1] remove tempest_enrage_pending_1_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_1_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_1_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 210 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_1_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_1_b,sort=nearest,limit=1] remove tempest_enrage_pending_1_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_2_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_2_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 60 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_2_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_2_a,sort=nearest,limit=1] remove tempest_enrage_pending_2_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_2_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_2_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 240 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_2_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_2_b,sort=nearest,limit=1] remove tempest_enrage_pending_2_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_3_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_3_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 90 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_3_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_3_a,sort=nearest,limit=1] remove tempest_enrage_pending_3_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_3_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_3_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 270 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_3_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_3_b,sort=nearest,limit=1] remove tempest_enrage_pending_3_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_4_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_4_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 120 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_4_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_4_a,sort=nearest,limit=1] remove tempest_enrage_pending_4_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_4_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_4_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 300 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_4_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_4_b,sort=nearest,limit=1] remove tempest_enrage_pending_4_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_5_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_5_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 150 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_5_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_5_a,sort=nearest,limit=1] remove tempest_enrage_pending_5_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_5_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_5_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 330 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_5_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_5_b,sort=nearest,limit=1] remove tempest_enrage_pending_5_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_6_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_6_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 180 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_6_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_6_a,sort=nearest,limit=1] remove tempest_enrage_pending_6_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_6_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_6_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 0 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_6_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_6_b,sort=nearest,limit=1] remove tempest_enrage_pending_6_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_7_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_7_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 210 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_7_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_7_a,sort=nearest,limit=1] remove tempest_enrage_pending_7_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_7_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_7_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 30 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_7_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_7_b,sort=nearest,limit=1] remove tempest_enrage_pending_7_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_8_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_8_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 240 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_8_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_8_a,sort=nearest,limit=1] remove tempest_enrage_pending_8_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_8_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_8_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 60 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_8_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_8_b,sort=nearest,limit=1] remove tempest_enrage_pending_8_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_9_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_9_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 270 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_9_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_9_a,sort=nearest,limit=1] remove tempest_enrage_pending_9_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_9_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_9_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 90 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_9_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_9_b,sort=nearest,limit=1] remove tempest_enrage_pending_9_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_10_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_10_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 300 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_10_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_10_a,sort=nearest,limit=1] remove tempest_enrage_pending_10_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_10_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_10_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 120 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_10_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_10_b,sort=nearest,limit=1] remove tempest_enrage_pending_10_b"} @self
+    - remove @self
+
+TempestEnrage_Helper_11_A:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_11_a,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 330 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_11_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_11_a,sort=nearest,limit=1] remove tempest_enrage_pending_11_a"} @self
+    - remove @self
+
+TempestEnrage_Helper_11_B:
+  Skills:
+    # 전방위 무작위 탄막용 고정 방향 Helper
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_11_b,sort=nearest,limit=1] run tp <caster.uuid> ~ ~ ~ 150 0"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.6035;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_11_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_pending_11_b,sort=nearest,limit=1] remove tempest_enrage_pending_11_b"} @self
+    - remove @self
+
+TempestCustom_EnragePair_0:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_0_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_0_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_0_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_0_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_1:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_1_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_1_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_1_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_1_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_2:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_2_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_2_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_2_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_2_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_3:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_3_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_3_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_3_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_3_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_4:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_4_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_4_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_4_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_4_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_5:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_5_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_5_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_5_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_5_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_6:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_6_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_6_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_6_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_6_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_7:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_7_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_7_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_7_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_7_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_8:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_8_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_8_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_8_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_8_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_9:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_9_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_9_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_9_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_9_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_10:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_10_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_10_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_10_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_10_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+TempestCustom_EnragePair_11:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_11_a']}"} @self
+    - summon{type=TempestEnrageVectorHelper_11_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_pending_11_b']}"} @self
+    - summon{type=TempestEnrageVectorHelper_11_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.75;p=1.05} @self
+
+
+TempestEnrage_AimedHelper_A:
+  Skills:
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_aimed_a,sort=nearest,limit=1] facing entity @p[gamemode=survival,sort=nearest,limit=1] eyes run tp <caster.uuid> ~ ~ ~ ~ ~"} @self
+    - delay 1
+    - velocity{mode=SET;x=0;y=0;z=0.629;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_aimed_a,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_aimed_a,sort=nearest,limit=1] remove tempest_enrage_aimed_a"} @self
+    - remove @self
+
+TempestEnrage_AimedHelper_B:
+  Skills:
+    - command{c="execute at @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_aimed_b,sort=nearest,limit=1] facing entity @p[gamemode=survival,sort=nearest,limit=1] eyes run tp <caster.uuid> ~ ~ ~ ~ ~"} @self
+    - delay 1
+    # 정면 기준 정확히 180도 반대
+    - command{c="execute as <caster.uuid> at @s run tp @s ~ ~ ~ ~180 ~"} @self
+    - velocity{mode=SET;x=0;y=0;z=0.629;relative=true} @self
+    - delay 1
+    - command{c="data modify entity @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_aimed_b,sort=nearest,limit=1] Motion set from entity <caster.uuid> Motion"} @self
+    - command{c="tag @e[type=minecraft:breeze_wind_charge,tag=tempest_enrage_aimed_b,sort=nearest,limit=1] remove tempest_enrage_aimed_b"} @self
+    - remove @self
+
+TempestCustom_EnrageAimedPair:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_aimed_a']}"} @self
+    - summon{type=TempestEnrageAimedVectorHelper_A;amount=1} @self
+    - command{c="execute at <caster.uuid> run summon minecraft:breeze_wind_charge ~ ~1.35 ~ {Tags:['tempest_wc','tempest_enrage_wc','tempest_enrage_aimed_b']}"} @self
+    - summon{type=TempestEnrageAimedVectorHelper_B;amount=1} @self
+    - sound{s=entity.breeze.shoot;v=0.95;p=0.92} @self
+
+TempestCustom_EnrageRandomPair:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.enraged;value=1} true
+  Skills:
+    - randomskill{skills=TempestCustom_EnragePair_0,TempestCustom_EnragePair_1,TempestCustom_EnragePair_2,TempestCustom_EnragePair_3,TempestCustom_EnragePair_4,TempestCustom_EnragePair_5,TempestCustom_EnragePair_6,TempestCustom_EnragePair_7,TempestCustom_EnragePair_8,TempestCustom_EnragePair_9,TempestCustom_EnragePair_10,TempestCustom_EnragePair_11} @self
+
+# ============================================================
+# 4C. 분노 전방위 무작위 탄막
+#
+# - 현재 플레이어 방향을 매 발사 스텝의 0도 기준으로 사용
+# - 2줄기, 180도 간격 유지
+# - 플레이어 기준에서 30도씩 회전
+# - 따라서 완전한 고정 원형이 아니라 플레이어 쪽으로 탄막 축이 따라옴
+# - 12스텝 = 1바퀴
+# - 총 3바퀴 = 36스텝 = 72발
+# - 발사 중 5회 반사 성공 시 broken=1이 되어 남은 발사가 즉시 무효화됨
+# ============================================================
+
+TempestCustom_EnrageSpiralPattern:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - insurvivalmode true
+  Conditions:
+    - onground true
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+    - targetwithin{d=30} true
+  Skills:
+    - setvariable{var=caster.storm_casting;value=1;type=INTEGER;duration=200} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER;duration=200} @self
+    # reflect_hits는 탄막 패턴마다 초기화하지 않는다.
+    # 예: 이전 탄막에서 3/5까지 맞췄다면 다음 탄막은 3/5에서 이어진다.
+    # 초기화는 장벽이 실제로 파괴된 뒤 Recover 시점에만 수행한다.
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=tempest_breeze;s=storm_cast_p2} @self
+
+    - sound{s=entity.breeze.charge;v=1.6;p=0.55} @self
+    - effect:particles{particle=gust;amount=60;hS=1.2;vS=0.9;speed=0.12} @self
+    - message{m="&c[분노 탄막] &f전방위 탄막 속에서 5발을 되받아치세요!"} @PlayersInRadius{r=30}
+    - delay 18
+
+    # 탄막 시작 직전 한 번 밀어내 공간 확보.
+    - skill{s=TempestCustom_PreStormKnockback} @self
+
+    # --------------------------------------------------------
+    # 총 36회 발사
+    # 대부분: 12방향 중 무작위 1쌍
+    # 6,12,18,24,30,36번째: 현재 플레이어 정면 + 정확히 반대편 1쌍
+    # 즉 전체 72발 중 12발(6쌍)은 확정적인 플레이어 방향 탄
+    # --------------------------------------------------------
+    # 1번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 2번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 3번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 4번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 5번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 6번째 - 플레이어 확정 조준
+    - skill{s=TempestCustom_EnrageAimedPair} @self
+    - delay 3
+    # 7번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 8번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 9번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 10번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 11번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 12번째 - 플레이어 확정 조준
+    - skill{s=TempestCustom_EnrageAimedPair} @self
+    - delay 3
+    # 13번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 14번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 15번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 16번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 17번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 18번째 - 플레이어 확정 조준
+    - skill{s=TempestCustom_EnrageAimedPair} @self
+    - delay 3
+    # 19번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 20번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 21번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 22번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 23번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 24번째 - 플레이어 확정 조준
+    - skill{s=TempestCustom_EnrageAimedPair} @self
+    - delay 3
+    # 25번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 26번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 27번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 28번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 29번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 30번째 - 플레이어 확정 조준
+    - skill{s=TempestCustom_EnrageAimedPair} @self
+    - delay 3
+    # 31번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 32번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 33번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 34번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 35번째 - 전방위 무작위
+    - skill{s=TempestCustom_EnrageRandomPair} @self
+    - delay 3
+    # 36번째 - 플레이어 확정 조준
+    - skill{s=TempestCustom_EnrageAimedPair} @self
+    - delay 3
+
+    - delay 8
+    # 분노 탄막 종료: 먼저 캐스팅 잠금을 해제한 뒤 idle 복귀.
+    - setvariable{var=caster.storm_casting;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+
+# ============================================================
+# 장벽 피격 전환 후 현재 액션 복귀
+#
+# 문제 원인:
+# 반사 성공 1~4회 처리에서 barrier_*_transition 재생 후
+# 무조건 idle_phase2로 복귀하고 있었음.
+# 따라서 P2 탄막 도중 반사에 성공하는 순간 storm_cast_p2가 끊겼다.
+#
+# 수정:
+# storm_casting=1 이면 해당 페이즈의 cast 모션으로 복귀.
+# storm_casting=0 이면 idle로 복귀.
+# ============================================================
+
+TempestBM_ResumeAfterBarrierHit:
+  Skills:
+    - skill{s=TempestBM_ResumeCastP2} @self
+    - skill{s=TempestBM_ResumeCastP1} @self
+    - skill{s=TempestBM_ResumeIdleP2_AfterHit} @self
+    - skill{s=TempestBM_ResumeIdleP1_AfterHit} @self
+
+TempestBM_ResumeCastP2:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.storm_casting;value=1} true
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=storm_cast_p2} @self
+
+TempestBM_ResumeCastP1:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} true
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=storm_cast_p1} @self
+
+TempestBM_ResumeIdleP2_AfterHit:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.storm_casting;value=1} false
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=idle_phase2} @self
+
+TempestBM_ResumeIdleP1_AfterHit:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=idle_phase1} @self
+
+# ============================================================
+# 5. 반사 돌풍구 -> 2회 적중 시 무력화
+#
+# 실제 바닐라 breeze_wind_charge를 사용한다.
+# 이전 BREEZE 테스트에서 반사된 Wind Charge는 PROJECTILE 피해로 들어왔고
+# trigger가 발사 주체 쪽으로 보이는 특성이 확인된 적이 있다.
+#
+# 커스텀 ZOMBIE 베이스에서는 서버 버전/이벤트 전달 방식 차이가 있을 수 있으므로
+# 아래 Debug 메시지를 같이 유지한다.
+# ============================================================
+
+TempestCustom_ReflectedStormOrbHit:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    # 분노는 5회, 일반은 2회
+    - skill{s=TempestCustom_EnrageReflectHit5} @self
+    - skill{s=TempestCustom_EnrageReflectHit4} @self
+    - skill{s=TempestCustom_EnrageReflectHit3} @self
+    - skill{s=TempestCustom_EnrageReflectHit2} @self
+    - skill{s=TempestCustom_EnrageReflectHit1} @self
+    - skill{s=TempestCustom_NormalReflectHit2} @self
+    - skill{s=TempestCustom_NormalReflectHit1} @self
+
+
+
+# ============================================================
+# 반사 피격 시 시각 처리
+#
+# 핵심:
+# - 돌풍구 발사 애니메이션(storm_cast_p1/p2) 중에는
+#   barrier_*_hit_transition을 재생하지 않는다.
+#   -> transition state가 cast state를 끊는 현상 방지.
+# - 캐스팅 중에는 판 visibility만 즉시 갱신.
+# - 캐스팅 밖에서는 기존 transition 애니메이션 유지.
+# ============================================================
+
+TempestCustom_P1ReflectHit1Visual:
+  Skills:
+    - skill{s=TempestCustom_P1ReflectHit1Visual_Cast} @self
+    - skill{s=TempestCustom_P1ReflectHit1Visual_Free} @self
+
+TempestCustom_P1ReflectHit1Visual_Cast:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} true
+  Skills:
+    - skill{s=TempestBM_Vis_P1_Hit1} @self
+
+TempestCustom_P1ReflectHit1Visual_Free:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=barrier_p1_hit1_transition} @self
+    - delay 6
+    - skill{s=TempestBM_Vis_P1_Hit1} @self
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+TempestCustom_P2ReflectHit1Visual:
+  Skills:
+    - skill{s=TempestCustom_P2ReflectHit1Visual_Cast} @self
+    - skill{s=TempestCustom_P2ReflectHit1Visual_Free} @self
+
+TempestCustom_P2ReflectHit1Visual_Cast:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} true
+  Skills:
+    - skill{s=TempestBM_Vis_P2_Hit1} @self
+
+TempestCustom_P2ReflectHit1Visual_Free:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=barrier_p2_hit1_transition} @self
+    - delay 6
+    - skill{s=TempestBM_Vis_P2_Hit1} @self
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+TempestCustom_P2ReflectHit2Visual:
+  Skills:
+    - skill{s=TempestCustom_P2ReflectHit2Visual_Cast} @self
+    - skill{s=TempestCustom_P2ReflectHit2Visual_Free} @self
+
+TempestCustom_P2ReflectHit2Visual_Cast:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} true
+  Skills:
+    - skill{s=TempestBM_Vis_P2_Hit2} @self
+
+TempestCustom_P2ReflectHit2Visual_Free:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=barrier_p2_hit2_transition} @self
+    - delay 6
+    - skill{s=TempestBM_Vis_P2_Hit2} @self
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+TempestCustom_P2ReflectHit3Visual:
+  Skills:
+    - skill{s=TempestCustom_P2ReflectHit3Visual_Cast} @self
+    - skill{s=TempestCustom_P2ReflectHit3Visual_Free} @self
+
+TempestCustom_P2ReflectHit3Visual_Cast:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} true
+  Skills:
+    - skill{s=TempestBM_Vis_P2_Hit3} @self
+
+TempestCustom_P2ReflectHit3Visual_Free:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=barrier_p2_hit3_transition} @self
+    - delay 6
+    - skill{s=TempestBM_Vis_P2_Hit3} @self
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+TempestCustom_P2ReflectHit4Visual:
+  Skills:
+    - skill{s=TempestCustom_P2ReflectHit4Visual_Cast} @self
+    - skill{s=TempestCustom_P2ReflectHit4Visual_Free} @self
+
+TempestCustom_P2ReflectHit4Visual_Cast:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} true
+  Skills:
+    - skill{s=TempestBM_Vis_P2_Hit4} @self
+
+TempestCustom_P2ReflectHit4Visual_Free:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=barrier_p2_hit4_transition} @self
+    - delay 6
+    - skill{s=TempestBM_Vis_P2_Hit4} @self
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+# ---------- 일반 페이즈: 2회 ----------
+TempestCustom_NormalReflectHit1:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} false
+    - variableEquals{var=caster.reflect_hits;value=0} true
+  Skills:
+    - setvariable{var=caster.reflect_hits;value=1;type=INTEGER} @self
+    - skill{s=TempestCustom_P1ReflectHit1Visual} @self
+    - sound{s=entity.breeze.hurt;v=1.0;p=1.2} @self
+    - effect:particles{particle=gust;amount=22;hS=0.7;vS=0.6;speed=0.09} @self
+    - message{m="&b[돌풍구 반사 성공] &f1/2"} @PlayersInRadius{r=22}
+
+
+TempestCustom_NormalReflectHit2:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} false
+    - variableEquals{var=caster.reflect_hits;value=1} true
+  Skills:
+    - setvariable{var=caster.reflect_hits;value=2;type=INTEGER} @self
+    - setvariable{var=caster.wind_barrier;value=0;type=INTEGER} @self
+    - message{m="&e[돌풍구 반사 성공] &f2/2 - 바람장벽 파괴!"} @PlayersInRadius{r=22}
+    - state{mid=tempest_breeze;s=barrier_p1_break} @self
+    - delay 7
+    - skill{s=TempestBM_Vis_P1_Broken} @self
+    - skill{s=TempestCustom_EnterBroken} @self
+
+
+# ---------- 분노 페이즈: 5회 ----------
+TempestCustom_EnrageReflectHit1:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.reflect_hits;value=0} true
+  Skills:
+    - setvariable{var=caster.reflect_hits;value=1;type=INTEGER} @self
+    - skill{s=TempestCustom_P2ReflectHit1Visual} @self
+    - sound{s=entity.breeze.hurt;v=1.0;p=1.15} @self
+    - message{m="&c[분노 반사] &f1/5"} @PlayersInRadius{r=28}
+
+TempestCustom_EnrageReflectHit2:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.reflect_hits;value=1} true
+  Skills:
+    - setvariable{var=caster.reflect_hits;value=2;type=INTEGER} @self
+    - skill{s=TempestCustom_P2ReflectHit2Visual} @self
+    - sound{s=entity.breeze.hurt;v=1.0;p=1.10} @self
+    - message{m="&c[분노 반사] &f2/5"} @PlayersInRadius{r=28}
+
+TempestCustom_EnrageReflectHit3:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.reflect_hits;value=2} true
+  Skills:
+    - setvariable{var=caster.reflect_hits;value=3;type=INTEGER} @self
+    - skill{s=TempestCustom_P2ReflectHit3Visual} @self
+    - sound{s=entity.breeze.hurt;v=1.0;p=1.05} @self
+    - message{m="&c[분노 반사] &f3/5"} @PlayersInRadius{r=28}
+
+TempestCustom_EnrageReflectHit4:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.reflect_hits;value=3} true
+  Skills:
+    - setvariable{var=caster.reflect_hits;value=4;type=INTEGER} @self
+    - skill{s=TempestCustom_P2ReflectHit4Visual} @self
+    - sound{s=entity.breeze.hurt;v=1.0;p=1.00} @self
+    - message{m="&c[분노 반사] &f4/5"} @PlayersInRadius{r=28}
+
+TempestCustom_EnrageReflectHit5:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.reflect_hits;value=4} true
+  Skills:
+    - setvariable{var=caster.reflect_hits;value=5;type=INTEGER} @self
+    - setvariable{var=caster.wind_barrier;value=0;type=INTEGER} @self
+    - message{m="&6[분노 반사] &f5/5 - 회전 탄막 파훼!"} @PlayersInRadius{r=30}
+    - state{mid=tempest_breeze;s=barrier_p2_hit5_transition} @self
+    - delay 6
+    - skill{s=TempestBM_Vis_P2_Broken} @self
+    - skill{s=TempestCustom_EnterBroken} @self
+
+
+# ============================================================
+# 6초 무력화
+# ============================================================
+
+TempestCustom_EnterBroken:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - setvariable{var=caster.broken;value=1;type=INTEGER} @self
+    - setvariable{var=caster.wind_barrier;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.movement_pause;value=1;type=INTEGER} @self
+    - setvariable{var=caster.storm_casting;value=0;type=INTEGER} @self
+
+    # 무력화에 들어간 순간 이미 날아가던 전용 돌풍구를 제거.
+    # 기절 종료 직후 예전 반사탄이 새 스택으로 잡히는 현상 방지.
+    - command{c="execute at <caster.uuid> run kill @e[type=minecraft:breeze_wind_charge,tag=tempest_wc,distance=..40]"} @self
+    - command{c="tag <caster.uuid> remove tempest_reflected_wc_hit"} @self
+
+    - skill{s=TempestAnim_Stunned} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    - potion{type=SLOWNESS;duration=130;level=10} @self
+    - potion{type=WEAKNESS;duration=130;level=10} @self
+
+    - sound{s=entity.breeze.death;v=0.95;p=1.3} @self
+    - effect:particles{particle=cloud;amount=48;hS=1.0;vS=0.72;speed=0.05} @self
+    - message{m="&c[무력화] &f바람장벽 해제! 6초 동안 공격 기회!"} @PlayersInRadius{r=30}
+
+    # 정확히 6초(120틱) 후 자동 복구.
+    # 단, 그 전에 30% 이하가 되어 P2로 전환되면 broken=0이므로 이 Recover는 자동 무시됨.
+    - delay 120
+    - skill{s=TempestCustom_Recover} @self
+
+
+TempestCustom_Recover:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} true
+  Skills:
+    # 혹시 무력화 중 외곽에서 들어온 오래된 전용 돌풍구가 남아있다면
+    # 장벽을 켜기 전에 한 번 더 정리한다.
+    - command{c="execute at <caster.uuid> run kill @e[type=minecraft:breeze_wind_charge,tag=tempest_wc,distance=..40]"} @self
+    - command{c="tag <caster.uuid> remove tempest_reflected_wc_hit"} @self
+    - skill{s=TempestAnim_BarrierRestore} @self
+    - potionclear{type=SLOWNESS} @self
+    - potionclear{type=WEAKNESS} @self
+
+    - setvariable{var=caster.reflect_hits;value=0;type=INTEGER} @self
+    - setvariable{var=caster.enrage_reflect_hits;value=0;type=INTEGER} @self
+    - setvariable{var=caster.wind_barrier;value=1;type=INTEGER} @self
+    - setvariable{var=caster.broken;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.storm_casting;value=0;type=INTEGER} @self
+    - setvariable{var=caster.movement_pause;value=0;type=INTEGER} @self
+
+    - sound{s=entity.breeze.charge;v=1.2;p=0.95} @self
+    - effect:particles{particle=gust;amount=30;hS=0.9;vS=0.75;speed=0.11} @self
+    - message{m="&b[회복] &f바람장벽 복구 / 패턴 재개"} @PlayersInRadius{r=30}
+
+
+# ============================================================
+# 반사된 전용 Wind Charge 근접 감지
+#
+# 중요:
+# onDamaged 이벤트가 발생할 때는 Wind Charge 엔티티가 이미 충돌로 제거되어
+# 주변 엔티티 검색이 실패할 수 있다.
+#
+# 따라서 매 틱 보스 주변 4블럭을 검사한다.
+# 조건:
+#   1) breeze_wind_charge
+#   2) tempest_wc 태그 보유
+#   3) origin이 PLAYER (플레이어가 받아친 뒤 projectile origin이 플레이어로 변경된 경우만 성립)
+#
+# 조건이 맞으면 반사 성공으로 처리하고, 가장 가까운 해당 돌풍구를 제거한다.
+# ============================================================
+
+TempestCustom_ReflectedWindProximityCheck:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    # --------------------------------------------------------
+    # STEP 1. 플레이어가 받아친 tempest_wc 자체를 표시
+    #
+    # 'on origin'으로 발사 주체가 PLAYER가 된 돌풍구를 찾은 뒤,
+    # 그 돌풍구 위치 근처의 tempest_wc에 tempest_reflected_wc 태그를 부여한다.
+    # 일반/분노 돌풍구 모두 동일하게 작동한다.
+    # --------------------------------------------------------
+    - command{c="execute at <caster.uuid> as @e[type=minecraft:breeze_wind_charge,tag=tempest_wc,distance=..35] at @s on origin if entity @s[type=minecraft:player] run tag @e[type=minecraft:breeze_wind_charge,tag=tempest_wc,distance=..0.8,sort=nearest,limit=1] add tempest_reflected_wc"} @self
+
+    # --------------------------------------------------------
+    # STEP 2. 반사 표시된 돌풍구가 보스 6블럭 안으로 돌아오면 1회 성공
+    # --------------------------------------------------------
+    - command{c="execute at <caster.uuid> if entity @e[type=minecraft:breeze_wind_charge,tag=tempest_reflected_wc,distance=..6.0,limit=1] run tag <caster.uuid> add tempest_reflected_wc_hit"} @self
+
+    - skill{s=TempestCustom_ConfirmReflectedWindCharge} @self
+
+
+TempestCustom_ConfirmReflectedWindCharge:
+  Conditions:
+    - hastag{t=tempest_reflected_wc_hit} true
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.wind_barrier;value=1} true
+  Skills:
+    # 실제로 되돌아온 반사탄만 제거
+    - command{c="execute at <caster.uuid> run kill @e[type=minecraft:breeze_wind_charge,tag=tempest_reflected_wc,distance=..6.0,sort=nearest,limit=1]"} @self
+
+    # 일반: 2스택 / 분노: 5스택
+    - skill{s=TempestCustom_ReflectedStormOrbHit} @self
+
+    # 같은 탄 중복 카운트 방지
+    - command{c="execute as <caster.uuid> if entity @s[tag=tempest_reflected_wc_hit] run tag @s remove tempest_reflected_wc_hit"} @self
+
+
+TempestCustom_BrokenProjectileCleanup:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} true
+  Skills:
+    - command{c="execute at <caster.uuid> run kill @e[type=minecraft:breeze_wind_charge,tag=tempest_wc,distance=..40]"} @self
+    - command{c="tag <caster.uuid> remove tempest_reflected_wc_hit"} @self
+
+TempestCustom_DamageDebug:
+  Skills:
+    - message{m="&8[DMG DEBUG] &7cause=<skill.var.damage-cause> / amount=<skill.var.damage-amount> / trigger=<trigger.name> / trigger.type=<trigger.type> / reflect=<caster.var.reflect_hits> / broken=<caster.var.broken>"} @PlayersInRadius{r=20}
+
+# ============================================================
+# 6. 원거리 무효 / 근접 장벽
+# ============================================================
+
+TempestCustom_BlockRangedDamage:
+  Conditions:
+    - variableEquals{var=caster.wind_barrier;value=1} true
+    - variableEquals{var=caster.broken;value=1} false
+    - damagecause{cause=PROJECTILE} true
+  Skills:
+    - cancelevent
+
+
+TempestCustom_BarrierDamageReduction:
+  Conditions:
+    - variableEquals{var=caster.wind_barrier;value=1} true
+    - variableEquals{var=caster.broken;value=1} false
+    - damagecause{cause=FALL} false
+    - damagecause{cause=PROJECTILE} false
+  Skills:
+    # 바람장벽 활성 중 근접/기타 피해는 최종 30%만 통과
+    - modifyDamage{a=-0.70;action=ADDITIVE_MULTIPLIER;sync=true} @self
+
+
+TempestCustom_MeleeBarrier:
+  Conditions:
+    - damagecause{cause=ENTITY_ATTACK} true
+    - variableEquals{var=caster.wind_barrier;value=1} true
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    # 물리적인 밀쳐내기는 캐스팅 중에도 유지.
+    - throw{velocity=15.0;velocityY=1.10} @PlayersInRadius{r=4.5}
+    - effect:particles{particle=gust;amount=18;hS=1.2;vS=0.55;speed=0.10} @self
+    - sound{s=entity.breeze.wind_burst;v=1.2;p=0.85} @self
+    # barrier_repel 애니메이션은 돌풍구 캐스팅 중이 아닐 때만.
+    - skill{s=TempestCustom_MeleeBarrierVisual} @self
+
+TempestCustom_MeleeBarrierVisual:
+  Conditions:
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - state{mid=tempest_breeze;s=barrier_repel} @self
+    - delay 14
+    - skill{s=TempestBM_SyncIdle} @self
+
+
+# ============================================================
+# 7. 장거리 복귀
+# ============================================================
+
+TempestCustom_FarReturn:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>=18} true
+    - distance{d=<24} true
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} false
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.storm_casting;value=1} false
+  Skills:
+    - look{headOnly=false;force=true;immediately=true} @target
+    - state{mid=tempest_breeze;s=jump_charge} @self
+    - delay 8
+    - velocity{mode=SET;x=0;y=1.00;z=0.58;relative=true} @self
+    - skill{s=TempestBM_SyncIdle} @self
+    - effect:particles{particle=cloud;amount=7;hS=0.28;vS=0.18;speed=0.03} @self
+
+# ============================================================
+# 8. 분노 플래그
+# 테스트 체력 40 / 30% = 12 HP 이하에서 P2 진입
+# ============================================================
+
+TempestCustom_EnrageCheck:
+  Conditions:
+    - health{h=<12} true
+    - variableEquals{var=caster.enraged;value=1} false
+  Skills:
+    # 30% 이하가 되는 순간 P1 상태를 전부 끊고 바로 P2로 전환.
+    # P1 무력화 중이어도 6초를 끝까지 기다리지 않는다.
+    - setvariable{var=caster.enraged;value=1;type=INTEGER} @self
+    - setvariable{var=caster.broken;value=0;type=INTEGER} @self
+    - setvariable{var=caster.wind_barrier;value=1;type=INTEGER} @self
+    - setvariable{var=caster.reflect_hits;value=0;type=INTEGER} @self
+    - setvariable{var=caster.enrage_reflect_hits;value=0;type=INTEGER} @self
+    - setvariable{var=caster.storm_casting;value=0;type=INTEGER} @self
+    - setvariable{var=caster.movement_pause;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER;duration=20} @self
+
+    # P1 기절 효과 즉시 해제
+    - potionclear{type=SLOWNESS} @self
+    - potionclear{type=WEAKNESS} @self
+
+    # P2 시각/상태로 즉시 전환
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - skill{s=TempestAnim_EnrageStart} @self
+    - sound{s=entity.breeze.charge;v=1.65;p=0.55} @self
+    - skill{s=TempestCustom_EnrageBurst} @self
+    - message{m="&4[분노] &f폭풍의 브리즈가 즉시 2페이즈로 전환합니다!"} @PlayersInRadius{r=30}
+
+
+# ------------------------------------------------------------
+# 분노 진입 연출
+# - 작은 링 -> 중간 링 -> 큰 링 순서로 빠르게 퍼져나가
+#   "지금 P2에 들어갔다"는 것을 즉시 읽히게 한다.
+# ------------------------------------------------------------
+
+TempestCustom_EnrageBurst:
+  Skills:
+    # 분노 진입 시 폭발형 파티클 없음.
+    # 순간적으로 파란 기운만 짧게 보여준다.
+    - effect:particles{particle=dust;color=#77BFFF;size=1.15;amount=8;hS=0.55;vS=0.18;y=0.18;speed=0.005} @self
+    - effect:particles{particle=dust;color=#A8D8FF;size=0.95;amount=6;hS=0.40;vS=0.15;y=2.35;speed=0.005} @self
+
+
+# ------------------------------------------------------------
+# 분노 지속 오라 - 최소 표현
+# - 바닥 근처: 옅은 파란 연무처럼 보이는 dust
+# - 머리 위: 아주 소량의 밝은 파란 입자
+# - 폭발/링/전기 파티클 없음
+# ------------------------------------------------------------
+
+TempestCustom_EnrageAura:
+  Conditions:
+    - variableEquals{var=caster.enraged;value=1} true
+    - variableEquals{var=caster.broken;value=1} false
+  Skills:
+    - effect:particles{particle=dust;color=#6FAEFF;size=1.10;amount=3;hS=0.70;vS=0.08;y=0.12;speed=0.003} @self
+    - effect:particles{particle=dust;color=#B5DEFF;size=0.85;amount=2;hS=0.38;vS=0.10;y=2.45;speed=0.002} @self
+
+
+TempestCustom_EnrageKnockback:
+  Skills:
+    # 분노 진입 순간 주변 플레이어를 즉시 밀어내 전환 공간 확보
+    - throw{velocity=1.9;velocityY=0.55} @PlayersInRadius{r=7}
+    - effect:particles{particle=gust_emitter_small;amount=18;hS=1.3;vS=0.7;speed=0.08} @self
+    - sound{s=entity.breeze.wind_burst;v=1.5;p=0.75} @self
+
+TempestAnim_EnrageStart:
+  Skills:
+    - skill{s=TempestCustom_EnrageKnockback} @self
+    - skill{s=TempestBM_Vis_P2_Base} @self
+    - state{mid=tempest_breeze;s=idle_phase2} @self
+
+
+
+TempestAnim_BarrierOn:
+  Skills:
+    - skill{s=TempestBM_SyncIdle} @self
+TempestAnim_Stunned:
+  Conditions:
+    - variableEquals{var=caster.broken;value=1} true
+  Skills:
+    - skill{s=TempestBM_StunnedP2} @self
+    - skill{s=TempestBM_StunnedP1} @self
+TempestAnim_BarrierRestore:
+  Skills:
+    - skill{s=TempestBM_InitVisual} @self
+
+TempestCustom_EnrageKnockback:
+  Skills:
+    # 분노 진입 순간 주변 플레이어를 즉시 밀어내 전환 공간 확보
+    - throw{velocity=1.9;velocityY=0.55} @PlayersInRadius{r=7}
+    - effect:particles{particle=gust_emitter_small;amount=18;hS=1.3;vS=0.7;speed=0.08} @self
+    - sound{s=entity.breeze.wind_burst;v=1.5;p=0.75} @self
+
+TempestAnim_EnrageStart:
+  Skills:
+    - skill{s=TempestCustom_EnrageKnockback} @self
+    - skill{s=TempestBM_Vis_P2_Base} @self
+    - state{mid=tempest_breeze;s=idle_phase2} @self
+
+
+TempestCustom_Death:
+  Skills:
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=tempest_breeze;s=death} @self
+    - sound{s=entity.breeze.death;v=1.4;p=0.65} @self
+    - effect:particles{particle=gust;amount=80;hS=1.4;vS=1.1;speed=0.13} @self

@@ -1,0 +1,957 @@
+# ============================================================
+# Barkan Mercenary v3.6 - Static Standoff TEST6
+#
+# 핵심 변수
+#   count:
+#     0 = 자유
+#     1 = grab / 공격 중
+#     2 = block 중
+#
+#   drawn:
+#     0 = 무기 보관 상태
+#     1 = 손에 장비를 꺼낸 상태
+#
+#   combat_started:
+#     0 = 비전투
+#     1 = 현재 타겟과 전투 진입
+#
+#   standoff:
+#     0 = 일반 전투
+#     1 = grab 직후 aggro_idle 대치 상태
+#
+#   standoff_attack_ready:
+#     0 = 최소 대치시간(0.8초) 중
+#     1 = 플레이어가 공격거리 안이면 선공 가능
+#
+#   engaged:
+#     0 = 아직 실제 교전 전
+#     1 = 공격/추격/실피격이 시작된 본격 교전
+#
+#   chase:
+#     0 = 대치/정지
+#     1 = run + goto 추격
+#
+#   far_pending:
+#     1 = 공격거리 밖 2초 대기 타이머 진행 중
+#
+#   combat_combo:
+#     실제 공격 적중 +1
+#     실제 피해를 받음 +1
+#     3초간 교환 없으면 0
+#
+#   combo_live:
+#     마지막 유효 교환 후 60틱 동안 존재하는 임시 변수
+#
+#   block_active:
+#     block 애니메이션 시작 후 9틱(0.45s) 동안 존재
+#     이 동안 전방 180도 공격만 취소
+#
+# ============================================================
+# 애니메이션
+#
+# idle             : hip에 무기가 있는 평상시 대기
+# idle_nohip       : hip에 무기가 없는 평상시 대기
+# walk             : 비전투 이동
+# run              : 전투 추격
+# aggro_idle       : 플레이어와 대치/공격 대기
+#
+# grab_gear_hip    : hip 단독 무기
+# grab_gear        : hip 무기 + back 방패
+# grab_gear_back   : hip 없음 + back 혼합 파츠
+#
+# melee1           : 0.25s / 5틱 / 2블럭 / -30~+30
+# melee2           : 0.21s / 4틱 / 2블럭 / -90~+60
+# left_melee1      : 0.25s / 5틱 / 2블럭 / -60~+60
+# shield_melee1    : 0.29s / 6틱 / 2블럭 / -60~+80 / 뇌진탕
+# block            : 0~0.42s 전방 -90~+90 방어
+# kick             : 모델 핵심 프레임 약 0.417s / 8틱 / 2블럭 / -30~+30 / 밀치기
+#
+# death / death2 / death3 : 스폰 때 랜덤 1개 지정
+#
+# idle_kneel은 현재 전투 설계에서 용도가 확정되지 않아 비활성.
+# ============================================================
+
+
+# ============================================================
+# SPAWN / VISUAL RANDOMIZATION
+# ============================================================
+
+BarkanMerc_Spawn:
+  Skills:
+    - meg:model{mid=viking;usm=true} @self
+
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+    - setvariable{var=caster.drawn;type=INTEGER;val=0} @self
+    - setvariable{var=caster.ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.combat_started;type=INTEGER;val=0} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setvariable{var=caster.combat_combo;type=INTEGER;val=0} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=0} @self
+
+    - randomskill{skills=BarkanMerc_Head1,BarkanMerc_Head2,BarkanMerc_Head3,BarkanMerc_Head4,BarkanMerc_Head5,BarkanMerc_Head6,BarkanMerc_Head7,BarkanMerc_Head8} @self
+    - randomskill{skills=BarkanMerc_Body1,BarkanMerc_Body2,BarkanMerc_Body3} @self
+
+    # 허용 조합:
+    # 1) hip 무기 단독
+    # 2) hip 무기 + back 방패
+    # 3) hip 없음 + back 혼합장비
+    - randomskill{skills=BarkanMerc_Loadout_AxeHip 1.0,BarkanMerc_Loadout_HammerHip 0.8,BarkanMerc_Loadout_MaceHip 0.8,BarkanMerc_Loadout_AxeShield 1.4,BarkanMerc_Loadout_HammerShield 1.1,BarkanMerc_Loadout_MaceShield 1.0,BarkanMerc_Loadout_AxeShieldBack 1.3,BarkanMerc_Loadout_HammerShieldBack 1.1,BarkanMerc_Loadout_DualAxeBack 0.8} @self
+
+    - meg:defaultstate{mid=viking;t=walk;s=walk;li=2;lo=2} @self
+    - skill{s=BarkanMerc_SetPeaceIdle} @self
+
+    # 죽을 때 사용할 모션을 스폰 때 미리 랜덤 확정
+    - randomskill{skills=BarkanMerc_Death1,BarkanMerc_Death2,BarkanMerc_Death3} @self
+
+
+# ============================================================
+# HEAD / BODY
+# ============================================================
+
+BarkanMerc_Head1:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_1} @self
+BarkanMerc_Head2:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_2} @self
+BarkanMerc_Head3:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_3} @self
+BarkanMerc_Head4:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_4} @self
+BarkanMerc_Head5:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_5} @self
+BarkanMerc_Head6:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_6} @self
+BarkanMerc_Head7:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_7} @self
+BarkanMerc_Head8:
+  Skills:
+    - meg:changepart{mid=viking;pid=head;nmid=viking_parts;npid=head_8} @self
+
+BarkanMerc_Body1:
+  Skills:
+    - meg:changepart{mid=viking;pid=body;nmid=viking_parts;npid=body_1} @self
+BarkanMerc_Body2:
+  Skills:
+    - meg:changepart{mid=viking;pid=body;nmid=viking_parts;npid=body_2} @self
+BarkanMerc_Body3:
+  Skills:
+    - meg:changepart{mid=viking;pid=body;nmid=viking_parts;npid=body_3} @self
+
+
+# ============================================================
+# LOADOUTS - SPAWN STORAGE STATE
+#
+# 중요:
+# ChangePart로 "빈 파츠"를 넣어서 지우지 않는다.
+# 렌더 큐브가 없는 파츠는 교체가 눈에 안 먹을 수 있으므로
+# back / hip 비우기는 PartVis로 확실하게 처리한다.
+# ============================================================
+
+# --------------------
+# HIP ONLY -> idle + grab_gear_hip
+# --------------------
+
+BarkanMerc_Loadout_AxeHip:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=AXE_HIP} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=RIGHT} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=HIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=0} @self
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=true;em=true} @self
+    - meg:changepart{mid=viking;pid=hip;nmid=viking;npid=hip} @self
+
+BarkanMerc_Loadout_HammerHip:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=HAMMER_HIP} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=RIGHT} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=HIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=0} @self
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=true;em=true} @self
+    - meg:changepart{mid=viking;pid=hip;nmid=viking_parts;npid=hip_hammer} @self
+
+BarkanMerc_Loadout_MaceHip:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=MACE_HIP} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=RIGHT} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=HIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=0} @self
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=true;em=true} @self
+    - meg:changepart{mid=viking;pid=hip;nmid=viking_parts;npid=hip_mace} @self
+
+# --------------------
+# HIP WEAPON + BACK SHIELD -> idle + grab_gear
+# --------------------
+
+BarkanMerc_Loadout_AxeShield:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=AXE_SHIELD} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=SHIELD} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=HIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=1} @self
+    - meg:partvis{mid=viking;pid=back;v=true;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=true;em=true} @self
+    - meg:changepart{mid=viking;pid=back;nmid=viking_parts;npid=back_shield} @self
+    - meg:changepart{mid=viking;pid=hip;nmid=viking;npid=hip} @self
+
+BarkanMerc_Loadout_HammerShield:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=HAMMER_SHIELD} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=SHIELD} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=HIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=1} @self
+    - meg:partvis{mid=viking;pid=back;v=true;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=true;em=true} @self
+    - meg:changepart{mid=viking;pid=back;nmid=viking_parts;npid=back_shield} @self
+    - meg:changepart{mid=viking;pid=hip;nmid=viking_parts;npid=hip_hammer} @self
+
+BarkanMerc_Loadout_MaceShield:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=MACE_SHIELD} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=SHIELD} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=HIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=1} @self
+    - meg:partvis{mid=viking;pid=back;v=true;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=true;em=true} @self
+    - meg:changepart{mid=viking;pid=back;nmid=viking_parts;npid=back_shield} @self
+    - meg:changepart{mid=viking;pid=hip;nmid=viking_parts;npid=hip_mace} @self
+
+# --------------------
+# HIP EMPTY + BACK MIXED -> idle_nohip + grab_gear_back
+# --------------------
+
+BarkanMerc_Loadout_AxeShieldBack:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=AXE_SHIELD_BACK} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=SHIELD} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=NOHIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=1} @self
+    - meg:partvis{mid=viking;pid=back;v=true;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=back;nmid=viking_parts;npid=back_shieldaxe} @self
+
+BarkanMerc_Loadout_HammerShieldBack:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=HAMMER_SHIELD_BACK} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=SHIELD} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=NOHIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=1} @self
+    - meg:partvis{mid=viking;pid=back;v=true;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=back;nmid=viking_parts;npid=back_shieldhammer} @self
+
+BarkanMerc_Loadout_DualAxeBack:
+  Skills:
+    - setvariable{var=caster.loadout;type=STRING;val=DUAL_AXE_BACK} @self
+    - setvariable{var=caster.combat_type;type=STRING;val=DUAL} @self
+    - setvariable{var=caster.peace_idle;type=STRING;val=NOHIP} @self
+    - setvariable{var=caster.has_shield;type=INTEGER;val=0} @self
+    - meg:partvis{mid=viking;pid=back;v=true;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=back;nmid=viking_parts;npid=back_shieldaxe2} @self
+
+
+# ============================================================
+# PEACE IDLE / DEATH
+# ============================================================
+
+BarkanMerc_SetPeaceIdle:
+  Skills:
+    - skill{s=BarkanMerc_SetPeaceIdle_Hip} @self
+    - skill{s=BarkanMerc_SetPeaceIdle_NoHip} @self
+
+BarkanMerc_SetPeaceIdle_Hip:
+  Conditions:
+    - variableEquals{var=caster.peace_idle;value="HIP"}
+  Skills:
+    - meg:defaultstate{mid=viking;t=idle;s=idle;li=2;lo=2} @self
+
+BarkanMerc_SetPeaceIdle_NoHip:
+  Conditions:
+    - variableEquals{var=caster.peace_idle;value="NOHIP"}
+  Skills:
+    - meg:defaultstate{mid=viking;t=idle;s=idle_nohip;li=2;lo=2} @self
+
+BarkanMerc_Death1:
+  Skills:
+    - meg:defaultstate{mid=viking;t=death;s=death;li=0;lo=0} @self
+BarkanMerc_Death2:
+  Skills:
+    - meg:defaultstate{mid=viking;t=death;s=death2;li=0;lo=0} @self
+BarkanMerc_Death3:
+  Skills:
+    - meg:defaultstate{mid=viking;t=death;s=death3;li=0;lo=0} @self
+
+
+# ============================================================
+# COMBAT ENTRY
+# ============================================================
+
+BarkanMerc_EnterCombat:
+  Conditions:
+    - variableEquals{var=caster.combat_started;value=0}
+  Skills:
+    - setvariable{var=caster.combat_started;type=INTEGER;val=1} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setspeed{speed=0;type=WALK} @self
+
+    - skill{s=BarkanMerc_EnterCombat_Draw} @self
+    - skill{s=BarkanMerc_EnterCombat_AlreadyDrawn} @self
+
+BarkanMerc_EnterCombat_Draw:
+  Conditions:
+    - variableEquals{var=caster.drawn;value=0}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;val=1} @self
+    - setvariable{var=caster.ready;type=INTEGER;val=0} @self
+    - skill{s=BarkanMerc_DrawRouter} @self
+
+BarkanMerc_EnterCombat_AlreadyDrawn:
+  Conditions:
+    - variableEquals{var=caster.drawn;value=1}
+  Skills:
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_PostDrawStandoff:
+  Skills:
+    - setvariable{var=caster.drawn;type=INTEGER;val=1} @self
+    - setvariable{var=caster.ready;type=INTEGER;val=1} @self
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=0} @self
+
+    # 무기 꺼낸 직후 대치 상태.
+    - setvariable{var=caster.standoff;type=INTEGER;val=1} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setspeed{speed=0;type=WALK} @self
+    - meg:defaultstate{mid=viking;t=idle;s=aggro_idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=viking;t=walk;s=run;li=2;lo=2} @self
+
+    # 0.8초는 먼저 공격하지 않고 대치한다.
+    - delay 16
+    - skill{s=BarkanMerc_StandoffArm} @self
+
+BarkanMerc_StandoffArm:
+  Conditions:
+    - variableEquals{var=caster.combat_started;value=1}
+    - variableEquals{var=caster.standoff;value=1}
+    - variableEquals{var=caster.count;value=0}
+  Skills:
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=1} @self
+
+
+# ============================================================
+# DRAW ROUTER
+# 모든 grab은 1초.
+# 7틱 시점에 보관 파츠 -> 손 파츠 ChangePart.
+# 20틱에 grab 종료 후 PostDrawStandoff.
+# ============================================================
+
+BarkanMerc_DrawRouter:
+  Skills:
+    - skill{s=BarkanMerc_Draw_AxeHip} @self
+    - skill{s=BarkanMerc_Draw_HammerHip} @self
+    - skill{s=BarkanMerc_Draw_MaceHip} @self
+    - skill{s=BarkanMerc_Draw_AxeShield} @self
+    - skill{s=BarkanMerc_Draw_HammerShield} @self
+    - skill{s=BarkanMerc_Draw_MaceShield} @self
+    - skill{s=BarkanMerc_Draw_AxeShieldBack} @self
+    - skill{s=BarkanMerc_Draw_HammerShieldBack} @self
+    - skill{s=BarkanMerc_Draw_DualAxeBack} @self
+
+BarkanMerc_Draw_AxeHip:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="AXE_HIP"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear_hip;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_axe} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_HammerHip:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="HAMMER_HIP"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear_hip;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_hammer} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_MaceHip:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="MACE_HIP"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear_hip;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_mace} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_AxeShield:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="AXE_SHIELD"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=left_hand;nmid=viking_parts;npid=left_hand_shield1} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_axe} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_HammerShield:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="HAMMER_SHIELD"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=left_hand;nmid=viking_parts;npid=left_hand_shield2} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_hammer} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_MaceShield:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="MACE_SHIELD"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:partvis{mid=viking;pid=hip;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=left_hand;nmid=viking_parts;npid=left_hand_shield2} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_mace} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_AxeShieldBack:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="AXE_SHIELD_BACK"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear_back;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=left_hand;nmid=viking_parts;npid=left_hand_shield1} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_axe} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_HammerShieldBack:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="HAMMER_SHIELD_BACK"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear_back;li=1;lo=2;f=true} @self
+    - delay 7
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=left_hand;nmid=viking_parts;npid=left_hand_shield2} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_hammer} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+BarkanMerc_Draw_DualAxeBack:
+  Conditions:
+    - variableEquals{var=caster.loadout;value="DUAL_AXE_BACK"}
+  Skills:
+    - meg:state{mid=viking;s=grab_gear_back;li=1;lo=2;f=true} @self
+    - delay 7
+    # 보관 파츠 전체를 지우고 양손 도끼
+    - meg:partvis{mid=viking;pid=back;v=false;em=true} @self
+    - meg:changepart{mid=viking;pid=left_hand;nmid=viking_parts;npid=left_hand_axe} @self
+    - meg:changepart{mid=viking;pid=right_hand;nmid=viking_parts;npid=right_hand_axe} @self
+    - delay 13
+    - skill{s=BarkanMerc_PostDrawStandoff} @self
+
+
+# ============================================================
+# COMBAT BRAIN
+#
+# 실행 주기: 몹 파일 ~onTimer:4 = 0.20초마다 판단
+# 공격 공용락(count)은 공격별 후딜까지 포함:
+#   melee1 / melee2 / left_melee1 = 총 24틱 = 1.20초
+#   shield_melee1 / kick          = 총 30틱 = 1.50초
+#
+# standoff=1:
+#   - grab 직후 최소 0.8초 대치
+#   - 방패형은 AggroBlock 가능
+#   - 0.8초 이후 플레이어가 2.2 안이면 선공
+#
+# 거리 >2.2 상태가 2초 유지:
+#   - standoff 해제
+#   - engaged=1
+#   - run + goto 추격
+#
+# 추격 중 2.2 안:
+#   - 정지
+#   - 일반 공격
+# ============================================================
+
+BarkanMerc_CombatBrain:
+  Conditions:
+    - variableEquals{var=caster.combat_started;value=1}
+    - variableEquals{var=caster.ready;value=1}
+  Skills:
+    - skill{s=BarkanMerc_StopChaseAtRange} @target
+    - skill{s=BarkanMerc_StandoffAttackTry} @target
+    - skill{s=BarkanMerc_AttackTry} @target
+    - skill{s=BarkanMerc_FarWaitStart} @target
+    - skill{s=BarkanMerc_ChaseTick} @target
+
+BarkanMerc_StopChaseAtRange:
+  Conditions:
+    - variableEquals{var=caster.chase;value=1}
+  TargetConditions:
+    - distance{d=0to2.2}
+  Skills:
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setspeed{speed=0;type=WALK} @self
+
+BarkanMerc_StandoffAttackTry:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.standoff;value=1}
+    - variableEquals{var=caster.standoff_attack_ready;value=1}
+  TargetConditions:
+    - distance{d=0to2.2}
+  Skills:
+    - setvariable{var=caster.standoff;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setspeed{speed=0;type=WALK} @self
+    - skill{s=BarkanMerc_AttackRouter} @target
+
+BarkanMerc_AttackTry:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.standoff;value=0}
+  TargetConditions:
+    - distance{d=0to2.2}
+  Skills:
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setspeed{speed=0;type=WALK} @self
+    - skill{s=BarkanMerc_AttackRouter} @target
+
+BarkanMerc_FarWaitStart:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.chase;value=0}
+    - variableEquals{var=caster.far_pending;value=0}
+  TargetConditions:
+    - distance{d=>2.2}
+  Skills:
+    - setvariable{var=caster.far_pending;type=INTEGER;val=1} @self
+    - delay 40
+    - skill{s=BarkanMerc_BeginChase} @target
+
+BarkanMerc_BeginChase:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.far_pending;value=1}
+    - variableEquals{var=caster.combat_started;value=1}
+  TargetConditions:
+    - distance{d=>2.2}
+  Skills:
+    - setvariable{var=caster.standoff;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=1} @self
+    - setspeed{speed=1.25;type=WALK} @self
+    - goto{speed=1;sh=0;sv=0} @target
+
+BarkanMerc_ChaseTick:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.chase;value=1}
+  TargetConditions:
+    - distance{d=>2.2}
+  Skills:
+    - setspeed{speed=1.25;type=WALK} @self
+    - goto{speed=1;sh=0;sv=0} @target
+
+
+# ============================================================
+# ATTACK ROUTER
+# combat_combo < 5:
+#   기본 공격만
+#
+# combat_combo >= 5:
+#   SHIELD -> shield_melee + kick 해금
+#   DUAL/RIGHT -> kick 해금
+#   CombatBlock도 별도 피격 라우터에서 해금
+# ============================================================
+
+BarkanMerc_AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+  Skills:
+    - skill{s=BarkanMerc_AttackShield_Low} @target
+    - skill{s=BarkanMerc_AttackShield_High} @target
+    - skill{s=BarkanMerc_AttackDual_Low} @target
+    - skill{s=BarkanMerc_AttackDual_High} @target
+    - skill{s=BarkanMerc_AttackRight_Low} @target
+    - skill{s=BarkanMerc_AttackRight_High} @target
+
+BarkanMerc_AttackShield_Low:
+  Conditions:
+    - variableEquals{var=caster.combat_type;value="SHIELD"}
+    - variableInRange{var=caster.combat_combo;value=0to4}
+  Skills:
+    - randomskill{skills=BarkanMerc_Attack_Melee1 1.0,BarkanMerc_Attack_Melee2 1.0} @target
+
+BarkanMerc_AttackShield_High:
+  Conditions:
+    - variableEquals{var=caster.combat_type;value="SHIELD"}
+    - variableInRange{var=caster.combat_combo;value=>=5}
+  Skills:
+    - randomskill{skills=BarkanMerc_Attack_Melee1 3.0,BarkanMerc_Attack_Melee2 3.0,BarkanMerc_Attack_Shield 1.4,BarkanMerc_Attack_Kick 1.0} @target
+
+BarkanMerc_AttackDual_Low:
+  Conditions:
+    - variableEquals{var=caster.combat_type;value="DUAL"}
+    - variableInRange{var=caster.combat_combo;value=0to4}
+  Skills:
+    - randomskill{skills=BarkanMerc_Attack_Melee1 1.0,BarkanMerc_Attack_Melee2 1.0,BarkanMerc_Attack_Left 1.0} @target
+
+BarkanMerc_AttackDual_High:
+  Conditions:
+    - variableEquals{var=caster.combat_type;value="DUAL"}
+    - variableInRange{var=caster.combat_combo;value=>=5}
+  Skills:
+    - randomskill{skills=BarkanMerc_Attack_Melee1 2.0,BarkanMerc_Attack_Melee2 2.0,BarkanMerc_Attack_Left 2.0,BarkanMerc_Attack_Kick 1.0} @target
+
+BarkanMerc_AttackRight_Low:
+  Conditions:
+    - variableEquals{var=caster.combat_type;value="RIGHT"}
+    - variableInRange{var=caster.combat_combo;value=0to4}
+  Skills:
+    - randomskill{skills=BarkanMerc_Attack_Melee1 1.0,BarkanMerc_Attack_Melee2 1.0} @target
+
+BarkanMerc_AttackRight_High:
+  Conditions:
+    - variableEquals{var=caster.combat_type;value="RIGHT"}
+    - variableInRange{var=caster.combat_combo;value=>=5}
+  Skills:
+    - randomskill{skills=BarkanMerc_Attack_Melee1 3.0,BarkanMerc_Attack_Melee2 3.0,BarkanMerc_Attack_Kick 1.0} @target
+
+
+# ============================================================
+# ATTACK ANIMATIONS
+# count=1 동안 Block 시작 불가.
+# ============================================================
+
+BarkanMerc_Attack_Melee1:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;val=1} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - meg:state{mid=viking;s=melee1;li=1;lo=1;f=true} @self
+    - delay 5
+    - skill{s=BarkanMerc_Hit_Melee1} @target
+    - delay 19
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+
+BarkanMerc_Attack_Melee2:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;val=1} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - meg:state{mid=viking;s=melee2;li=1;lo=1;f=true} @self
+    - delay 4
+    - skill{s=BarkanMerc_Hit_Melee2} @target
+    - delay 20
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+
+BarkanMerc_Attack_Left:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.combat_type;value="DUAL"}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;val=1} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - meg:state{mid=viking;s=left_melee1;li=1;lo=1;f=true} @self
+    - delay 5
+    - skill{s=BarkanMerc_Hit_Left} @target
+    - delay 19
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+
+BarkanMerc_Attack_Shield:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.has_shield;value=1}
+    - variableInRange{var=caster.combat_combo;value=>=5}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;val=1} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - meg:state{mid=viking;s=shield_melee1;li=1;lo=1;f=true} @self
+    - delay 6
+    - skill{s=BarkanMerc_Hit_Shield} @target
+    - delay 24
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+
+BarkanMerc_Attack_Kick:
+  Conditions:
+    - variableEquals{var=caster.count;value=0}
+    - variableInRange{var=caster.combat_combo;value=>=5}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;val=1} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - meg:state{mid=viking;s=kick;li=1;lo=1;f=true} @self
+    - delay 8
+    - skill{s=BarkanMerc_Hit_Kick} @target
+    - delay 22
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+
+
+# ============================================================
+# HIT WINDOWS
+#
+# Mythic fieldofview rotation = 시계방향(+ = 오른쪽)
+#
+# 사용자 각도 기준은 음수 = 몹 오른쪽.
+# 따라서:
+# melee1  -30~+30 -> angle 60 / rot 0
+# melee2  -90~+60 -> 중심 사용자 -15(오른쪽 15)
+#                    -> Mythic rot +15 / angle 150
+# left     -60~+60 -> angle 120 / rot 0
+# shield   -60~+80 -> 중심 사용자 +10(왼쪽 10)
+#                    -> Mythic rot -10 / angle 140
+# kick     -30~+30 -> angle 60 / rot 0
+# ============================================================
+
+BarkanMerc_Hit_Melee1:
+  TargetConditions:
+    - distance{d=0to2.2}
+    - fieldofview{angle=60;rotation=0}
+  Skills:
+    - damage{a=6;pkb=true} @target
+    - skill{s=BarkanMerc_ComboAdd} @self
+
+BarkanMerc_Hit_Melee2:
+  TargetConditions:
+    - distance{d=0to2.2}
+    - fieldofview{angle=150;rotation=15}
+  Skills:
+    - damage{a=7;pkb=true} @target
+    - skill{s=BarkanMerc_ComboAdd} @self
+
+BarkanMerc_Hit_Left:
+  TargetConditions:
+    - distance{d=0to2.2}
+    - fieldofview{angle=120;rotation=0}
+  Skills:
+    - damage{a=6;pkb=true} @target
+    - skill{s=BarkanMerc_ComboAdd} @self
+
+BarkanMerc_Hit_Shield:
+  TargetConditions:
+    - distance{d=0to2.2}
+    - fieldofview{angle=140;rotation=-10}
+  Skills:
+    - damage{a=4;pkb=true} @target
+    # 임시 뇌진탕 효과. 밸런스 단계에서 별도 상태이상으로 교체 가능.
+    - potion{t=SLOW;d=20;l=1;p=false;i=false} @target
+    - potion{t=NAUSEA;d=30;l=0;p=false;i=false} @target
+    - sound{s=item.shield.block;v=0.8;p=0.75} @target
+    - skill{s=BarkanMerc_ComboAdd} @self
+
+BarkanMerc_Hit_Kick:
+  TargetConditions:
+    - distance{d=0to2.2}
+    - fieldofview{angle=60;rotation=0}
+  Skills:
+    - damage{a=2;pkb=true} @target
+    - throw{v=3;vy=0.10} @target
+    - skill{s=BarkanMerc_ComboAdd} @self
+
+
+# ============================================================
+# COMBAT COMBO
+# 마지막 교환 후 3초(60t) 동안 combo_live 유지.
+# ============================================================
+
+BarkanMerc_ComboAdd:
+  Skills:
+    - variableadd{var=caster.combat_combo;amount=1} @self
+    - setvariable{var=caster.combo_live;type=INTEGER;val=1;duration=60} @self
+
+BarkanMerc_ComboResetCheck:
+  Conditions:
+    - variableInRange{var=caster.combat_combo;value=>0}
+    # combo_live가 존재하면 이 스킬을 취소.
+    # 존재하지 않을 때만 아래 reset 실행.
+    - variableIsSet{var=caster.combo_live} false
+  Skills:
+    - setvariable{var=caster.combat_combo;type=INTEGER;val=0} @self
+
+
+# ============================================================
+# DAMAGE / BLOCK ROUTER
+#
+# 처리 순서:
+# 1) 이미 block_active면 정면 공격 취소
+# 2) 최초 aggro_idle 대치라면 Aggro Block
+# 3) 실제 교전 + combo>=5라면 Combat Block (5초 CD)
+# 4) 위에서 취소되지 않은 실제 피해만 combo +1
+#
+# sync=true는 mob 파일의 DamageRouter 호출에서 상속됨.
+# ============================================================
+
+BarkanMerc_DamageRouter:
+  Skills:
+    - skill{s=BarkanMerc_BlockHold} @trigger
+    - skill{s=BarkanMerc_AggroBlock_Start} @trigger
+    - skill{s=BarkanMerc_CombatBlock_Start} @trigger
+    - skill{s=BarkanMerc_TakeHitCombo} @trigger
+
+
+# block 애니메이션 0.42초 보호 구간
+BarkanMerc_BlockHold:
+  Conditions:
+    - isCancelled false
+    - variableEquals{var=caster.block_active;value=1}
+  TargetConditions:
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - cancelevent
+    - sound{s=item.shield.block;v=1.0;p=1.0} @self
+
+
+# ------------------------------------------------------------
+# AGGRO IDLE BLOCK
+# standoff=1 대치 상태에서는 combat_combo 조건 없이 즉시 방어.
+# 공격 중(count=1)에는 발동 불가.
+# 거리 제한 없음: 정면 공격이라면 대치 중 방어.
+# ------------------------------------------------------------
+
+BarkanMerc_AggroBlock_Start:
+  Conditions:
+    - isCancelled false
+    - variableEquals{var=caster.has_shield;value=1}
+    - variableEquals{var=caster.standoff;value=1}
+    - variableEquals{var=caster.count;value=0}
+    - variableEquals{var=caster.combat_started;value=1}
+  TargetConditions:
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - cancelevent
+    - setvariable{var=caster.count;type=INTEGER;val=2} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setvariable{var=caster.block_active;type=INTEGER;val=1;duration=9} @self
+    - setspeed{speed=0;type=WALK} @self
+    - meg:state{mid=viking;s=block;li=1;lo=1;f=true} @self
+    - sound{s=item.shield.block;v=1.0;p=0.95} @self
+    - delay 17
+    # 첫 대치 블록이 끝나면 일반 교전으로 전환.
+    - setvariable{var=caster.standoff;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+
+
+# ------------------------------------------------------------
+# COMBAT BLOCK
+# 조건:
+# - shield
+# - 실제 교전 engaged=1
+# - combat_combo >= 5
+# - count=0
+# - attacker <= 3.5 blocks (멀리 도망/원거리 상태에서는 발동 X)
+# - 정면 180도
+# - 이 스킬 자체 Cooldown 5초
+# ------------------------------------------------------------
+
+BarkanMerc_CombatBlock_Start:
+  Cooldown: 5
+  Conditions:
+    - isCancelled false
+    - variableEquals{var=caster.has_shield;value=1}
+    - variableEquals{var=caster.standoff;value=0}
+    - variableEquals{var=caster.engaged;value=1}
+    - variableEquals{var=caster.count;value=0}
+    - variableInRange{var=caster.combat_combo;value=>=5}
+  TargetConditions:
+    - distance{d=0to3.5}
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - cancelevent
+    - setvariable{var=caster.count;type=INTEGER;val=2} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setvariable{var=caster.block_active;type=INTEGER;val=1;duration=9} @self
+    - setspeed{speed=0;type=WALK} @self
+    - meg:state{mid=viking;s=block;li=1;lo=1;f=true} @self
+    - sound{s=item.shield.block;v=1.0;p=0.9} @self
+    - delay 17
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+
+
+# 실제로 피해가 취소되지 않았을 때만 피격 콤보 증가.
+# 최초 대치 중 뒤/측후방 공격을 맞으면 여기서 engaged=1로 넘어간다.
+BarkanMerc_TakeHitCombo:
+  Conditions:
+    - isCancelled false
+  Skills:
+    # 대치 중 방어하지 못한 실제 피격은 즉시 본격 교전으로 전환.
+    - setvariable{var=caster.standoff;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=1} @self
+    - variableadd{var=caster.combat_combo;amount=1} @self
+    - setvariable{var=caster.combo_live;type=INTEGER;val=1;duration=60} @self
+
+
+# ============================================================
+# DROP COMBAT
+# 장비를 다시 집어넣는 역재생 모션은 없으므로 손에 든 채 유지.
+# 다음 전투 진입 시 grab 없이 다시 aggro_idle 대치부터 시작.
+# ============================================================
+
+BarkanMerc_DropCombat:
+  Skills:
+    - setvariable{var=caster.combat_started;type=INTEGER;val=0} @self
+    - setvariable{var=caster.engaged;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff;type=INTEGER;val=0} @self
+    - setvariable{var=caster.standoff_attack_ready;type=INTEGER;val=0} @self
+    - setvariable{var=caster.chase;type=INTEGER;val=0} @self
+    - setvariable{var=caster.far_pending;type=INTEGER;val=0} @self
+    - setvariable{var=caster.count;type=INTEGER;val=0} @self
+    - setvariable{var=caster.combat_combo;type=INTEGER;val=0} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:defaultstate{mid=viking;t=idle;s=idle_nohip;li=2;lo=2} @self
+    - meg:defaultstate{mid=viking;t=walk;s=walk;li=2;lo=2} @self

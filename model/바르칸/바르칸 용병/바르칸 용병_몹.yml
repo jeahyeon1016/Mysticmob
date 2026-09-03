@@ -1,0 +1,51 @@
+# ============================================================
+# Barkan Mercenary
+# v3.6 - Static Standoff TEST6
+# MythicMobs 5.13.0 + ModelEngine
+# ============================================================
+
+Barkan_Mercenary:
+  Type: ZOMBIE
+  Display: '&6바르칸 용병'
+  Health: 45
+  Damage: 0
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.24
+    FollowRange: 14
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.60
+
+  Modules:
+    ThreatTable: true
+
+  # 평상시에는 배회만 함.
+  # 전투 추격은 meleeattack AI가 아니라 goto 스킬로 제어한다.
+  AIGoalSelectors:
+    - clear
+    - randomstroll
+    - lookatplayers
+
+  AITargetSelectors:
+    - clear
+    - players
+
+  Skills:
+    - skill{s=BarkanMerc_Spawn} @self ~onSpawn
+
+    # 실제 ~onEnterCombat만 전투 진입으로 사용.
+    - skill{s=BarkanMerc_EnterCombat} @self ~onEnterCombat
+
+    # 전투 두뇌: 공격거리 / 2초 대치 / 추격
+    - skill{s=BarkanMerc_CombatBrain} @target ~onTimer:4
+
+    # 피격 라우터는 반드시 sync.
+    - skill{s=BarkanMerc_DamageRouter;sync=true} @trigger ~onDamaged
+
+    # 마지막 교환 후 3초가 지나면 combat_combo 리셋
+    - skill{s=BarkanMerc_ComboResetCheck} @self ~onTimer:10
+
+    - skill{s=BarkanMerc_DropCombat} @self ~onDropCombat

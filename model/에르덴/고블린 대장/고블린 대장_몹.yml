@@ -1,0 +1,765 @@
+# ============================================================
+# 고블린 킹 라이더 - ModelEngine 4 Mobs
+# Development v5.63_TEST100
+#
+# v5.63
+# - P1 Runner 거리 판정을 2페와 동일한 TriggerConditions 방식으로 수정
+# - ~onDamaged 공격자(@Trigger)와 보스의 거리 >7블럭 검사
+# - sync=true로 damage trigger context 유지
+#
+# v5.62
+# - 1페 Runner 원거리 판정을 Bukkit PROJECTILE -> 피격 Trigger 거리 >7블럭 기준으로 변경
+# - Fabled Particle Projectile / 마법탄 등 비엔티티형 원거리 스킬도 Runner Stack 반영
+# - 2페 Runner는 기존부터 Trigger 거리 >7블럭 기준이므로 변경 없음
+# - TEST100 유지
+#
+# v5.61
+# - skills v5.61 BOAR SFX 볼륨 추가 감소 대응
+# - Mob AI/Threat/HP/공격수치 변경 없음
+# - TEST100 유지
+#
+# v5.60
+# - skills v5.60 BOAR 공격 navigation stop / 방향 보정 / 공격 VFX 제거 대응
+# - Mob AI/Threat/HP/공격수치 변경 없음
+# - TEST100 유지
+#
+# v5.59
+# - skills v5.59 Spin 텔레그래프 / Range Slash VFX 정리 대응
+# - Mob AI/Threat/HP/공격수치 변경 없음
+# - TEST100 유지
+#
+# v5.58
+# - skills v5.58 실제 VFX 밀도/역할 재조정 대응
+# - Mob AI/Threat/HP/공격수치 변경 없음
+# - TEST100 유지
+#
+# v5.57
+# - skills v5.57 SFX 청감 조정 및 개발용 사거리 파티클 제거 대응
+# - Mob AI/Threat/HP/공격수치 변경 없음
+# - TEST100 유지
+#
+# v5.56
+# - skills v5.56 실제 전투 VFX/SFX 추가 대응
+# - Mob AI/Threat/HP/공격수치 변경 없음
+# - TEST100 유지
+#
+# v5.55
+# - 1페 라이더 Threat/공격 판정 구조를 skills v5.55에서 정리
+# - BOAR 설정 변화 없음
+# - TEST100 유지
+#
+# v5.54
+# - BOAR goto horizontal spread 2.0 적용
+# - 1페 라이더 Runner 강제 타겟 확정 로직은 skills v5.54에서 수정
+# - TEST100 유지
+#
+# v5.53
+# - BOAR GORE 판정 좌우 40도(총 80도), 3블럭 대응
+# - BOAR 타겟팅/추격/수치 변경 없음
+# - TEST100 유지
+#
+# v5.52
+# - BOAR meleeattack/movetowardstarget/randomstroll AI Goal 제거
+# - goto @target 5틱 주기 직접 navigation 적용
+# - 커스텀 GORE 공격 유지
+# - TEST100 유지
+#
+# v5.51
+# - BOAR Parent 구조 제거
+# - 검증된 Premium direct origin=@MIR{...KUR...} 방식 적용
+# - BOAR가 KUR 기준 FURTHEST player를 직접 Threat/current target으로 지정
+# - TEST100 유지
+#
+# v5.50
+# - 고블린모스라이더 / KUR의 미정의 BossThreat ~onTimer:100 호출 제거
+# - 현재 로드된 skills에 BossThreat: 정의가 없어 실제 실행 불가였던 원본 잔재 정리
+# - 기존 Threat/Runner/BOAR 동작 변경 없음
+# - TEST100 유지
+#
+# v5.49
+# - Skills의 Dust particle 색상 HEX 변환 대응
+# - Mob 동작/수치 변경 없음
+# - TEST100 유지
+#
+# v5.48
+# - MythicMobs Premium origin=@Parent 기반 BOAR targeting
+# - Parent=KUR / BOAR가 KUR 기준 FURTHEST player 직접 선정
+# - player relay 제거, ThreatTable/current target에 직접 저장
+# - TEST100 유지
+#
+# v5.47
+# - KUR->BOAR SudoSkill direct relay + SetParent(player) 구조 대응
+# - BOAR는 @Parent만 Threat/Target/Attack에 사용
+# - TEST100 유지
+#
+# v5.46
+# - BOAR 연결키를 scoreboard tag gk_boar_selected로 교체
+# - ThreatTable/custom GORE 유지
+# - TEST100 유지
+#
+# v5.45
+# - BOAR selected player target-scope child-meta 방식 대응
+# - ThreatTable/custom attack 구조 유지
+# - TEST100 유지
+#
+# v5.44
+# - BOAR target bridge를 gk_boar_target Aura -> target.gk_boar_selected variable로 교체
+# - ThreatTable/custom attack 구조 유지
+# - TEST100 유지
+#
+# v5.43
+# - BOAR clearTarget + global Aura lookup 대응
+# - FollowRange 256
+# - TEST100 유지
+#
+# v5.42
+# - BOAR FollowRange 128
+# - BOAR Aura target direct-lock/direct-attack 구조 대응
+# - TEST100 유지
+#
+# v5.41
+# - KUR Threat restore / Runner inherited target 수정 대응
+# - KUR STATE 전역 디버그 추가
+# - TEST100 유지
+#
+# v5.40
+# - BOAR/KUR target Aura 검색을 공식 targeter inline conditions 문법으로 수정
+# - Runner Aura 검색 수정 대응
+# - TEST100 유지
+#
+# v5.39
+# - BOAR 실제 target debug variables 추가
+# - Threat lock 순서 수정
+# - ~onAttack 제거 / timer-based custom Gore 사용
+# - TEST100 유지
+#
+# v5.38
+# - BOAR/KUR inherited target 전달 수정 대응
+# - FURTHEST 선정 및 ThreatTable 구조는 유지
+# - TEST100 유지
+#
+# v5.37
+# - KUR 보어 타겟 선정: 자신 기준 가장 먼 플레이어 1명으로 단순화
+# - gk_king_target은 P2 원거리 Threat 유지용으로만 유지, BOAR 선정에는 미사용
+# - BOAR ThreatTable / script target lock 유지
+# - TEST100 유지
+#
+# v5.36
+# - BOAR 자동 players TargetSelector 제거
+# - script target(setTarget + Threat100) 전용으로 통일
+# - KUR-side deterministic FURTHEST selector 대응
+# - TEST100 유지
+#
+# v5.35
+# - BOAR ThreatTable 기반 타겟/공격으로 롤백
+# - 보어 selected target lock 1틱 주기
+# - 보어 피격 후 다음 틱 script target 재고정
+# - KUR Runner v5.34 수정 유지
+# - TEST100 유지
+#
+# v5.34
+# - Runner Mode 실행 경로에서 incombat 의존 제거
+# - Runner WAIT/ROUTER 디버그 추가
+# - TEST100 유지
+#
+# v5.33
+# - 보어 ~onAttack 의존 제거
+# - ~onTimer:2 custom Gore Router 추가
+# - 근접 거리에서는 goto 중단
+# - TEST100 유지
+#
+# v5.32
+# - 보어 Target Orchestration의 incombat 조건 제거
+# - FURTHEST 수정본 skills 대응
+# - Boar Script Target 전역 디버그 추가
+# - TEST100 유지
+#
+# v5.31
+# - GOBLIN_KING_BOAR ThreatTable 제거
+# - 보어 AITargetSelectors players 제거
+# - KUR이 선정한 gk_boar_target만 setTarget + goto로 추적
+# - 보어 피격은 타겟에 영향 없음
+# - TEST100 유지
+#
+# v5.30
+# - 2페 >7블럭 원거리 공격은 Runner 전 타겟 탈취 차단
+# - BIG HIT / SIDE-BACK Threat Swap 근거리 전용
+# - Runner 7스택에서만 원거리 공격자로 강제 타겟 전환
+# - TEST100 유지
+#
+# v5.29
+# - P1 Threat AFTER 1T 디버그 대응
+# - 전투 로직은 v5.28 유지
+# - TEST100 유지
+#
+# v5.28
+# - P1 ~onChangeTarget Threat 디버그 추가
+# - 원거리 피격 Threat 수치/현재 TOP 전역 표시 대응
+# - 전투 로직은 v5.27 유지
+# - TEST100 유지
+#
+# v5.27
+# - P1/P2 Runner Stack 전역 디버그 대응
+# - 전투 로직은 v5.26 유지
+# - TEST100 유지
+#
+# v5.26
+# - 멀티 실전 테스트용 디버그 메시지 전역화 대응
+# - 실제 전투 로직은 v5.25 유지
+# - TEST100 유지
+#
+# v5.25
+# - 1페 종료 시 KUR + 분리 멧돼지 동시 소환
+# - GOBLIN_KING_BOAR 독립 Mob 추가 (model: kur_rot_boar)
+# - KUR 위치 기준 FAR/MID/최근타겟 Target Rotation 추가
+# - 돼지 script Threat lock + 커스텀 몸박
+# - TEST100 유지
+#
+# v5.24
+# - Runner Mode 중 자연 Threat Target 변경 잠금
+# - Runner Target Threat를 매 tick 재고정
+# - Runner Leap은 7번째 Stack 공격자에게 직접 실행
+# - TEST100 유지
+#
+# v5.23
+# - Jump 1.80초 단발 착지 검사 제거
+# - 실제 착지와 타점 도달을 독립 기억 후 둘 다 만족 시 Impact
+# - 새 변수 추가 없이 jump_armed 상태값 0/1/2 사용
+# - TEST100 유지
+#
+# v5.22
+# - 일반 Jump를 5.5~11블럭 접근기로 변경
+# - Range Slash 7~18블럭
+# - Special 가중치 Jump 3 / Range Slash 2로 조정
+# - Runner Leap은 거리 제한 없는 강제 추격 유지
+# - TEST100 유지
+#
+# v5.21
+# - 2페 p2_ready 및 중복 Jump 상태변수 정리
+# - Runner Mode Router / onDamaged Threat Reaction 추가
+# - Side/Back 및 MaxHP 10% 이상 단일 피해 Threat Swap
+# - Runner Stack: 7블럭 밖 피격 7회 -> Runner Leap
+# - 2페 AI OFF/velocity0 제거, SLOW 중심 제어
+# - TEST100 유지
+#
+# v5.20
+# - 2페 KUR 소환 직후 초기 delay 제거
+# - look / idle / SLOW / 뒤 3블럭 Missile 하차 즉시 시작
+# - busy=1은 패턴 중첩 방지용으로만 유지
+# - TEST100 유지
+#
+# v5.19
+# - 2페 하차 Missile 디버그를 Spawn 진입/목적지/Start/Tick/End 단계로 분리
+# - 정상 작동한 Missile 계열처럼 fromorigin=true 사용
+# - 짧은 3블럭 역방향 궤도용 sfo=0 / entity collision 비활성
+# - 공용 busy 구조 및 TEST100 유지
+#
+# v5.18
+# - 1페 -> 2페 죽음 전환도 공용 caster.busy로 통합
+# - busy=1 일반 패턴 중 사망해도 ~onDeath가 무조건 busy=2로 선점
+# - 1페 delayed cleanup은 busy=1일 때만 lock 해제
+# - 따라서 패턴 도중 죽어도 death 3초 후 KUR 2페 반드시 소환
+# - 별도 phase transition 변수 제거
+# - TEST100 유지
+#
+# v5.17
+# - 사망 전용 변수 완전 제거, 기존 caster.busy 공용 lock만 사용
+# - busy 0=Free / 1=Action / 2=Death
+# - Death 이동 정지는 SLOW만 사용
+# - AI false / velocity 0 / 매틱 Freeze 제거
+# - 이전 패턴 END_ACTION이 Death busy=2를 해제하지 못하게 보호
+# - TEST100 유지
+#
+# v5.16
+# - 2페 death 이동 미세 흔들림 수정
+# - death 진입 시 AI false
+# - 이전 v5.16의 매 tick velocity 0 + AI false 강제 방식은 v5.17에서 제거
+# - SLOW도 보조로 유지
+# - TEST100 유지
+#
+# v5.15
+# - 2페 커스텀 Death Pattern 추가
+# - 이전 사망 전용 변수 구조는 v5.17에서 caster.busy로 통합
+# - ~onDeath sync=true + CancelEvent 후 60틱 테스트 제거
+# - TEST100 유지
+#
+# v5.14
+# - 2페 Attack2 기본 넉백 차단 pkb=true 유지
+# - Attack2 Throw horizontal -1 -> 0
+# - Y 2.2 및 Levitation 단계 유지
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.13
+# - 2페 Attack2 기본 피격 넉백 차단은 skills v5.13
+# - damage pkb=true / throw -1, Y 2.2 유지
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.12
+# - 2페 Attack2 초기 Throw horizontal -0.2 -> -1
+# - Y 2.2 유지
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.11
+# - 2페 Attack2 초기 Throw horizontal 0.2 -> -0.2
+# - Y 2.2 유지
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.10
+# - 2페 Attack2 초기 Throw horizontal 1 -> 0.2
+# - Y 2.2 유지
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.9
+# - 2페 Attack2 초기 Throw: horizontal 1 / Y 2.2는 skills v5.9
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.8
+# - 1페 Shove velocityY 0 -> 1 변경은 skills v5.8
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.7
+# - Attack2 Airborne / 1페 Shove 변경은 skills v5.7
+# - 몹 구조 및 TEST100 체력 동일
+#
+# v5.6
+# - Jump movement 핵심 수정은 skills v5.6
+# - KUR 구조/TEST100 체력은 동일
+#
+# v5.5
+# - ArmorStand Jump Guide 8종 제거
+# - Jump 이동은 skills v5.5의 invisible missile callback 방식으로 전환
+# - Fallen Devastator Leap1 구조: missile origin -> pull @Self
+# - 테스트 체력 100 유지
+#
+# v5.3
+# - 2페 Jump Attack/범위표시는 skills v5.3에서 변경
+# - Mobs 구조/TEST100 체력은 v5.2와 동일
+#
+# v5.2 FIX
+# - 1페 죽음 이벤트를 취소하고 kur_rot death 3.0초 전체 재생 후 KUR 생성
+# - 1페 Options.ReviveHealth=1 + ~onDeath sync=true
+# - 죽음 전환 중 추가 피격 CancelEvent guard
+# - 2페 ModelEngine 기본 idle을 idle_default로 remap
+# - 기존 idle_default 수동 timer 제거
+#
+# v5.1 FIX
+# - 2페 idle 무한 LOOP 제거
+# - spawn onGround 전환 timer 제거
+# - idle 2.0s -> land 1.5s 고정 전환 후 전투 활성화
+# - 1페/2페 테스트 체력 100 유지
+#
+# v5.0 핵심
+# - 2페이즈 KUR 실제 구현
+# - 1페 사망 -> KUR 소환 -> idle 하차점프 -> land -> idle_default
+# - Attack1 -> Attack2 -> Attack3 연계 콤보
+# - Spin Attack 순차 회전 판정
+# - Jump Attack 실제 onGround 확인 후 1.79s 강공격
+# - Range Slash 0.75s / 1.25s 2연속 검기
+# - Slide Attack은 연결 모션 미정으로 비활성
+#
+# v3.9 핵심 수정
+# - 행동 패턴 시작부에 mob-file 1차 필터 추가
+# - Melee: inCombat + 현재 Target 4.5블럭 이내에서만 Router 호출
+# - Slam: inCombat + 현재 Target 5블럭 이내에서만 직접 호출
+# - Charge: inCombat + 현재 Target 7블럭 밖에서만 직접 호출
+# - Slam/Charge는 skill 내부 조건도 그대로 유지하여 2중 거리 검증
+# - 피격 combat_stack / runner_stack / Threat 반응에는 inCombat 조건을 걸지 않음
+#   (첫 피격 자체가 전투 시작 신호가 될 수 있기 때문)
+#
+# v3.8 핵심 수정
+# - 모든 피격 시 combat_stack +1
+# - busy/charging 중 피격도 전투스택 누적
+# - PROJECTILE 피격은 combat_stack과 runner_stack을 각각 누적
+#
+# v3.7 핵심 수정
+# - Charge SetSpeed 제거: 평상시 MovementSpeed 0.32 고정
+# - Charge 가속은 goto speed modifier로만 처리
+# - delay TIMEOUT 제거, CHARGE_WATCHDOG timer로 현재 Charge만 감시
+#
+# v3.6 핵심 수정
+# - 원거리 피격 반응 target을 @Trigger로 수정
+# - Charge 중 2틱마다 goto 재추적 pulse 추가
+# - Charge 진입/종료/Timeout 시 AI=true 강제 복구
+#
+# v3.5 핵심 수정
+# - Runner Stack 재도입: Charge 조건이 아니라 원거리 Threat 전환 확률 보정용
+# - 7블럭 밖 PROJECTILE 피격마다 stack +1, 15/30/45/60/75%로 상승
+# - Threat 전환 성공 시 stack 0
+# - Charge는 AI Goal clear/FollowPath 없이 기존 추적 AI + SetSpeed 방식
+# - Charge 디버그 메시지 추가
+#
+#
+# v3.2 핵심 수정
+# - KUR_GROUNDROCKS를 Marker ArmorStand VFX로 변경: 플레이어 공격 판정/충돌 제거
+# - KUR_GROUNDBREAK도 Invincible 처리: 슬램 VFX 엔티티가 피해를 받지 않음
+#
+# v3.1 핵심 수정
+# - ENTITY_ATTACK -1 제거: 플레이어 일반 공격으로 정상 피격
+# - Damage: 0: 바닐라 평타 피해는 제거하고 커스텀 스킬 판정만 사용
+# - ~onAttack 의존 제거: MeleeRouter / SpecialRouter 타이머 방식
+# - v3.1 skill 파일의 패턴 격리 / 콤보 / combat_stack 구조와 동기화
+# - ModelEngine mechanic은 meg:model 네임스페이스 사용
+# ============================================================
+
+####### MOUNTED ########
+
+고블린모스라이더:
+  Type: HUSK
+  Display: '&6(Lv44) &c아토믹 고블린 라이더'
+
+  # 중요: 기존의 아래 설정은 플레이어 근접 공격을 막으므로 사용하지 않음.
+  # DamageModifiers:
+  # - ENTITY_ATTACK -1
+
+  AIGoalSelectors:
+  - clear
+  - float
+  - meleeattack
+  - movetowardstarget
+  - randomstroll
+  - lookatplayers
+  - randomlookaround
+
+  AITargetSelectors:
+  - clear
+  - players
+
+  BossBar:
+    Enabled: true
+    Title: '&c아토믹 고블린 라이더'
+    Range: 64
+    Color: RED
+    DarkenSky: true
+
+  Health: 100
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    FollowRange: 64
+    MovementSpeed: 0.32
+    PreventOtherDrops: true
+    Silent: true
+    Despawn: false
+    NoDamageTicks: 0
+    KnockbackResistance: 1
+    # Custom death sequence에서 ~onDeath를 취소한 뒤 60틱 동안 엔티티 유지
+    ReviveHealth: 1
+
+  Skills:
+  # 패턴 변수 초기화
+  - skill{s=kurrot_INIT} @self ~onSpawn
+  - skill{s=aggro} @self ~onEnterCombat
+
+
+  # Charge 중 현재 Threat Target을 2틱마다 재추적 + 접근 감지 + watchdog
+  - skill{s=kurrot_CHARGE_CHASE} @target ~onTimer:2
+  - skill{s=kurrot_charge_attack} @target ~onTimer:2
+  - skill{s=kurrot_CHARGE_WATCHDOG} @self ~onTimer:2
+
+  # 1페 death 연출 중에는 추가 피격을 즉시 취소.
+  # CancelEvent는 sync 실행이 필수.
+  - skill{s=kurrot_TRANSITION_DAMAGE_GUARD;sync=true} @self ~onDamaged
+
+  # 모든 피격: combat_stack +1 (death 전환 중에는 skill 내부에서 차단)
+  - skill{s=kurrot_COMBATSTACK_DAMAGED} @self ~onDamaged
+
+  # 7블럭 밖에서 플레이어에게 피격 시 Runner Stack 누적 + 스택별 Threat 전환 확률
+  # Bukkit PROJECTILE 판정에 의존하지 않으므로 Fabled Particle Projectile 등도 포함
+  - skill{s=kurrot_RANGED_DISTANCE_HIT;sync=true} @Trigger ~onDamaged
+
+  # ThreatTable의 실제 현재 타겟이 바뀔 때마다 전역 로그.
+  - skill{s=kurrot_THREAT_TARGET_CHANGED} @self ~onChangeTarget
+
+  # KUR 내부 전투 상태 확인용 디버그.
+  - skill{s=kur2_STATE_DEBUG} @self ~onTimer:20
+
+  # ========================================================
+  # 행동 패턴 1차 필터 (mob file)
+  #
+  # 고수분 구조처럼:
+  # 1) mob 파일에서 전투 여부 + 대략적인 거리 필터
+  # 2) skill 내부에서 실제 실행 거리 / busy / stack 재검사
+  # ========================================================
+
+  # 근접 콤보:
+  # - 전투 중
+  # - 현재 Threat Target이 4.5블럭 이내일 때만 호출
+  # - 실제 COMBO_START는 skill 내부에서 4.0블럭을 다시 검사
+  - skill{s=kurrot_MeleeRouter} @target ~onTimer:4 ?incombat ?targetwithin{d=4.5}
+
+  # Ground Slam:
+  # - 전투 중
+  # - 현재 Threat Target이 5블럭 이내
+  # - skill 내부에서 combat_stack >= 4 / busy=0 / 거리 5.0 재검사
+  - skill{s=kurrot_groundslam} @target ~onTimer:10 ?incombat ?targetwithin{d=5}
+
+  # Charge:
+  # - 전투 중
+  # - 현재 Threat Target이 7블럭 밖
+  # - skill 내부에서 busy=0 / charging=0 / 거리 >7 재검사
+  - skill{s=kurrot_charge} @target ~onTimer:10 ?incombat ?targetnotwithin{d=7}
+
+  # ModelEngine Hybrid State Machine
+  - meg:model{mid=kur_rot;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onSpawn
+  - meg:model{mid=kur_rot;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onLoad
+
+  - skill{s=kurrot_DEATH;sync=true} @self ~onDeath
+
+
+####### ON FOOT / 2 PHASE ########
+#
+# 1페 종료 후 kurrot_DEATH가 KUR을 소환.
+# idle(하차 점프) -> land -> idle_default 이후 전투 시작.
+#
+
+KUR:
+  Type: HUSK
+  Display: '&6(Lv50) &c아토믹 고블린'
+
+  AIGoalSelectors:
+  - clear
+  - float
+  - meleeattack
+  - movetowardstarget
+  - randomstroll
+  - lookatplayers
+  - randomlookaround
+
+  AITargetSelectors:
+  - clear
+  - players
+
+  Health: 100
+  Damage: 0
+
+  BossBar:
+    Enabled: true
+    Title: '&c아토믹 고블린'
+    Range: 64
+    Color: RED
+    DarkenSky: true
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    FollowRange: 64
+    MovementSpeed: 0.38
+    PreventOtherDrops: true
+    Silent: true
+    LockPitch: true
+    Despawn: false
+    NoDamageTicks: 0
+    KnockbackResistance: 1
+    ReviveHealth: 1
+
+  Skills:
+  - remove{delay=6000} @self ~onSpawn
+
+  # 모델 부착.
+  - meg:model{mid=kur;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onSpawn
+  - meg:model{mid=kur;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onLoad
+
+  # 중요:
+  # kur.bbmodel의 'idle'은 하차 회전 모션인데 이름 때문에 기본 idle에 자동 매칭됨.
+  # 기본 idle 타입을 실제 평상시 대기 모션인 idle_default로 교체한다.
+  - meg:defaultstate{mid=kur;type=idle;state=idle_default;li=2;lo=2} @self ~onSpawn
+  - meg:defaultstate{mid=kur;type=idle;state=idle_default;li=2;lo=2} @self ~onLoad
+
+  # death 종료 후 생성된 KUR: 플레이어를 보며 뒤 3블럭 Missile 하차 -> 실제 착지 -> land.
+  - skill{s=kurSPAWN} @self ~onSpawn
+
+  # 하차 Missile 이동 후 실제 착지 감지 -> land
+  - skill{s=kurSPAWNLAND} @self ~onTimer:1
+
+  # idle_default의 시작/정지는 ModelEngine DefaultState에 맡긴다.
+
+  # Jump Attack 실제 착지 감지
+  - skill{s=kur2_JUMP_LAND_CHECK} @self ~onTimer:1
+
+  # ========================================================
+  # 분리 멧돼지
+  # ========================================================
+
+  # KUR 현재 Threat Target 표식.
+  # 이 Aura는 P2 원거리 Runner 이전 Threat 유지 로직에서만 사용한다.
+  # BOAR 대상 선정에는 사용하지 않는다.
+  - skill{s=kur2_BOAR_MARK_KING_TARGET} @target ~onTimer:2
+
+  # BOAR 대상 선정은 BOAR가 직접 수행한다.
+  # BOAR Parent=KUR + Premium origin=@Parent 방식.
+
+  # ========================================================
+  # 행동 패턴 1차 필터 (mob file)
+  # 스킬 내부에서도 incombat / busy / 거리 재검사.
+  # ========================================================
+
+  # Runner Mode 동안 자연 Threat까지 잠금.
+  # runner_mode 자체를 기준으로 실행하므로 incombat에 의존하지 않는다.
+  - skill{s=kur2_RUNNER_THREAT_LOCK} @self ~onTimer:1
+
+  # 다른 패턴 종료 대기 여부 확인용 디버그.
+  - skill{s=kur2_RUNNER_WAIT_DEBUG} @self ~onTimer:10
+
+  # Runner Mode 최우선 실행: busy=0이 되는 즉시 고정 Runner Target에게 Leap.
+  - skill{s=kur2_RUNNER_ROUTER} @self ~onTimer:1
+
+  # 특수 패턴 후보: Spin / Jump / Range Slash
+  - skill{s=kur2_SpecialRouter} @target ~onTimer:10 ?incombat ?targetwithin{d=18}
+
+  # 근접 콤보 후보: 실제 Attack1 부채꼴은 skill 안에서 다시 검사.
+  - skill{s=kur2_MeleeRouter} @self ~onTimer:4 ?incombat ?targetwithin{d=5.5}
+
+  # 바닐라 HUSK 평타 이벤트는 항상 취소.
+  - skill{s=kurATTACKsync;sync=true} @self ~onAttack
+
+  # 커스텀 Death Pattern 중 추가 피해 차단
+
+  - skill{s=kur2_DEATH_DAMAGE_GUARD;sync=true} @self ~onDamaged
+
+  # 2페 피격 반응 우선순위:
+  # 1) 7블럭 밖이면 Runner 전 기존 타겟 유지
+  # 2) Runner Stack 누적 / 7스택이면 Runner Target으로 전환
+  # 3) Big Damage / Side-Back은 7블럭 이내 근거리에서만 Threat Swap
+  - skill{s=kur2_RANGED_PRE_RUNNER_HOLD;sync=true} @Trigger ~onDamaged
+  - skill{s=kur2_RUNNER_STACK_HIT;sync=true} @Trigger ~onDamaged
+  - skill{s=kur2_THREAT_BIG_DAMAGE;sync=true} @Trigger ~onDamaged
+  - skill{s=kur2_THREAT_BACKSIDE;sync=true} @Trigger ~onDamaged
+
+  # 자연사 취소 -> caster.busy=2 기반 Death Pattern
+  - skill{s=kurDEATH;sync=true} @self ~onDeath
+
+
+
+
+# ============================================================
+# SEPARATED BOAR / 분리 멧돼지
+#
+# BetterModel model id: kur_rot_boar
+# - 과거 분리 모델에서 idle / walk / charge / shove 등을 보유.
+#
+# 역할:
+# - KUR의 현재 타겟과 다른 플레이어 우선
+# - KUR 기준 먼 플레이어(FAR/MID) 우선
+# - 최근 타겟을 잠시 후순위
+# - 4초마다 KUR이 선정한 script target만 추적
+# - 자연 Threat 자체를 사용하지 않으며 KUR이 지정한 script target만 추적
+#
+# TEST:
+# - HP 100
+# - 몸박 5
+# ============================================================
+
+GOBLIN_KING_BOAR:
+  Type: HUSK
+  Display: '&6고블린 킹의 멧돼지'
+
+  Health: 100
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    FollowRange: 256
+    MovementSpeed: 0.36
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    Silent: true
+    Despawn: false
+    NoDamageTicks: 0
+    KnockbackResistance: 0.65
+
+  AIGoalSelectors:
+    - clear
+    - float
+
+    # v5.52:
+    # 이동은 MythicMobs goto @target으로 직접 제어.
+    # meleeattack / movetowardstarget / randomstroll 제거로 AI Goal 간섭 차단.
+    - lookAtTarget
+
+  AITargetSelectors:
+    # 자연 자동 선택은 금지.
+    # 플레이어 target은 direct origin=@MIR{...KUR...} selector가 BOAR ThreatTable에 직접 지정.
+    - clear
+
+  Skills:
+    - meg:model{mid=kur_rot_boar;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onSpawn
+    - meg:model{mid=kur_rot_boar;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onLoad
+
+    - skill{s=GK_BOAR_INIT} @self ~onSpawn
+    - skill{s=GK_BOAR_INIT} @self ~onLoad
+
+    # 스폰 직후 4틱 대기 후 첫 direct-origin target 선정.
+    - skill{s=GK_BOAR_INITIAL_SELECT} @self ~onSpawn
+    - skill{s=GK_BOAR_INITIAL_SELECT} @self ~onLoad
+
+    # 4초마다 BOAR가 mechanic 자체의 origin을 주변 KUR로 지정하고
+    # KUR 기준 FURTHEST 플레이어를 직접 Threat/current target으로 지정.
+    - skill{s=GK_BOAR_SELECT_TARGET_DIRECT} @self ~onTimer:80
+
+    # ThreatTOP 상태 확인.
+    - skill{s=GK_BOAR_STATE_DEBUG} @self ~onTimer:20
+
+    # v5.52:
+    # 실제 current target(@target)으로 5틱마다 직접 pathfinding.
+    # 더미 v1.4에서 정상 이동 확인한 방식.
+    - skill{s=GK_BOAR_CHASE_TARGET} @self ~onTimer:5
+
+    # Damage:0 / vanilla ~onAttack과 무관하게 직접 커스텀 공격 판정.
+    - skill{s=GK_BOAR_ATTACK_ROUTER} @self ~onTimer:2
+
+    - skill{s=GK_BOAR_DEATH} @self ~onDeath
+
+
+####### SKILL SPECIFIC MOBS, DO NOT USE ########
+
+KUR_GROUNDBREAK:
+  Type: CAT
+  AITargetSelectors:
+  - clear
+  AIGoalSelectors:
+  - clear
+  Options:
+    PreventBlockInfection: true
+    Silent: true
+    FollowRange: 64
+    Collidable: false
+    Invincible: true
+    PreventOtherDrops: true
+    PreventItemPickup: true
+  Skills:
+  - skill{s=kurrot_groundbreak} @self ~onSpawn
+  - meg:model{mid=kurrot_groundbreak;d=false;i=true} @self ~onSpawn
+  - meg:model{mid=kurrot_groundbreak;d=false;i=true} @self ~onLoad
+
+KUR_GROUNDROCKS:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    Collidable: false
+    PreventOtherDrops: true
+    PreventItemPickup: true
+
+  AIGoalSelectors:
+  - clear
+  AITargetSelectors:
+  - clear
+
+  Skills:
+  - skill{s=kurrot_groundrocks} @self ~onSpawn
+  - skill{s=kurrot_groundrocksremove} @self ~onTimer:1
+  - meg:model{mid=kurrot_groundrocks;d=false;i=true} @self ~onSpawn
+  - meg:model{mid=kurrot_groundrocks;d=false;i=true} @self ~onLoad

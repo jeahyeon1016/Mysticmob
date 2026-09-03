@@ -1,0 +1,1172 @@
+# ============================================================
+# Goblin Pack Skills
+# v1.49
+# ============================================================
+
+# ------------------------------------------------------------
+# 고블린 부하
+# ------------------------------------------------------------
+
+GoblinWorker_Attack:
+  Skills:
+    # 일꾼이 워리어를 '도망 목적지'로 AI 타겟 잡았을 때도
+    # meleeattack이 공격 이벤트를 발생시키므로 실제 공격은 항상 취소.
+    - cancelevent
+
+    # 현재 AI 타겟이 PLAYER일 때만 실제 공격 애니메이션/판정 실행.
+    # 워리어를 향해 도망가는 동안에는 공격 모션을 절대 재생하지 않음.
+    - skill{s=GoblinWorker_AttackExecute} @target
+
+GoblinWorker_AttackExecute:
+  Conditions:
+    - variableIsSet{var=caster.worker_attack_lock} false
+    - variableIsSet{var=caster.goblin_calling} false
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    # 24틱 = 1.20초 동안 다음 평타 시작 잠금
+    - setvariable{var=caster.worker_attack_lock;value=1;type=INTEGER;duration=24}
+    - look{headOnly=false;immediately=true} @target
+    - state{s=attack;li=0;lo=0} @self
+
+    # 0.75초 = 15틱
+    - delay 15
+    - skill{s=GoblinWorker_AttackHit} @self
+    - sound{s=entity.player.attack.sweep;v=0.65;p=1.25} @self
+
+GoblinWorker_AttackHit:
+  Skills:
+    # 전방 90도 / 3블럭 부채꼴 판정
+    - damage{a=4} @LivingInCone{a=90;r=3;rot=0;target=players}
+
+# ------------------------------------------------------------
+# 고블린 공통 인식 / 소집 시스템
+# ------------------------------------------------------------
+#
+# 기본 인식: 7블럭
+# 소집 반경: 소집한 고블린 기준 20블럭
+#
+# goblin_call_used
+#   - 최초 소집을 이미 했는지 표시
+#   - 자연 인식으로 소집하면 1
+#   - 다른 고블린의 소집을 받고 온 개체도 즉시 1
+#   -> 소집되어 온 고블린은 다시 소집하지 않음
+#
+# goblin_recruited
+#   - 다른 고블린의 소집을 받고 합류한 개체 표시
+# ------------------------------------------------------------
+
+GoblinWorker_DetectPlayer:
+  Conditions:
+    - variableIsSet{var=caster.goblin_call_used} false
+    - playerwithin{d=7} true
+  Skills:
+    # 일꾼이 직접 플레이어를 발견한 경우:
+    # 1) 위협 플레이어를 인식
+    # 2) 최초 1회 소집
+    # 3) 가까운 워리어에게 도망
+    - settarget @NearestPlayer{r=7}
+    - skill{s=GoblinWorker_CallOnce} @self
+
+GoblinWarrior_DetectPlayer:
+  Conditions:
+    - variableIsSet{var=caster.goblin_call_used} false
+    - playerwithin{d=7} true
+  Skills:
+    - settarget @NearestPlayer{r=7}
+    - skill{s=GoblinWarrior_CallOnce} @self
+
+GoblinWorker_CallOnce:
+  Skills:
+    # 이 개체는 이후 다시 소집하지 않음
+    - setvariable{var=caster.goblin_call_used;value=1;type=INTEGER}
+
+    # 소집 모션 동안 이동/공격 잠금
+    - setvariable{var=caster.goblin_calling;value=1;type=INTEGER;duration=24}
+    - potion{type=SLOWNESS;duration=24;level=255;particles=false} @self
+
+    # 일꾼 도움 요청 모션
+    - state{s=call;li=0;lo=0} @self
+
+    # 낮은 염소뿔 소리 1회만 재생
+    - sound{s=item.goat_horn.sound.0;v=1.15;p=0.76} @self
+
+    - effect:particles{p=angry_villager;amount=5;hS=0.25;vS=0.25;y=1.65} @self
+
+    # 소집자 기준 반경 20블럭의 두 고블린 종류에만 신호
+    - signal{s=GOBLIN_RALLY} @MobsInRadius{r=20;types=Goblin_Worker,Goblin_Warrior,Goblin_Shaman,Goblin_Thrower}
+
+    # call 애니메이션(1.2초)이 끝난 뒤에만 워리어 쪽으로 이동 시작.
+    - delay 24
+
+    # '직접 발견한 최초 1회'에만 가장 가까운 워리어를 찾아 도망감.
+    # 20블럭 안에 워리어가 없으면 이 스킬 자체가 실행되지 않아서
+    # DetectPlayer에서 잡아둔 플레이어 타겟을 그대로 유지 = 즉시 전투.
+    - skill{s=GoblinWorker_StartFleeToWarrior} @MobsInRadius{r=20;types=Goblin_Warrior;sort=NEAREST;limit=1}
+
+GoblinWorker_StartFleeToWarrior:
+  Skills:
+    # 이 메타스킬은 @MobsInRadius로 선택된 '워리어'를 상속 타겟으로 받음.
+    # @target은 몹의 기존 AI 타겟(플레이어)을 가리키므로 사용하면 다시 플레이어에게 감.
+    # @TargetedTarget은 이 메타스킬에 상속된 워리어를 정확히 가리킴.
+    - setvariable{var=caster.worker_fleeing;value=1;type=INTEGER}
+    - settarget @TargetedTarget
+
+GoblinWarrior_CallOnce:
+  Skills:
+    - setvariable{var=caster.goblin_call_used;value=1;type=INTEGER}
+
+    # rally 모션 동안 이동/공격 잠금 (1.15초 ≈ 23틱)
+    - setvariable{var=caster.goblin_calling;value=1;type=INTEGER;duration=23}
+    - potion{type=SLOWNESS;duration=23;level=255;particles=false} @self
+
+    # 워리어는 rally 모션으로 소집
+    - state{s=rally;li=0;lo=0} @self
+
+    - sound{s=item.goat_horn.sound.0;v=1.25;p=0.72} @self
+
+    - effect:particles{p=crit;amount=6;hS=0.3;vS=0.35;y=1.8} @self
+    - signal{s=GOBLIN_RALLY} @MobsInRadius{r=20;types=Goblin_Worker,Goblin_Warrior,Goblin_Shaman,Goblin_Thrower}
+
+Goblin_ReceiveRally:
+  Conditions:
+    # 이미 직접 발견해서 소집했거나, 이전에 소집된 고블린은 신호를 다시 받지 않음.
+    # 호출자 자신도 CallOnce 시작에서 goblin_call_used=1이므로 자기 신호 무시.
+    - variableIsSet{var=caster.goblin_call_used} false
+  Skills:
+    # 소집되어 온 고블린은 다시 소집 패턴을 실행하지 않음
+    - setvariable{var=caster.goblin_call_used;value=1;type=INTEGER}
+    - setvariable{var=caster.goblin_recruited;value=1;type=INTEGER}
+
+    # 소집자는 플레이어에서 최대 7블럭,
+    # 수신자는 소집자에서 최대 20블럭이므로 플레이어 탐색 최대치를 27로 둠.
+    - settarget @NearestPlayer{r=27}
+    - effect:particles{p=cloud;amount=3;hS=0.15;vS=0.1;y=0.4} @self
+
+# 일꾼이 워리어에게 도망가는 도중 매 틱 검사.
+# 현재 AI 타겟이 워리어이고 그 워리어 3블럭 안에 들어가면
+# 다시 플레이어를 타겟으로 잡고 함께 싸우기 시작.
+GoblinWorker_FleeCheck:
+  Conditions:
+    - variableIsSet{var=caster.worker_fleeing} true
+    - variableIsSet{var=caster.worker_joined} false
+  Skills:
+    # 기존 targetwithin 체크는 현재 AI 타겟 기준 판정 때문에
+    # 워리어 도착 감지가 불안정했음.
+    # 이제 '실제로 3블럭 안에 워리어가 존재하는지' 직접 검사.
+    - skill{s=GoblinWorker_JoinFight} @MobsInRadius{r=3;types=Goblin_Warrior;limit=1;sort=NEAREST}
+
+GoblinWorker_JoinFight:
+  TargetConditions:
+    - distance{d=<3.1} true
+  Skills:
+    # 워리어 근처에 도착한 순간 1회만 실행
+    - setvariable{var=caster.worker_joined;value=1;type=INTEGER}
+
+    # 도망 상태 자체를 해제
+    - variableUnset{var=caster.worker_fleeing} @self
+
+    # 워리어 타겟을 버리고 즉시 플레이어로 전환
+    - settarget @NearestPlayer{r=27}
+    - effect:particles{p=crit;amount=4;hS=0.2;vS=0.2;y=1.0} @self
+
+# 직접 맞았을 때 어그로 처리.
+# 워리어에게 도망가는 중에는 피격돼도 목적지 타겟을 플레이어로 덮어쓰지 않음.
+# 워리어가 없어서 바로 전투 중이거나, 워리어 도착 후에는 정상적으로 공격자를 타겟.
+GoblinWorker_AggroOnDamaged:
+  Conditions:
+    - variableIsSet{var=caster.worker_fleeing} false
+  Skills:
+    - settarget @trigger
+
+# 워리어 전투 중 강공격 패턴
+GoblinWarrior_CombatPattern:
+  Conditions:
+    - targetwithin{d=4} true
+  Skills:
+    - skill{s=GoblinWarrior_HeavyAttack} @target 0.32
+
+GoblinWorker_HurtSound:
+  Cooldown: 0.35
+  Skills:
+    # 작고 날카로운 고블린 목소리. 좀비 사운드 사용 X.
+    - sound{s=entity.pillager.hurt;v=0.78;p=1.34} @self
+    - sound{s=entity.evoker.hurt;v=0.18;p=1.48} @self
+
+GoblinWorker_Death:
+  Skills:
+    - state{s=death;li=0;lo=0} @self
+    # 작은 고블린: 짧고 높은 비명
+    - sound{s=entity.pillager.death;v=0.78;p=1.32} @self
+    - sound{s=entity.evoker.death;v=0.16;p=1.48} @self
+
+GoblinWarrior_NormalAttack:
+  Skills:
+    # 바닐라 좀비 평타를 항상 취소해서 선딜 이전의 즉발 데미지 방지
+    - cancelevent
+    - skill{s=GoblinWarrior_NormalAttackExecute} @self
+
+GoblinWarrior_NormalAttackExecute:
+  Conditions:
+    - variableIsSet{var=caster.warrior_attack_lock} false
+    - variableIsSet{var=caster.goblin_calling} false
+  Skills:
+    # 29틱 = 1.45초 동안 다음 평타 시작 잠금
+    - setvariable{var=caster.warrior_attack_lock;value=1;type=INTEGER;duration=29}
+    - state{s=attack;li=0;lo=0} @self
+
+    # 요청 타점 0.82초.
+    # MythicMobs delay는 1틱(0.05초) 단위라 가장 가까운 16틱 = 0.80초로 적용.
+    - delay 16
+    - skill{s=GoblinWarrior_NormalHit} @target
+    - sound{s=entity.player.attack.strong;v=0.9;p=0.8} @self
+
+GoblinWarrior_NormalHit:
+  TargetConditions:
+    - distance{d=<3.2} true
+    - fieldofview{angle=100} true
+  Skills:
+    - damage{a=8} @target
+
+# 전사가 가끔 강공격을 사용하도록 별도 패턴으로 호출할 수 있음.
+GoblinWarrior_HeavyAttack:
+  Cooldown: 5
+  Conditions:
+    - variableIsSet{var=caster.goblin_calling} false
+  Skills:
+    - state{s=heavy_attack;li=0;lo=0} @self
+    - sound{s=item.armor.equip_iron;v=0.55;p=0.75} @self
+
+    # 0.85초 = 17틱
+    - delay 17
+    - effect:particles{p=sweep_attack;amount=3;hS=0.8;vS=0.2;y=1.0} @self
+    - damage{a=13} @PlayersInRadius{r=2.8}
+    - throw{velocity=0.45;velocityY=0.12} @PlayersInRadius{r=2.8}
+    - sound{s=entity.player.attack.knockback;v=1.0;p=0.75} @self
+
+GoblinWarrior_HurtSound:
+  Cooldown: 0.35
+  Skills:
+    # 일반 고블린보다 굵고 무거운 톤.
+    - sound{s=entity.vindicator.hurt;v=0.82;p=1.08} @self
+    - sound{s=entity.pillager.hurt;v=0.22;p=1.16} @self
+
+GoblinWarrior_Death:
+  Skills:
+    - state{s=death;li=0;lo=0} @self
+    # 전사: 같은 종족이지만 더 굵고 무거운 톤
+    - sound{s=entity.vindicator.death;v=0.86;p=0.94} @self
+    - sound{s=entity.pillager.death;v=0.20;p=1.02} @self
+
+GoblinShaman_DetectPlayer:
+  Conditions:
+    - playerwithin{d=7} true
+  Skills:
+    - settarget @NearestPlayer{r=7}
+
+
+
+# ------------------------------------------------------------
+# 샤먼 근접 도주 -> 즉시 반격 메커니즘
+# ------------------------------------------------------------
+#
+# fleeplayers AI는 '이동'만 담당한다.
+# 아래 스킬은 전투 상태를 메커니즘으로 제어:
+#
+# 플레이어 3블럭 진입
+#   -> flee counter lock
+#   -> 0.6초 동안 도주
+#   -> 플레이어를 즉시 바라봄
+#   -> 바로 주문 시전
+#
+# 일반 패턴 타이머가 도주 도중 먼저 주문을 쓰지 못하도록
+# shaman_casting / shaman_flee_counter 변수로 잠금.
+GoblinShaman_FleeCounter:
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_casting} false
+    - variableIsSet{var=caster.shaman_flee_counter} false
+    - targetwithin{d=3} true
+
+  Skills:
+    # 현재 플레이어를 확실하게 전투 타겟으로 유지
+    - settarget @NearestPlayer{r=7}
+
+    # 도주 중 일반 주문 타이머 차단
+    - setvariable{var=caster.shaman_flee_counter;value=1;type=INTEGER}
+    - setvariable{var=caster.shaman_casting;value=1;type=INTEGER}
+
+    # fleeplayers AI가 먼저 거리를 벌림.
+    # 12틱 = 0.6초
+    - delay 12
+
+    # ========================================================
+    # 도주 종료 -> 공격 준비
+    # 여기부터는 이동 AI보다 공격 준비가 무조건 우선.
+    # ========================================================
+
+    # 먼저 완전히 멈춤.
+    - potion{type=SLOWNESS;duration=8;level=255;particles=false} @self
+
+    # 플레이어를 몸 전체로 강제 조준.
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # 2틱 동안 시선을 고정해 이동 AI가 방향을 다시 뺏지 못하게 함.
+    - delay 2
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # 일반 Pattern 조건을 다시 열고 즉시 반격.
+    - variableUnset{var=caster.shaman_casting} @self
+    - variableUnset{var=caster.shaman_flee_counter} @self
+
+    # 5블럭보다 멀면 화염구.
+    # Pattern1이 성공하면 shaman_casting이 즉시 다시 잡혀 Pattern2는 실패.
+    - skill{s=GoblinShaman_Pattern1} @target
+
+    # 아직 5블럭 이내면 연쇄 불기둥.
+    - skill{s=GoblinShaman_Pattern2} @target
+
+
+# 캐스팅 상태에서는 2틱마다 현재 타겟을 다시 바라봄.
+# 플레이어가 옆으로 움직여도 주문 시전 방향이 계속 플레이어를 따라감.
+GoblinShaman_CastLook:
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_casting} true
+  Skills:
+    # force=true:
+    # 걷기/도주/pathfinding/기타 회전 AI보다 우선해서
+    # 시전 중에는 몸 전체가 현재 플레이어 타겟을 강제로 바라봄.
+    - look{headOnly=false;force=true;immediately=true} @target
+
+# ------------------------------------------------------------
+# 기본 마력탄
+# ------------------------------------------------------------
+
+# ------------------------------------------------------------
+# Pattern2 [연쇄 불기둥] : 전방 순차 화염기둥
+# ------------------------------------------------------------
+
+GoblinShaman_Pattern2:
+  Cooldown: 6
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_flee_counter} false
+    - variableIsSet{var=caster.shaman_casting} false
+    - targetwithin{d=10} true
+  Skills:
+    - setvariable{var=caster.shaman_casting;value=1;type=INTEGER;duration=34}
+    - potion{type=SLOWNESS;duration=34;level=255;particles=false} @self
+    # 스킬 시작 전 최우선 조준 단계:
+    # 이동을 잠근 상태에서 플레이어를 강제로 바라본 뒤 실제 패턴 시작.
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 2
+    - look{headOnly=false;force=true;immediately=true} @target
+    - state{s=pattern2;li=0;lo=0} @self
+
+    # 0.00 ~ 0.75초 : 기 모으기
+    - sound{s=entity.evoker.prepare_attack;v=0.85;p=0.72} @self
+    - effect:particles{p=flame;amount=12;hS=0.25;vS=0.35;y=1.35} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - effect:particles{p=flame;amount=16;hS=0.28;vS=0.40;y=1.35} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - effect:particles{p=small_flame;amount=20;hS=0.32;vS=0.45;y=1.35} @self
+
+    # 0.75초 이후:
+    # 각 기둥을 샤먼 정면 기준으로 직접 다른 @Forward 좌표에 생성.
+    # nested skill + @origin 구조를 제거해서 모든 기둥이 같은 자리에서
+    # 터지는 문제를 없앰.
+    #
+    # 거리: 2.5 -> 5.5 -> 8.5 -> 11.5
+
+    # 1번 기둥
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - effect:particlering{particle=flame;radius=1.15;points=20;amount=1;hS=0;vS=0;y=0.08} @Forward{f=2.5;y=0}
+    - effect:particlering{particle=smoke;radius=0.75;points=12;amount=1;hS=0;vS=0;y=0.10} @Forward{f=2.5;y=0}
+    - effect:particles{p=lava;amount=7;hS=0.45;vS=0.12;y=0.18} @Forward{f=2.5;y=0}
+    - sound{s=entity.generic.explode;v=0.55;p=0.72} @Forward{f=2.5;y=0}
+    - sound{s=block.lava.pop;v=0.80;p=0.78} @Forward{f=2.5;y=0}
+    - effect:particles{p=explosion;amount=1;hS=0.12;vS=0.08;y=0.15} @Forward{f=2.5;y=0}
+    - effect:particles{p=lava;amount=12;hS=0.55;vS=0.35;y=0.35} @Forward{f=2.5;y=0}
+    - effect:particles{p=large_smoke;amount=8;hS=0.50;vS=0.30;y=0.30} @Forward{f=2.5;y=0}
+    - totem{onTick=GoblinShaman_P2_FirePillarTick;onHit=GoblinShaman_P2_FirePillarHit;ch=1;i=1;md=7;hR=1.50;vR=3.2;yo=0.1;hs=true;hfs=0.1} @Forward{f=2.5;y=0}
+
+    # 2번 기둥
+    - delay 4
+    - look{headOnly=false;force=true;immediately=true} @target
+    - effect:particlering{particle=flame;radius=1.15;points=20;amount=1;hS=0;vS=0;y=0.08} @Forward{f=5.5;y=0}
+    - effect:particlering{particle=smoke;radius=0.75;points=12;amount=1;hS=0;vS=0;y=0.10} @Forward{f=5.5;y=0}
+    - effect:particles{p=lava;amount=7;hS=0.45;vS=0.12;y=0.18} @Forward{f=5.5;y=0}
+    - sound{s=entity.generic.explode;v=0.55;p=0.72} @Forward{f=5.5;y=0}
+    - sound{s=block.lava.pop;v=0.80;p=0.78} @Forward{f=5.5;y=0}
+    - effect:particles{p=explosion;amount=1;hS=0.12;vS=0.08;y=0.15} @Forward{f=5.5;y=0}
+    - effect:particles{p=lava;amount=12;hS=0.55;vS=0.35;y=0.35} @Forward{f=5.5;y=0}
+    - effect:particles{p=large_smoke;amount=8;hS=0.50;vS=0.30;y=0.30} @Forward{f=5.5;y=0}
+    - totem{onTick=GoblinShaman_P2_FirePillarTick;onHit=GoblinShaman_P2_FirePillarHit;ch=1;i=1;md=7;hR=1.50;vR=3.2;yo=0.1;hs=true;hfs=0.1} @Forward{f=5.5;y=0}
+
+    # 3번 기둥
+    - delay 4
+    - look{headOnly=false;force=true;immediately=true} @target
+    - effect:particlering{particle=flame;radius=1.15;points=20;amount=1;hS=0;vS=0;y=0.08} @Forward{f=8.5;y=0}
+    - effect:particlering{particle=smoke;radius=0.75;points=12;amount=1;hS=0;vS=0;y=0.10} @Forward{f=8.5;y=0}
+    - effect:particles{p=lava;amount=7;hS=0.45;vS=0.12;y=0.18} @Forward{f=8.5;y=0}
+    - sound{s=entity.generic.explode;v=0.55;p=0.72} @Forward{f=8.5;y=0}
+    - sound{s=block.lava.pop;v=0.80;p=0.78} @Forward{f=8.5;y=0}
+    - effect:particles{p=explosion;amount=1;hS=0.12;vS=0.08;y=0.15} @Forward{f=8.5;y=0}
+    - effect:particles{p=lava;amount=12;hS=0.55;vS=0.35;y=0.35} @Forward{f=8.5;y=0}
+    - effect:particles{p=large_smoke;amount=8;hS=0.50;vS=0.30;y=0.30} @Forward{f=8.5;y=0}
+    - totem{onTick=GoblinShaman_P2_FirePillarTick;onHit=GoblinShaman_P2_FirePillarHit;ch=1;i=1;md=7;hR=1.50;vR=3.2;yo=0.1;hs=true;hfs=0.1} @Forward{f=8.5;y=0}
+
+    # 4번 기둥
+    - delay 4
+    - look{headOnly=false;force=true;immediately=true} @target
+    - effect:particlering{particle=flame;radius=1.15;points=20;amount=1;hS=0;vS=0;y=0.08} @Forward{f=11.5;y=0}
+    - effect:particlering{particle=smoke;radius=0.75;points=12;amount=1;hS=0;vS=0;y=0.10} @Forward{f=11.5;y=0}
+    - effect:particles{p=lava;amount=7;hS=0.45;vS=0.12;y=0.18} @Forward{f=11.5;y=0}
+    - sound{s=entity.generic.explode;v=0.55;p=0.72} @Forward{f=11.5;y=0}
+    - sound{s=block.lava.pop;v=0.80;p=0.78} @Forward{f=11.5;y=0}
+    - effect:particles{p=explosion;amount=1;hS=0.12;vS=0.08;y=0.15} @Forward{f=11.5;y=0}
+    - effect:particles{p=lava;amount=12;hS=0.55;vS=0.35;y=0.35} @Forward{f=11.5;y=0}
+    - effect:particles{p=large_smoke;amount=8;hS=0.50;vS=0.30;y=0.30} @Forward{f=11.5;y=0}
+    - totem{onTick=GoblinShaman_P2_FirePillarTick;onHit=GoblinShaman_P2_FirePillarHit;ch=1;i=1;md=7;hR=1.50;vR=3.2;yo=0.1;hs=true;hfs=0.1} @Forward{f=11.5;y=0}
+
+
+GoblinShaman_P2_FirePillarTick:
+  Skills:
+    # 4단으로 쌓아 기둥의 높이/중심을 훨씬 명확하게 표시.
+    - effect:particles{p=flame;amount=18;hS=0.48;vS=0.28;y=0.20} @origin
+    - effect:particles{p=flame;amount=22;hS=0.44;vS=0.32;y=1.10} @origin
+    - effect:particles{p=small_flame;amount=20;hS=0.40;vS=0.34;y=2.05} @origin
+    - effect:particles{p=flame;amount=14;hS=0.34;vS=0.30;y=2.95} @origin
+
+    # 중앙을 진하게 만들어 '어디가 판정인지' 잘 보이게 함.
+    - effect:particles{p=lava;amount=6;hS=0.30;vS=0.50;y=0.55} @origin
+    - effect:particles{p=large_smoke;amount=7;hS=0.38;vS=0.60;y=1.45} @origin
+    - effect:particles{p=smoke;amount=5;hS=0.30;vS=0.45;y=2.45} @origin
+
+
+GoblinShaman_P2_FirePillarHit:
+  Skills:
+    # Totem의 onHit 타겟을 그대로 상속받아 1회 타격.
+    - damage{a=7}
+    - throw{velocity=0.35;velocityY=0.18}
+    - sound{s=item.firecharge.use;v=0.75;p=0.82} @origin
+
+# ------------------------------------------------------------
+# Pattern1 [화염구] : 마법진 충전 후 모델 화염구 발사
+# ------------------------------------------------------------
+
+
+# ============================================================
+# 언데드 고블린 부활 공용
+# ============================================================
+
+
+GoblinUndead_Worker_HurtSound:
+  Cooldown: 0.35
+  Skills:
+    # 살아있는 부하와 같은 계열을 낮은 피치로 재생.
+    # 좀비 사운드는 섞지 않음.
+    - sound{s=entity.pillager.hurt;v=0.66;p=0.72} @self
+    - sound{s=entity.evoker.hurt;v=0.20;p=0.66} @self
+
+
+GoblinUndead_Warrior_HurtSound:
+  Cooldown: 0.35
+  Skills:
+    # 살아있는 전사 계열을 더 낮고 둔하게.
+    - sound{s=entity.vindicator.hurt;v=0.70;p=0.66} @self
+    - sound{s=entity.pillager.hurt;v=0.18;p=0.60} @self
+
+
+GoblinUndead_Worker_Death:
+  Skills:
+    - state{s=death;li=0;lo=0} @self
+    # 살아있는 부하와 같은 계열을 낮은 피치로.
+    - sound{s=entity.pillager.death;v=0.66;p=0.64} @self
+    - sound{s=entity.vex.death;v=0.18;p=0.70} @self
+    - sound{s=block.soul_sand.break;v=0.30;p=0.72} @self
+
+
+GoblinUndead_Warrior_Death:
+  Skills:
+    - state{s=death;li=0;lo=0} @self
+    # 더 낮고 무거운 언데드 전사 톤.
+    - sound{s=entity.vindicator.death;v=0.72;p=0.58} @self
+    - sound{s=entity.vex.death;v=0.16;p=0.62} @self
+    - sound{s=block.soul_sand.break;v=0.32;p=0.66} @self
+
+GoblinUndead_RiseVFX:
+  Skills:
+    # 땅이 갈라지고 시체가 밀고 올라오는 느낌.
+    - sound{s=block.gravel.break;v=0.85;p=0.72} @self
+    - sound{s=entity.zombie.ambient;v=0.55;p=0.72} @self
+    - effect:particles{p=ash;amount=18;hS=0.70;vS=0.15;y=0.10} @self
+    - effect:particles{p=smoke;amount=12;hS=0.55;vS=0.18;y=0.15} @self
+
+    - delay 8
+    - sound{s=block.gravel.break;v=0.75;p=0.62} @self
+    - effect:particles{p=ash;amount=16;hS=0.60;vS=0.22;y=0.15} @self
+    - effect:particles{p=soul;amount=5;hS=0.35;vS=0.45;y=0.45} @self
+
+    - delay 10
+    - sound{s=block.rooted_dirt.break;v=0.75;p=0.68} @self
+    - effect:particles{p=smoke;amount=12;hS=0.48;vS=0.35;y=0.35} @self
+    - effect:particles{p=soul;amount=7;hS=0.38;vS=0.55;y=0.75} @self
+
+    - delay 12
+    - sound{s=entity.zombie.step;v=0.75;p=0.72} @self
+    - effect:particles{p=ash;amount=14;hS=0.55;vS=0.30;y=0.20} @self
+
+
+GoblinUndead_ReacquireTarget:
+  Skills:
+    # 부활 종료 직전 다시 플레이어를 잡아,
+    # 45틱 잠금이 풀리는 순간 바로 추적/공격하게 한다.
+    - delay 44
+    - settarget @NearestPlayer{r=40}
+
+
+# ============================================================
+# Pattern4 - 고블린 시체 부활
+#
+# 샤먼이 주문을 외운 뒤:
+# - 되살아난 부하 1마리
+# - 되살아난 전사 1마리
+# 를 주변 땅에서 소환.
+#
+# 소환몹 쪽에는 DetectPlayer/Rally 스킬이 아예 없으므로
+# 나팔 호출은 절대 발생하지 않는다.
+# ============================================================
+
+GoblinShaman_Pattern4_SummonUndead:
+  Cooldown: 20
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_flee_counter} false
+    - variableIsSet{var=caster.shaman_casting} false
+    - targetwithin{d=16} true
+
+  Skills:
+    # 소환 도중 다른 이동/스킬보다 이 패턴을 우선.
+    - setvariable{var=caster.shaman_casting;value=1;type=INTEGER;duration=54}
+    - potion{type=SLOWNESS;duration=54;level=255;particles=false} @self
+
+    # 먼저 플레이어를 확실히 바라본 뒤 주문 시작.
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 2
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # 현재 샤먼 모델에 전용 pattern4가 없으므로
+    # 기존 캐스팅 동작 중 가장 무난한 pattern3 포즈를 임시 사용.
+    - state{s=pattern3;li=0;lo=0} @self
+
+    # 죽은 고블린들을 깨우는 전조.
+    - sound{s=entity.evoker.prepare_wololo;v=0.90;p=0.48} @self
+    - effect:particlering{particle=soul;radius=2.6;points=28;amount=1;hS=0;vS=0;y=0.12} @self
+    - effect:particles{p=ash;amount=26;hS=1.6;vS=0.25;y=0.20} @self
+
+    - delay 10
+    - look{headOnly=false;force=true;immediately=true} @target
+    - sound{s=block.soul_sand.break;v=0.85;p=0.60} @self
+    - effect:particles{p=soul;amount=16;hS=1.5;vS=0.55;y=0.45} @self
+
+    # 샤먼이 플레이어를 바라본 방향을 기준으로
+    # 정확히 좌/우에 한 마리씩 부활시킨다.
+    #
+    # Worker  : 샤먼 왼쪽 3블럭
+    # Warrior : 샤먼 오른쪽 3블럭
+    #
+    # 랜덤 noise는 제거해서 항상 양옆에서 올라오게 함.
+    - delay 6
+    - look{headOnly=false;force=true;immediately=true} @target
+    - summon{t=Goblin_Undead_Worker;a=1;yr=0;noise=0} @Forward{f=0;sideOffset=-3;y=0}
+
+    - delay 3
+    - look{headOnly=false;force=true;immediately=true} @target
+    - summon{t=Goblin_Undead_Warrior;a=1;yr=0;noise=0} @Forward{f=0;sideOffset=3;y=0}
+
+    - sound{s=entity.zombie_villager.converted;v=0.65;p=0.62} @self
+    - effect:particles{p=soul;amount=22;hS=1.8;vS=0.70;y=0.40} @self
+
+
+GoblinShaman_Pattern1:
+  Cooldown: 9
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_flee_counter} false
+    - variableIsSet{var=caster.shaman_casting} false
+    - targetwithin{d=15} true
+    - targetwithin{d=5} false
+
+  Skills:
+    - setvariable{var=caster.shaman_casting;value=1;type=INTEGER;duration=70}
+    - potion{type=SLOWNESS;duration=70;level=255;particles=false} @self
+    # 스킬 시작 전 최우선 조준 단계:
+    # 이동을 잠근 상태에서 플레이어를 강제로 바라본 뒤 실제 패턴 시작.
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 2
+    - look{headOnly=false;force=true;immediately=true} @target
+    - state{s=pattern1;li=0;lo=0} @self
+    - sound{s=entity.evoker.prepare_summon;v=0.8;p=0.72} @self
+
+    # --------------------------------------------------------
+    # 이상적인 단일 projectile 구조
+    #
+    # 1) 처음부터 projectile 하나 생성
+    # 2) caster 변수 fireball_velocity = 0
+    # 3) onTick에서 매 틱 modifyProjectile로 현재 속도를 이 변수에 맞춤
+    # 4) 2.25초 뒤 변수만 14로 변경
+    # 5) 같은 MOB bullet이 그대로 출발
+    #
+    # charge helper / 발사용 helper 없음.
+    # --------------------------------------------------------
+    # 실제 projectile 기본 속도는 처음부터 정상값 14.
+    # onStart에서 실제 velocity vector만 0.001배로 줄여
+    # 방향정보를 유지한 채 사실상 정지시킨다.
+    - setvariable{var=caster.shaman_fireball_release;value=0;type=INTEGER}
+
+    - projectile{
+        bulletType=MOB;
+        mob=Goblin_Shaman_Fireball_Projectile;
+        onStart=GoblinShaman_P1_Fireball_FREEZE;
+        onTick=GoblinShaman_P1_Fireball_TICK;
+        onEnd=GoblinShaman_P1_Fireball_END;
+        v=14;
+        i=1;
+        hR=0.9;
+        vR=0.9;
+        md=120;
+        mr=40;
+        syo=1.35;
+        sfo=1.25;
+        tyo=0;
+        stopAtBlock=true;
+        stopAtEntity=true
+      } @target
+
+    # 0.00 ~ 2.25초 : 같은 projectile은 정지한 채 충전
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - skill{s=GoblinShaman_P1_MagicCircle} @self
+    - delay 5
+
+    # 45틱 = 2.25초
+    # 여기서는 projectile을 직접 건드리지 않고 변수만 바꿈.
+    # 실제 modifyProjectile은 계속 onTick 내부에서 실행됨.
+    - sound{s=entity.blaze.shoot;v=1.0;p=0.72} @self
+    - setvariable{var=caster.shaman_fireball_release;value=1;type=INTEGER}
+
+
+GoblinShaman_P1_MagicCircle:
+  Skills:
+    - effect:particlering{particle=flame;radius=1.35;points=24;amount=1;hS=0;vS=0;y=0.10} @self
+    - effect:particlering{particle=enchant;radius=0.85;points=16;amount=1;hS=0;vS=0;y=0.12} @self
+
+
+GoblinShaman_P1_Fireball_FREEZE:
+  Skills:
+    # v=14로 만들어진 projectile의 실제 방향 벡터를 보존하면서
+    # 0.001배로 줄여 사실상 정지.
+    # 정확히 0으로 만들지 않는 이유는 발사 방향 벡터를 잃지 않기 위해서.
+    - projectilevelocity{mode=MULTIPLY;vx=0.001;vy=0.001;vz=0.001}
+
+
+GoblinShaman_P1_Fireball_RELEASE:
+  Conditions:
+    - variableEquals{var=caster.shaman_fireball_release;value=1}
+  Skills:
+    # 1) 먼저 같은 projectile의 실제 속도를 원래 v=14 수준으로 복원.
+    - projectilevelocity{mode=MULTIPLY;vx=1000;vy=1000;vz=1000}
+
+    # 2) 속도가 정상으로 복구된 뒤 방향만 현재 플레이어에게 재조준.
+    # projectile callback에서는 기존 @target 문맥을 믿지 않고
+    # projectile 위치 기준 가장 가까운 플레이어를 직접 찾는다.
+    - setprojectiledirection{magnitude=1} @NearestPlayer{r=30}
+
+    # 같은 projectile에서 한 번만 실행.
+    - setvariable{var=caster.shaman_fireball_release;value=2;type=INTEGER}
+
+
+GoblinShaman_P1_Fireball_TICK:
+  Skills:
+    # release가 1인 그 틱에 현재 projectile 문맥에서 실제 벡터를 복원.
+    - skill{s=GoblinShaman_P1_Fireball_RELEASE}
+
+    # 테스트 v6에서 맞춘 파티클 -0.25Y 보정
+    - effect:particles{p=flame;amount=9;hS=0.20;vS=0.20;y=-0.25} @origin
+    - effect:particles{p=small_flame;amount=6;hS=0.15;vS=0.15;y=-0.25} @origin
+    - effect:particles{p=smoke;amount=1;hS=0.06;vS=0.06;y=-0.25} @origin
+
+
+GoblinShaman_P1_Fireball_END:
+  Skills:
+    - effect:particles{p=flame;amount=32;hS=0.75;vS=0.65;y=-0.25} @origin
+    - effect:particles{p=small_flame;amount=18;hS=0.60;vS=0.55;y=-0.25} @origin
+    - effect:particles{p=smoke;amount=12;hS=0.50;vS=0.40;y=-0.25} @origin
+    - damage{a=12} @PlayersNearOrigin{r=1.9}
+    - throw{velocity=0.25;velocityY=0.10} @PlayersNearOrigin{r=1.9}
+    - sound{s=entity.generic.explode;v=0.90;p=1.05} @origin
+
+# ------------------------------------------------------------
+
+GoblinShaman_Pattern3:
+  Cooldown: 13
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_flee_counter} false
+    - variableIsSet{var=caster.shaman_casting} false
+    - targetwithin{d=15} true
+
+  Skills:
+    - setvariable{var=caster.shaman_casting;value=1;type=INTEGER;duration=70}
+    - potion{type=SLOWNESS;duration=70;level=255;particles=false} @self
+    # 스킬 시작 전 최우선 조준 단계:
+    # 이동을 잠근 상태에서 플레이어를 강제로 바라본 뒤 실제 패턴 시작.
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 2
+    - look{headOnly=false;force=true;immediately=true} @target
+    - state{s=pattern3;li=0;lo=0} @self
+    - sound{s=entity.evoker.prepare_wololo;v=0.95;p=0.65} @self
+
+    # 0.85초
+    - delay 17
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # 장식용 마법진만 별도 오브젝트 - 기존보다 1블럭 낮춤 (Y 6.1)
+    - summon{t=Goblin_Shaman_Meteor_Circle;a=1;yr=0;noise=0} @SelfLocation{y=6.1}
+
+    # 메테오는 마법진보다 정확히 1블럭 위(Y 7.1)에서 생성.
+    # 기본 projectile 속도는 처음부터 v=14.
+    # 생성 직후 실제 velocity vector만 0.001배로 줄여 충전 위치에 고정.
+    - setvariable{var=caster.shaman_meteor_release;value=0;type=INTEGER}
+
+    - projectile{
+        bulletType=MOB;
+        mob=Goblin_Shaman_Meteor_Projectile;
+        onStart=GoblinShaman_P3_Meteor_FREEZE;
+        onTick=GoblinShaman_P3_Meteor_TICK;
+        onEnd=GoblinShaman_P3_Meteor_END;
+        v=14;
+        i=1;
+        hR=1.8;
+        vR=1.8;
+        md=140;
+        mr=50;
+        syo=7.1;
+        sfo=0;
+        tyo=0;
+        stopAtBlock=true;
+        stopAtEntity=true
+      } @target
+
+    - sound{s=block.respawn_anchor.charge;v=0.65;p=0.72} @self
+
+    # 0.85 ~ 2.75초 동안 같은 projectile이 그 자리에서 charge
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 4
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 5
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 8
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 8
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 8
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # projectile 생성 후 정확히 38틱 = 1.90초
+    # 전체 패턴 기준 0.85 + 1.90 = 2.75초
+    #
+    # 여기서도 projectile을 새로 만들지 않음.
+    # release 플래그만 올리고, 실제 velocity vector 복원은
+    # 바로 다음 projectile onTick에서 실행.
+    - sound{s=entity.blaze.shoot;v=1.2;p=0.55} @self
+    - setvariable{var=caster.shaman_meteor_release;value=1;type=INTEGER}
+
+
+
+GoblinShaman_P3_Meteor_FREEZE:
+  Skills:
+    # v=14 방향 벡터는 유지하고 0.001배로 줄여 사실상 정지.
+    - projectilevelocity{mode=MULTIPLY;vx=0.001;vy=0.001;vz=0.001}
+
+
+GoblinShaman_P3_Meteor_RELEASE:
+  Conditions:
+    - variableEquals{var=caster.shaman_meteor_release;value=1}
+  Skills:
+    # 1) 먼저 원래 v=14 수준으로 실제 velocity 복원.
+    - projectilevelocity{mode=MULTIPLY;vx=1000;vy=1000;vz=1000}
+
+    # 2) 복구된 속도의 크기는 유지하고,
+    # 발사 순간 projectile 기준 가장 가까운 플레이어 방향으로만 회전.
+    - setprojectiledirection{magnitude=1} @NearestPlayer{r=40}
+
+    - setvariable{var=caster.shaman_meteor_release;value=2;type=INTEGER}
+
+
+GoblinShaman_P3_Meteor_TICK:
+  Skills:
+    # 발사 틱에 실제 projectile vector를 복원.
+    - skill{s=GoblinShaman_P3_Meteor_RELEASE}
+
+    # 정지/비행 모두 같은 projectile origin
+    - effect:particles{p=portal;amount=8;hS=0.30;vS=0.28} @origin
+    - effect:particles{p=witch;amount=5;hS=0.22;vS=0.20} @origin
+    - effect:particles{p=large_smoke;amount=3;hS=0.18;vS=0.18} @origin
+
+
+GoblinShaman_P3_Meteor_END:
+  Skills:
+    - effect:particles{p=witch;amount=42;hS=1.35;vS=0.80} @origin
+    - effect:particles{p=portal;amount=34;hS=1.20;vS=0.70} @origin
+    - effect:particles{p=large_smoke;amount=30;hS=1.30;vS=0.75} @origin
+    - effect:particles{p=explosion;amount=3;hS=0.55;vS=0.35} @origin
+    - damage{a=14} @PlayersNearOrigin{r=3.5}
+    - throw{velocity=0.55;velocityY=0.22} @PlayersNearOrigin{r=3.5}
+    - sound{s=entity.generic.explode;v=1.30;p=0.68} @origin
+
+# ------------------------------------------------------------
+# 피격 / 사망
+# ------------------------------------------------------------
+
+GoblinShaman_HurtSound:
+  Cooldown: 0.35
+  Skills:
+    # 같은 고블린 계열이지만 샤먼은 더 높은 피치.
+    - sound{s=entity.evoker.hurt;v=0.74;p=1.42} @self
+    - sound{s=entity.pillager.hurt;v=0.20;p=1.50} @self
+
+GoblinShaman_FinalSuicideCheck:
+  Conditions:
+    - variableIsSet{var=caster.shaman_casting} false
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_final_done} false
+    - health{h=<10} true
+  Skills:
+    - skill{s=GoblinShaman_FinalSuicide} @self
+
+
+GoblinShaman_FinalInvulnerability:
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} true
+  Skills:
+    # 최종 패턴 연출 도중에는 플레이어가 샤먼을 먼저 죽일 수 없음.
+    - cancelevent
+
+
+GoblinShaman_FinalSuicide:
+  Conditions:
+    - variableIsSet{var=caster.shaman_final_active} false
+    - variableIsSet{var=caster.shaman_final_done} false
+  Skills:
+    # 전투당 1회 잠금.
+    - setvariable{var=caster.shaman_final_active;value=1;type=INTEGER}
+    - setvariable{var=caster.shaman_final_done;value=1;type=INTEGER}
+
+    # 모든 일반 패턴/도주 메커니즘을 casting 상태로 봉인.
+    - setvariable{var=caster.shaman_casting;value=1;type=INTEGER;duration=160}
+    - potion{type=SLOWNESS;duration=160;level=255;particles=false} @self
+
+    # 기존 death 포즈를 "7초 부유 자살 모션"으로 개조한 상태.
+    - state{s=death;li=0;lo=0} @self
+
+    - sound{s=entity.witch.death;v=0.75;p=0.55} @self
+    - sound{s=entity.evoker.prepare_wololo;v=0.95;p=0.42} @self
+
+    # 시작 저주 폭발
+    - effect:particlering{particle=witch;radius=2.2;points=28;amount=1;hS=0;vS=0;y=0.40} @self
+    - effect:particles{p=reverse_portal;amount=28;hS=1.15;vS=0.80;y=1.15} @self
+    - effect:particles{p=soul;amount=16;hS=0.85;vS=0.70;y=0.85} @self
+
+    # 저주 이펙트는 별도 스킬에서 7초 동안 계속 반복.
+    - skill{s=GoblinShaman_FinalCurseVFX} @self
+
+    # --------------------------------------------------------
+    # 1차 부활 - 0.75초
+    # Worker + Warrior 동시에, 샤먼 주변 비교적 넓은 무작위 위치 (약 7블럭)
+    # --------------------------------------------------------
+    - delay 15
+    - sound{s=block.soul_sand.break;v=0.9;p=0.58} @self
+    - summon{t=Goblin_Undead_Worker;a=1;yr=0;noise=7.0} @SelfLocation
+    - summon{t=Goblin_Undead_Warrior;a=1;yr=0;noise=7.0} @SelfLocation
+
+    # --------------------------------------------------------
+    # 2차 부활 - 2.00초 (약 7블럭)
+    # --------------------------------------------------------
+    - delay 25
+    - sound{s=block.soul_sand.break;v=0.9;p=0.54} @self
+    - summon{t=Goblin_Undead_Worker;a=1;yr=0;noise=7.0} @SelfLocation
+    - summon{t=Goblin_Undead_Warrior;a=1;yr=0;noise=7.0} @SelfLocation
+
+    # --------------------------------------------------------
+    # 3차 부활 - 3.25초 (약 8블럭)
+    # --------------------------------------------------------
+    - delay 25
+    - sound{s=block.soul_sand.break;v=0.95;p=0.50} @self
+    - summon{t=Goblin_Undead_Worker;a=1;yr=0;noise=8.0} @SelfLocation
+    - summon{t=Goblin_Undead_Warrior;a=1;yr=0;noise=8.0} @SelfLocation
+
+    # --------------------------------------------------------
+    # 4차 부활 - 4.50초 (약 9블럭)
+    # 총 8마리 완성
+    # --------------------------------------------------------
+    - delay 25
+    - sound{s=block.soul_sand.break;v=1.0;p=0.46} @self
+    - summon{t=Goblin_Undead_Worker;a=1;yr=0;noise=9.0} @SelfLocation
+    - summon{t=Goblin_Undead_Warrior;a=1;yr=0;noise=9.0} @SelfLocation
+
+    # 마지막 2.5초는 샤먼 주위 저주가 계속 유지되며
+    # 이미 부활한 고블린들이 플레이어를 공격.
+    - delay 50
+
+    # 정확히 7초 후 자살.
+    - effect:particles{p=reverse_portal;amount=55;hS=1.35;vS=1.10;y=1.10} @self
+    - effect:particles{p=soul;amount=28;hS=1.00;vS=0.95;y=0.95} @self
+    - sound{s=entity.evoker.death;v=0.72;p=0.62} @self
+    - sound{s=entity.vex.death;v=0.32;p=0.70} @self
+
+    # 자기 자신을 죽이기 직전에 피격 무효 플래그 해제.
+    # final_done은 남겨 재발동 방지.
+    - variableUnset{var=caster.shaman_final_active} @self
+    - damage{a=999999;ia=true} @self
+
+
+# 7초 동안 누워 떠있는 샤먼 주변의 지속 저주 연출.
+GoblinShaman_FinalCurseVFX:
+  Skills:
+    - effect:particlering{particle=witch;radius=1.8;points=20;amount=1;hS=0;vS=0;y=0.55} @self
+    - effect:particles{p=reverse_portal;amount=12;hS=0.85;vS=0.55;y=1.00} @self
+    - effect:particles{p=soul;amount=6;hS=0.60;vS=0.55;y=0.75} @self
+
+    - delay 10
+    - effect:particlering{particle=witch;radius=2.1;points=22;amount=1;hS=0;vS=0;y=0.50} @self
+    - effect:particles{p=reverse_portal;amount=13;hS=0.90;vS=0.60;y=1.05} @self
+
+    - delay 10
+    - effect:particlering{particle=soul;radius=1.55;points=18;amount=1;hS=0;vS=0;y=0.60} @self
+    - effect:particles{p=witch;amount=14;hS=0.80;vS=0.60;y=0.90} @self
+
+    - delay 10
+    - effect:particlering{particle=witch;radius=2.25;points=24;amount=1;hS=0;vS=0;y=0.50} @self
+    - effect:particles{p=reverse_portal;amount=15;hS=1.00;vS=0.65;y=1.05} @self
+
+    - delay 10
+    - effect:particlering{particle=soul;radius=1.75;points=20;amount=1;hS=0;vS=0;y=0.55} @self
+    - effect:particles{p=witch;amount=16;hS=0.90;vS=0.65;y=0.95} @self
+
+    - delay 10
+    - effect:particlering{particle=witch;radius=2.35;points=25;amount=1;hS=0;vS=0;y=0.55} @self
+    - effect:particles{p=reverse_portal;amount=16;hS=1.05;vS=0.70;y=1.10} @self
+
+    - delay 10
+    - effect:particlering{particle=soul;radius=1.85;points=22;amount=1;hS=0;vS=0;y=0.60} @self
+    - effect:particles{p=witch;amount=18;hS=0.95;vS=0.70;y=1.00} @self
+
+    - delay 10
+    - effect:particlering{particle=witch;radius=2.45;points=26;amount=1;hS=0;vS=0;y=0.55} @self
+    - effect:particles{p=reverse_portal;amount=18;hS=1.10;vS=0.75;y=1.10} @self
+
+    - delay 10
+    - effect:particlering{particle=soul;radius=1.95;points=22;amount=1;hS=0;vS=0;y=0.60} @self
+    - effect:particles{p=witch;amount=18;hS=1.00;vS=0.75;y=1.00} @self
+
+    - delay 10
+    - effect:particlering{particle=witch;radius=2.55;points=28;amount=1;hS=0;vS=0;y=0.60} @self
+    - effect:particles{p=reverse_portal;amount=20;hS=1.15;vS=0.80;y=1.15} @self
+
+    - delay 10
+    - effect:particlering{particle=soul;radius=2.05;points=24;amount=1;hS=0;vS=0;y=0.65} @self
+    - effect:particles{p=witch;amount=20;hS=1.05;vS=0.80;y=1.05} @self
+
+    - delay 10
+    - effect:particlering{particle=witch;radius=2.65;points=30;amount=1;hS=0;vS=0;y=0.65} @self
+    - effect:particles{p=reverse_portal;amount=22;hS=1.20;vS=0.85;y=1.15} @self
+
+    - delay 10
+    - effect:particlering{particle=soul;radius=2.15;points=24;amount=1;hS=0;vS=0;y=0.65} @self
+    - effect:particles{p=witch;amount=22;hS=1.10;vS=0.85;y=1.05} @self
+
+    - delay 10
+    - effect:particlering{particle=witch;radius=2.75;points=32;amount=1;hS=0;vS=0;y=0.70} @self
+    - effect:particles{p=reverse_portal;amount=25;hS=1.25;vS=0.90;y=1.20} @self
+
+
+GoblinShaman_Death:
+  Conditions:
+    # 자살 패턴으로 죽은 경우 death 애니메이션을 다시 시작하지 않음.
+    - variableIsSet{var=caster.shaman_final_done} false
+  Skills:
+    - state{s=death;li=0;lo=0} @self
+    # 샤먼: 같은 고블린 계열보다 약간 더 높고 기괴한 톤
+    - sound{s=entity.evoker.death;v=0.76;p=1.28} @self
+    - sound{s=entity.witch.death;v=0.20;p=1.36} @self
+
+GoblinThrower_DetectPlayer:
+  Conditions:
+    # Worker / Warrior와 동일한 자연 인식 범위.
+    - playerwithin{d=7} true
+  Skills:
+    - settarget @NearestPlayer{r=7}
+
+
+# 공격 중에는 pathfinding / flee / 걷기 회전보다 플레이어 조준 우선.
+GoblinThrower_CastLook:
+  Conditions:
+    - variableIsSet{var=caster.thrower_casting} true
+  Skills:
+    - look{headOnly=false;force=true;immediately=true} @target
+
+
+GoblinThrower_RockAttack:
+  Cooldown: 2.6
+  Conditions:
+    - variableIsSet{var=caster.thrower_casting} false
+    - targetwithin{d=14} true
+    - targetwithin{d=3} false
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+
+  Skills:
+    # --------------------------------------------------------
+    # 공격 전 조준 단계
+    # 여기서부터 공격이 끝날 때까지 이동 정지.
+    # look force를 매 틱 다시 걸기 때문에 다른 AI보다 방향 제어가 우선.
+    # --------------------------------------------------------
+    - setvariable{var=caster.thrower_casting;value=1;type=INTEGER;duration=24}
+    - potion{type=SLOWNESS;duration=24;level=255;particles=false} @self
+
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 2
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # attack 애니메이션 시작 시점을 0.00초로 본다.
+    - state{s=attack;li=0;lo=0} @self
+
+    # --------------------------------------------------------
+    # attack 애니메이션 0.75초 = 정확히 15틱
+    # 이 프레임에서 실제 돌 projectile 발사.
+    # --------------------------------------------------------
+    - delay 15
+    - look{headOnly=false;force=true;immediately=true} @target
+    - sound{s=entity.snowball.throw;v=0.85;p=0.70} @self
+
+    # 발사 순간 거리를 다시 확인해서 궤도를 나눔.
+    # 가까운 플레이어에게는 낮은 조준점/약한 중력으로 직선에 가깝게,
+    # 먼 플레이어에게만 기존의 강한 포물선을 사용.
+    - skill{s=GoblinThrower_RockLaunch_Close} @target
+    - skill{s=GoblinThrower_RockLaunch_Far} @target
+
+    # attack 전체 길이가 1.0초라 남은 5틱 동안 후속 포즈 유지.
+    - delay 5
+
+
+
+GoblinThrower_RockLaunch_Close:
+  Conditions:
+    # 6블럭 이내에서는 높은 포물선이 머리 위로 넘어가므로
+    # 낮고 빠른 투척 궤도를 사용한다.
+    - targetwithin{d=6} true
+  Skills:
+    - projectile{
+        bulletType=MOB;
+        mob=Goblin_Thrower_Rock_Projectile;
+        onTick=GoblinThrower_Rock_TICK;
+        onHit=GoblinThrower_Rock_HIT;
+        onEnd=GoblinThrower_Rock_END;
+        v=12;
+        gravity=0.045;
+        i=1;
+        hR=0.48;
+        vR=0.48;
+        md=100;
+        mr=32;
+        syo=1.20;
+        sfo=0.45;
+        tyo=0.65;
+        stopAtBlock=true;
+        stopAtEntity=true
+      } @target
+
+
+GoblinThrower_RockLaunch_Far:
+  Conditions:
+    - targetwithin{d=6} false
+  Skills:
+    - projectile{
+        bulletType=MOB;
+        mob=Goblin_Thrower_Rock_Projectile;
+        onTick=GoblinThrower_Rock_TICK;
+        onHit=GoblinThrower_Rock_HIT;
+        onEnd=GoblinThrower_Rock_END;
+        v=12;
+        gravity=0.14;
+        i=1;
+        hR=0.48;
+        vR=0.48;
+        md=100;
+        mr=32;
+        syo=1.25;
+        sfo=0.75;
+        tyo=1.85;
+        stopAtBlock=true;
+        stopAtEntity=true
+      } @target
+
+
+GoblinThrower_Rock_TICK:
+  Skills:
+    # 돌 모델 자체가 보이므로 파티클은 아주 약하게만 보조.
+    - effect:particles{p=smoke;amount=1;hS=0.05;vS=0.05;y=-0.10} @origin
+
+
+GoblinThrower_Rock_HIT:
+  Skills:
+    # projectile가 플레이어에게 직접 닿았을 때
+    # 그 피격 대상을 그대로 받아 확실하게 데미지 적용.
+    - damage{a=7}
+    - throw{velocity=0.28;velocityY=0.10}
+
+
+GoblinThrower_Rock_END:
+  Skills:
+    # 블럭/엔티티 어느 쪽에 충돌해도 충돌 연출은 남김.
+    - sound{s=block.stone.hit;v=0.95;p=0.82} @origin
+    - effect:particles{p=crit;amount=7;hS=0.28;vS=0.28;y=0.05} @origin
+    - effect:particles{p=smoke;amount=4;hS=0.20;vS=0.18;y=0.05} @origin
+
+
+GoblinThrower_HurtSound:
+  Cooldown: 0.35
+  Skills:
+    # 일꾼/전사 사이 정도의 고블린 톤. 좀비 사운드 사용 X.
+    - sound{s=entity.pillager.hurt;v=0.78;p=1.22} @self
+    - sound{s=entity.vindicator.hurt;v=0.16;p=1.30} @self
+

@@ -1,0 +1,98 @@
+# ============================================================
+# 황야 늑대 / Desert Direwolf
+# 일반 몹 - 초반 필드 추적형 근접 몬스터
+# MythicMobs + BetterModel
+# Development v2.9
+#
+# v2.9
+# - Skills v2.9과 버전 동기화
+# - v2.5에서 이미 제거된 howl 잔재 정리 대응
+# - 몹 동작/수치 변경 없음
+#
+# BetterModel model id: direwolf_desert
+# VFX model ids:
+# - direwolfslash
+# - direwolfbite
+# ============================================================
+
+Direwolf_Desert_Normal:
+  Type: WOLF
+  Display: '&6황야 늑대'
+  Health: 35
+  Damage: 0
+  Armor: 1
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.30
+    FollowRange: 12
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    KnockbackResistance: 0.10
+
+  AIGoalSelectors:
+    - clear
+    - float
+    - meleeattack
+    - movetowardstarget
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+    - attacker
+
+  Skills:
+    - skill{s=DirewolfDesert_Init} @self ~onSpawnOrLoad
+    - skill{s=DirewolfDesert_WalkStart} @self ~onTimer:2
+    - skill{s=DirewolfDesert_IdleStart} @self ~onTimer:2
+    - skill{s=DirewolfDesert_AttackRouter} @self ~onTimer:4
+    - sound{s=entity.wolf.hurt;v=0.50;p=0.95} @self ~onDamaged
+    - skill{s=DirewolfDesert_Death} @self ~onDeath
+
+Direwolf_Desert_SlashFX:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    Collidable: false
+    PreventOtherDrops: true
+    PreventItemPickup: true
+  AIGoalSelectors:
+    - clear
+  AITargetSelectors:
+    - clear
+  Skills:
+    - model{mid=direwolfslash;n=false} @self ~onSpawn
+    - state{s=idle;li=0;lo=0} @self ~onSpawn
+    - remove{delay=16} @self ~onSpawn
+
+Direwolf_Desert_BiteFX:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    Collidable: false
+    PreventOtherDrops: true
+    PreventItemPickup: true
+  AIGoalSelectors:
+    - clear
+  AITargetSelectors:
+    - clear
+  Skills:
+    - model{mid=direwolfbite;n=false} @self ~onSpawn
+    - state{s=idle;li=0;lo=0} @self ~onSpawn
+    - remove{delay=18} @self ~onSpawn

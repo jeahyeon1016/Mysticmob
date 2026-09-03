@@ -1,0 +1,49 @@
+# ============================================================
+# TREE DOLL / DAMAGE TESTER
+# MythicMobs 5.13.0
+# v1.3
+# ============================================================
+
+DMG_TEST:
+  Type: HUSK
+  Display: '&6[TEST] &fTree Doll'
+  Health: 100000
+  Damage: 0
+
+  Options:
+    Silent: true
+    MovementSpeed: 0
+    KnockbackResistance: 1
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    Despawn: false
+    AlwaysShowName: true
+
+  AIGoalSelectors:
+    - clear
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+
+    # 로드 확인
+    - 'message{m="&a[TREE DOLL] &fSPAWN OK"} @World ~onSpawn'
+
+    # 피해 감지 확인
+    - 'message{m="&c[TREE DOLL] DAMAGED!"} @World ~onDamaged'
+
+    # 받은 데미지
+    - 'message{m="&7Damage: &c<skill.var.damage-amount>"} @World ~onDamaged'
+
+    # 피해 주체
+    - 'message{m="&7Source: &e<trigger.name>"} @World ~onDamaged'
+
+    # MythicMobs Damage Type
+    - 'message{m="&7Damage Type: &b<skill.var.damage-type>"} @World ~onDamaged'
+
+    # 실제 Damage Cause
+    - 'message{m="&7Damage Cause: &d<skill.var.damage-cause>"} @World ~onDamaged'
+
+    # 현재 체력
+    - 'message{m="&7HP: &a<caster.hp> &8/ &a<caster.mhp>"} @World ~onDamaged'

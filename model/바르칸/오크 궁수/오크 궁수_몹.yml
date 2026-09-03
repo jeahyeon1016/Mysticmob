@@ -1,0 +1,80 @@
+# ============================================================
+# ORC ARCHER - MOBS
+# Development v1.3
+# MythicMobs 5.13.0 + ModelEngine 4
+#
+# BetterModel ID: orc_archer
+# bbmodel animations:
+# - idle   2.00s LOOP
+# - walk   1.6667s LOOP
+# - attack 0.9167s ONCE
+# - death  2.50s ONCE
+#
+# Design:
+# - 선공형 원거리 몬스터
+# - 플레이어 쪽으로 접근하되 8블럭에서 정지
+# - 플레이어가 더 가까이 들어올수록 발사 주기가 짧아짐
+# - attack 0.33초(약 7틱) 지점에서 발사
+# ============================================================
+
+Orc_Archer:
+  Type: HUSK
+  Display: '&2오크 궁수'
+
+  # 임시 밸런스값 - 동작 확인 후 수치 조정
+  Health: 60
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.24
+    FollowRange: 32
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.15
+    NoDamageTicks: 0
+
+  AIGoalSelectors:
+    - clear
+    - float
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+    - players
+
+  Skills:
+    # MODEL
+    - meg:model{mid=orc_archer;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onSpawn
+    - meg:model{mid=orc_archer;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onLoad
+
+    - meg:defaultstate{mid=orc_archer;type=idle;state=idle;li=2;lo=2} @self ~onSpawn
+    - meg:defaultstate{mid=orc_archer;type=walk;state=walk;li=2;lo=2} @self ~onSpawn
+    - meg:defaultstate{mid=orc_archer;type=death;state=death;li=1;lo=1} @self ~onSpawn
+
+    - meg:defaultstate{mid=orc_archer;type=idle;state=idle;li=2;lo=2} @self ~onLoad
+    - meg:defaultstate{mid=orc_archer;type=walk;state=walk;li=2;lo=2} @self ~onLoad
+    - meg:defaultstate{mid=orc_archer;type=death;state=death;li=1;lo=1} @self ~onLoad
+
+    # RUNTIME
+    - skill{s=OrcArcher_Init} @self ~onSpawn
+    - skill{s=OrcArcher_Init} @self ~onLoad
+
+    # 현재 Threat Target 기준 8블럭까지 접근 / 8블럭 이내 정지
+    - skill{s=OrcArcher_Chase} @target ~onTimer:2 ?incombat
+    - skill{s=OrcArcher_StopAtRange} @target ~onTimer:2 ?incombat
+
+    # 거리별 발사 라우터
+    - skill{s=OrcArcher_AttackRouter} @target ~onTimer:2 ?incombat ?targetwithin{d=24}
+
+    # 피격 시 공격자를 확실히 타겟으로 편입
+    - settarget @trigger ~onDamaged
+
+    # 죽음
+    - skill{s=OrcArcher_Death} @self ~onDeath

@@ -1,0 +1,61 @@
+# ============================================================
+# MUMMY - MOBS
+# Development v1.0
+# MythicMobs 5.13.0 + ModelEngine 4
+#
+# BetterModel / ModelEngine ID: mummy
+# 공격 애니메이션: attack
+# ============================================================
+
+Mummy:
+  Type: HUSK
+  Display: '&6전쟁 망자'
+  Health: 80
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.17
+    FollowRange: 24
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.2
+    NoDamageTicks: 0
+
+  AIGoalSelectors:
+    - clear
+    - float
+    - meleeattack
+    - movetowardstarget
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+    - players
+
+  Skills:
+    # MODEL
+    - meg:model{mid=mummy;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onSpawn
+    - meg:model{mid=mummy;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onLoad
+
+    # 기본 상태
+    - meg:defaultstate{mid=mummy;type=idle;state=idle;li=2;lo=2} @self ~onSpawn
+    - meg:defaultstate{mid=mummy;type=walk;state=walk;li=2;lo=2} @self ~onSpawn
+    - meg:defaultstate{mid=mummy;type=idle;state=idle;li=2;lo=2} @self ~onLoad
+    - meg:defaultstate{mid=mummy;type=walk;state=walk;li=2;lo=2} @self ~onLoad
+
+    # 공격
+    - skill{s=Mummy_AttackRouter} @target ~onTimer:2 ?incombat
+
+    # 바닐라 HUSK 자체 평타 제거
+    - skill{s=Mummy_CancelVanillaAttack;sync=true} @self ~onAttack
+
+    # 초기화
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ~onSpawn
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ~onLoad
