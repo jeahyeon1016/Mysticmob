@@ -1,4 +1,33 @@
-# 마법 슬라임 — 몹 준비용 (미구현, 서버 배포 제외)
-# 기획: https://docs.google.com/document/d/19nH7ZbtBfQsa5KSMh-6AkD-h86iHA-omdYnnWKMTsWw/edit?tab=t.g4yk7wqs1gj
-# 모델: slime_mage.bbmodel
-# 실행 가능한 정의 없음. 패턴·수치·ID는 개별 구현 시 확정.
+# MythicMobs 5.13.0 / ModelEngine 4.1.0 — 구현명세 v4
+# 체력 확정 50. 마법탄 피해 4는 테스트용 임시값이며 스킬에서 조정한다.
+MagicSlime:
+  Type: ZOMBIE
+  Display: '&b마법 슬라임'
+  Health: 50
+  Damage: 0
+  Modules:
+    ThreatTable: true
+  Options:
+    Silent: true
+    MovementSpeed: 0.22
+    FollowRange: 20
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    PreventRandomEquipment: true
+  AIGoalSelectors:
+    - 0 clear
+    - 1 float
+    - 2 randomstroll
+    - 3 lookatplayers
+    - 4 randomlookaround
+  AITargetSelectors:
+    - 0 clear
+    - 1 attacker
+  Skills:
+    - skill{s=MS_Init} @self ~onSpawn
+    - skill{s=MS_CombatAI} @self ~onEnterCombat
+    - skill{s=MS_ResetCombat} @self ~onDropCombat
+    - skill{s=MS_Tick} @self ~onTimer:1
+    - skill{s=MS_Damaged} @self ~onDamaged
+    - skill{s=MS_Death} @self ~onDeath

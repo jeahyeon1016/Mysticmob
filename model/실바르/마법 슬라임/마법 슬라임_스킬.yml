@@ -1,4 +1,239 @@
-# 마법 슬라임 — 스킬 준비용 (미구현, 서버 배포 제외)
-# 기획: https://docs.google.com/document/d/19nH7ZbtBfQsa5KSMh-6AkD-h86iHA-omdYnnWKMTsWw/edit?tab=t.g4yk7wqs1gj
-# 모델: slime_mage.bbmodel
-# 실행 가능한 정의 없음. 패턴·수치·ID는 개별 구현 시 확정.
+# 명세 v4. state: 0=이동/대기, 1=공격, 2=순간이동 후딜, 9=사망.
+# 단일 틱 루프: 지연 발사 작업을 만들지 않아 공격 취소 후 유령 발사를 막는다.
+# 공격 44틱(2.2초), 발사 12틱(0.60초; 명세 0.58초의 틱 단위 근사).
+# 탄속 v=6, 마법탄 피해 a=4는 테스트용 임시값. 보상 미정.
+MS_Init:
+  Skills:
+    - setvariable{var=caster.ms_state;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_age;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_cooldown;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_teleport_used;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_damage_pending;type=INTEGER;value=0} @self
+    - meg:model{mid=slime_mage;d=false;i=true;lpitch=true;usm=true;save=false} @self
+    - meg:defaultstate{mid=slime_mage;type=idle;state=idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=slime_mage;type=walk;state=walk;li=2;lo=2} @self
+    - meg:defaultstate{mid=slime_mage;type=death;state=death} @self
+
+MS_CombatAI:
+  Conditions:
+    - variableEquals{var=caster.ms_state;value=9} false
+  Skills:
+    - setAI{ai=true} @self
+    - runaigoalselector{goal=clear} @self
+    - runaigoalselector{goal=float;priority=1} @self
+    - runaigoalselector{goal=fleeplayers{distance=4;speed=1.1;safespeed=1.1};priority=2} @self
+    - runaigoalselector{goal=MoveWithinDistanceOfTarget{minrange=5;maxrange=20;speed=1};priority=3} @self
+    - runaigoalselector{goal=lookattarget;priority=4} @self
+
+MS_ResetCombat:
+  Conditions:
+    - variableEquals{var=caster.ms_state;value=9} false
+  Skills:
+    - skill{s=MS_StopAttack} @self
+    - setvariable{var=caster.ms_teleport_used;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_cooldown;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_damage_pending;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_state;type=INTEGER;value=0} @self
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - runaigoalselector{goal=clear} @self
+    - runaigoalselector{goal=float;priority=1} @self
+    - runaigoalselector{goal=randomstroll;priority=2} @self
+    - runaigoalselector{goal=lookatplayers;priority=3} @self
+    - runaigoalselector{goal=randomlookaround;priority=4} @self
+
+MS_Tick:
+  Conditions:
+    - variableEquals{var=caster.ms_state;value=9} false
+  Skills:
+    - variablesubtract{var=caster.ms_cooldown;amount=1} @self ?variableInRange{var=caster.ms_cooldown;value=>0}
+    - variableadd{var=caster.ms_age;amount=1} @self ?variableInRange{var=caster.ms_state;value=1to2}
+    - skill{s=MS_AttackTick} @self ?variableEquals{var=caster.ms_state;value=1}
+    - skill{s=MS_Unlock} @self ?variableEquals{var=caster.ms_state;value=2} ?variableInRange{var=caster.ms_age;value=>=8}
+    - skill{s=MS_Move} @target ?variableEquals{var=caster.ms_state;value=0} ?incombat
+    - skill{s=MS_Attack} @target ?variableEquals{var=caster.ms_state;value=0} ?incombat
+
+# 4~6블록 완충 구간에서는 경로 추적 속도를 0으로 고정한다.
+MS_Move:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    - setspeed{speed=1;type=WALK} @self
+    - skill{s=MS_HoldDistance} @target
+
+MS_HoldDistance:
+  TargetConditions:
+    - distance{d=>4} true
+    - distance{d=<6} true
+  Skills:
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+MS_Attack:
+  Conditions:
+    - variableEquals{var=caster.ms_cooldown;value=0} true
+    - variableEquals{var=caster.ms_damage_pending;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - health{h=>0} true
+    - distance{d=>4} true
+    - distance{d=<6} true
+    - lineofsight true
+  Skills:
+    - setvariable{var=caster.ms_state;type=INTEGER;value=1} @self
+    - setvariable{var=caster.ms_age;type=INTEGER;value=0} @self
+    - setvariable{var=caster.ms_cooldown;type=INTEGER;value=44} @self
+    - skill{s=MS_Freeze} @self
+    - look{headOnly=false;immediately=true} @target
+    - meg:state{mid=slime_mage;s=hit;remove=true} @self
+    - meg:state{mid=slime_mage;s=attack;priority=3;li=0;lo=2} @self
+    - sound{s=block.amethyst_block.chime;v=0.25;p=1.6} @self
+
+MS_AttackTick:
+  Skills:
+    - look{headOnly=false;immediately=true} @target
+    - skill{s=MS_Charge} @self ?variableInRange{var=caster.ms_age;value=1to11}
+    - skill{s=MS_Fire} @target ?variableEquals{var=caster.ms_age;value=12}
+    - skill{s=MS_Unlock} @self ?variableInRange{var=caster.ms_age;value=>=24}
+
+MS_Charge:
+  Skills:
+    # 움직이는 마법봉 끝을 매 틱 조회하여 구체가 안쪽으로 모이도록 한다.
+    - particlesphere{p=redstone;color=#36DDFF;size=0.8;amount=16;radius=0.45} @ModelPart{mid=slime_mage;pid=wand_tip} ?variableInRange{var=caster.ms_age;value=1to4}
+    - particlesphere{p=redstone;color=#36DDFF;size=0.9;amount=20;radius=0.3} @ModelPart{mid=slime_mage;pid=wand_tip} ?variableInRange{var=caster.ms_age;value=5to8}
+    - particlesphere{p=redstone;color=#28E8D0;size=1;amount=24;radius=0.15} @ModelPart{mid=slime_mage;pid=wand_tip} ?variableInRange{var=caster.ms_age;value=9to11}
+    - particles{p=redstone;color=#A5FFFF;size=0.8;amount=4;hS=0.04;vS=0.04;speed=0} @ModelPart{mid=slime_mage;pid=wand_tip}
+
+MS_Fire:
+  Conditions:
+    - variableEquals{var=caster.ms_state;value=1} true
+    - variableEquals{var=caster.ms_damage_pending;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - health{h=>0} true
+    - lineofsight true
+  Skills:
+    - sound{s=entity.breeze.shoot;v=0.25;p=1.7} @self
+    - projectile{onTick=MS_OrbTick;onHit=MS_OrbHit;v=6;g=0;i=1;hR=0.25;vR=0.25;mr=16;md=60;syo=0;sfo=0;tyo=0.8;origin=@ModelPart{mid=slime_mage;pid=wand_tip};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
+
+MS_OrbTick:
+  Skills:
+    - particlesphere{p=redstone;color=#36DDFF;size=0.7;amount=8;radius=0.16} @origin
+
+MS_OrbHit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    # 테스트용 임시 피해량. 확정 후 이 값만 바꾼다.
+    - damage{a=4}
+    - particles{p=redstone;color=#28E8D0;size=0.8;amount=10;hS=0.18;vS=0.25;speed=0;y=0.8}
+    - sound{s=block.amethyst_block.hit;v=0.25;p=1.7}
+
+# onDamaged의 피해 적용 전 체력과 다음 틱 체력을 비교한다.
+# 피해 검증 대기 중에는 발사를 막고, 사망/취소된 피해는 패턴을 실행하지 않는다.
+MS_Damaged:
+  Conditions:
+    - damageamount{a=>0} true
+    - variableEquals{var=caster.ms_state;value=9} false
+  Skills:
+    - setvariable{var=skill.ms_health_before;type=FLOAT;value=<caster.hp>} @self
+    - variableadd{var=caster.ms_damage_pending;amount=1} @self
+    - delay 1
+    - skill{s=MS_ConfirmedDamage} @self
+    - variablesubtract{var=caster.ms_damage_pending;amount=1} @self ?variableInRange{var=caster.ms_damage_pending;value=>0}
+
+MS_ConfirmedDamage:
+  Conditions:
+    - health{h=>0} true
+    - health{h=<<skill.var.ms_health_before>} true
+    - variableEquals{var=caster.ms_state;value=9} false
+  Skills:
+    - skill{s=MS_TryTeleport} @self
+    - skill{s=MS_Hit} @self ?!variableEquals{var=caster.ms_state;value=2}
+
+MS_Hit:
+  Skills:
+    - sound{s=entity.slime.hurt;v=0.3;p=1.2} @self
+    # 공격(우선순위 3)보다 낮게 재생하여 발사 모션을 덮어쓰지 않는다.
+    - meg:state{mid=slime_mage;s=hit;priority=2;li=0;lo=2} @self
+
+MS_TryTeleport:
+  Conditions:
+    - healthpercent{p=<=30%} true
+    - variableEquals{var=caster.ms_teleport_used;value=0} true
+    - variableEquals{var=caster.ms_state;value=2} false
+  TriggerConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    # ponytail: 최대 4개 안전 후보를 같은 틱에 검사. 실패가 잦은 지형에서만 후보 수 확대.
+    # 성공하면 MS_Teleport의 상태/사용권 조건이 나머지 호출을 차단한다.
+    - skill{s=MS_Teleport} @EscapeLocation{radius=6;iterations=64;height=3;blockCentered=true}
+    - skill{s=MS_Teleport} @EscapeLocation{radius=6;iterations=64;height=3;blockCentered=true}
+    - skill{s=MS_Teleport} @EscapeLocation{radius=6;iterations=64;height=3;blockCentered=true}
+    - skill{s=MS_Teleport} @EscapeLocation{radius=6;iterations=64;height=3;blockCentered=true}
+
+MS_Teleport:
+  Conditions:
+    - health{h=>0} true
+    - variableEquals{var=caster.ms_teleport_used;value=0} true
+    - variableEquals{var=caster.ms_state;value=2} false
+    - variableEquals{var=caster.ms_state;value=9} false
+  TargetConditions:
+    # EscapeLocation은 실패하면 현재 위치를 돌려준다. 최소 거리로 이를 배제한다.
+    - distance{d=2to6} true
+    - ydiff{d=-1to1} true
+    - playersinradius{r=1.5;a=0} true
+    - blocktype{type=AIR,CAVE_AIR,VOID_AIR} true
+    # EscapeLocation이 발밑 지지면과 착지 공간의 액체/충돌을 검사한다.
+    # 주변의 물은 허용: 호숫가의 안전한 땅까지 제외하지 않는다.
+    - blocktypeinradius{type=LAVA,MAGMA_BLOCK,CAMPFIRE,SOUL_CAMPFIRE,CACTUS,FIRE,SOUL_FIRE,POWDER_SNOW;r=1.5;a=0} true
+  Skills:
+    - setvariable{var=caster.ms_state;type=INTEGER;value=2} @self
+    - setvariable{var=caster.ms_age;type=INTEGER;value=0} @self
+    - skill{s=MS_StopAttack} @self
+    - skill{s=MS_Freeze} @self
+    - skill{s=MS_TeleportFX} @self
+    - teleport{spreadh=0;spreadv=0;preserveyaw=true}
+    - skill{s=MS_TeleportArrived}
+
+# 텔레포트가 취소된 경우에는 1회 사용권을 소모하지 않는다.
+MS_TeleportArrived:
+  TargetConditions:
+    - distance{d=<0.5} true
+  Skills:
+    - setvariable{var=caster.ms_teleport_used;type=INTEGER;value=1} @self
+    - skill{s=MS_TeleportFX} @self
+
+MS_TeleportFX:
+  Skills:
+    - particles{p=redstone;color=#28E8D0;size=0.8;amount=20;hS=0.4;vS=0.4;speed=0;y=0.5} @self
+    - sound{s=entity.enderman.teleport;v=0.25;p=1.8} @self
+
+MS_Freeze:
+  Skills:
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+MS_StopAttack:
+  Skills:
+    - meg:state{mid=slime_mage;s=attack;remove=true} @self
+    - meg:state{mid=slime_mage;s=hit;remove=true} @self
+
+MS_Unlock:
+  Conditions:
+    - variableEquals{var=caster.ms_state;value=9} false
+  Skills:
+    - setvariable{var=caster.ms_state;type=INTEGER;value=0} @self
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+
+MS_Death:
+  Skills:
+    - setvariable{var=caster.ms_state;type=INTEGER;value=9} @self
+    - skill{s=MS_StopAttack} @self
+    - meg:state{mid=slime_mage;s=death;priority=10;li=0;lo=0} @self
+    - particles{p=redstone;color=#36DDFF;size=0.6;amount=12;hS=0.35;vS=0.25;speed=0;y=0.5} @self
+    - particles{p=redstone;color=#28E8D0;size=0.6;amount=6;hS=0.12;vS=0.12;speed=0} @ModelPart{mid=slime_mage;pid=wand_tip}
+    - sound{s=entity.slime.death;v=0.3;p=1.2} @self
+    - sound{s=block.amethyst_block.chime;v=0.2;p=0.8} @self
