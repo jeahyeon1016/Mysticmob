@@ -1,0 +1,43 @@
+# ============================================================
+# POISON SLIME - Mob
+# MythicMobs 5.13.0 + ModelEngine 4.1.0
+# Model ID: rpg_poison_slime_cube
+# ============================================================
+
+PoisonSlime:
+  Type: ZOMBIE
+  Display: '&2포이즌 슬라임'
+  Health: 40
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.22
+    FollowRange: 20
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    PreventSlimeSplit: true
+
+  AIGoalSelectors:
+    - 0 clear
+    - 1 fleeplayers{distance=5;speed=1.1}
+    - 2 movetowardstarget{distance=5}
+    - 3 randomstroll
+    - 4 lookatplayers
+    - 5 randomlookaround
+
+  AITargetSelectors:
+    - 0 clear
+    - 1 players
+
+  Skills:
+    # ModelEngine (rpg_poison_slime_cube)
+    - meg:model{mid=rpg_poison_slime_cube;d=false;i=true;lpitch=true;usm=true;save=false} @self ~onSpawn
+    # 임시 분리 진단: 이동 중에도 idle 재생. walk 착지 발사도 중단. 종료 시 state=walk로 원복.
+    - meg:defaultstate{mid=rpg_poison_slime_cube;type=walk;state=idle;li=2;lo=2} @self ~onSpawn
+
+    # 점액 발사는 walk 애니메이션의 0.75초 키프레임에서 호출한다.
