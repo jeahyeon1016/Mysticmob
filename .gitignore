@@ -1,0 +1,14 @@
+# Local server, credentials, caches and handoff archives
+/bukkit/
+/ChatGPT_*.zip
+/agent.json
+/.tmp*/
+/.agent-work/
+.env
+.env.*
+!.env.example
+# Legacy local operating notes (central rules live in Google Docs)
+/tasks/README.md
+/tasks/TEMPLATE.md
+/개발_참고사이트.md
+/병렬작업_인계.md
