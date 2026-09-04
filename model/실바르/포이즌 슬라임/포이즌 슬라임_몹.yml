@@ -37,7 +37,6 @@ PoisonSlime:
   Skills:
     # ModelEngine (rpg_poison_slime_cube)
     - meg:model{mid=rpg_poison_slime_cube;d=false;i=true;lpitch=true;usm=true;save=false} @self ~onSpawn
-    # 임시 분리 진단: 이동 중에도 idle 재생. walk 착지 발사도 중단. 종료 시 state=walk로 원복.
-    - meg:defaultstate{mid=rpg_poison_slime_cube;type=walk;state=idle;li=2;lo=2} @self ~onSpawn
+    - meg:defaultstate{mid=rpg_poison_slime_cube;type=walk;state=walk;li=2;lo=2} @self ~onSpawn
 
     # 점액 발사는 walk 애니메이션의 0.75초 키프레임에서 호출한다.
