@@ -1,5 +1,5 @@
 # MythicMobs
-- 현재 폴더가 작업 루트. origin: https://github.com/jeahyeon1016/rpg.git
+- 현재 폴더가 작업 루트. origin: https://github.com/jeahyeon1016/Mysticmob.git
 - 공통 규칙: https://docs.google.com/document/d/1Bg80xIFTi8ORz1-TVtqHi6dxOt_9tw7AhxbwhE31Obg/edit
 - 프로젝트 규칙: https://docs.google.com/document/d/1Kj1HJcptt0HGto7XjzA8CyLoj-Z5G7WzakIcxTyG7eY/edit
 - 자료·참고(필요할 때만): https://docs.google.com/document/d/12GnFiAuetxv45QzKSu5pec5CyzUZKoDVmF9FmAU2hm4/edit
