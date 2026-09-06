@@ -1,4 +1,31 @@
-# 엔트 미니언 — 몹 준비용 (미구현, 서버 배포 제외)
-# 기획: https://docs.google.com/document/d/19nH7ZbtBfQsa5KSMh-6AkD-h86iHA-omdYnnWKMTsWw/edit?tab=t.g4yk7wqs1gj
-# 모델: ent_minion.bbmodel
-# 실행 가능한 정의 없음. 패턴·수치·ID는 개별 구현 시 확정.
+# MythicMobs 5.13.0 / ModelEngine 4.1.0
+EntMinion:
+  Type: ZOMBIE
+  Display: '&2엔트 미니언'
+  Health: 100
+  Damage: 0
+  Modules:
+    ThreatTable: true
+  Options:
+    MovementSpeed: 0.16
+    KnockbackResistance: 0.85
+    FollowRange: 20
+    Silent: true
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    PreventRandomEquipment: true
+  AIGoalSelectors:
+    - 0 clear
+    - 1 float
+    - 2 meleeattack
+    - 3 movetowardstarget
+  AITargetSelectors:
+    - 0 clear
+    - 1 attacker
+  Skills:
+    - skill{s=EM_Init} @self ~onSpawn
+    - skill{s=EM_Aggro} @trigger ~onDamaged
+    - skill{s=EM_HurtSound} @self ~onDamaged
+    - skill{s=EM_TryAttack} @target ~onTimer:2
+    - skill{s=EM_Death} @self ~onDeath
