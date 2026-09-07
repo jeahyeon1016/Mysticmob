@@ -1,0 +1,29 @@
+# Local/generated environments
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.mypy_cache/
+
+# Agent-generated review/cache artifacts
+agent-system/.doc-review/
+agent-system/credentials.json
+agent-system/token.json
+agent-system/connections.json
+tmp/
+cadtemp/
+
+# Local secrets and machine-specific files
+**/.env
+**/.env.*
+!.env.example
+**/secrets.h
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Nested/independent repositories
+projects/mythicmobs/
