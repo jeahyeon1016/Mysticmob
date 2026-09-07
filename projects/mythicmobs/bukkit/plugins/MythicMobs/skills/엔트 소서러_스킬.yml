@@ -70,7 +70,7 @@ ES_Attack1:
 ES_Attack1Tick:
   Skills:
     - look{headOnly=false;immediately=true} @target
-    - particles{p=redstone;color=#36DDFF;size=0.75;amount=3;hS=0.05;vS=0.05;speed=0} @ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0} ?variableInRange{var=caster.es_age;value=1to14}
+    - particles{p=redstone;color=#287BFF;size=0.75;amount=3;hS=0.05;vS=0.05;speed=0} @ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0} ?variableInRange{var=caster.es_age;value=1to14}
     - skill{s=ES_Attack1Hit} @self ?variableEquals{var=caster.es_age;value=15}
     - skill{s=ES_Unlock} @self ?variableInRange{var=caster.es_age;value=>=35}
 
@@ -122,7 +122,7 @@ ES_FireStraight:
   Skills:
     - particlesphere{p=redstone;color=#A5FFFF;size=0.9;amount=8;radius=0.12} @ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0}
     - sound{s=entity.breeze.shoot;v=0.45;p=1.65} @self
-    - projectile{onTick=ES_MissileTick;onHit=ES_MissileHit;v=14;g=0;i=1;hR=0.25;vR=0.25;mr=16;md=40;id=0;syo=0;sfo=0;tyo=1;origin=@ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
+    - projectile{onStart=ES_MissileStart;onTick=ES_MissileTick;onHit=ES_MissileHit;v=14;g=0;i=1;hR=0.25;vR=0.25;mr=16;md=40;id=0;syo=1.7;sfo=0.5;tyo=1;origin=@ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
 
 # startdir가 먼저 옆으로 향하고, 큰 inertia가 목표 쪽으로 천천히 휘게 만든다.
 ES_FireRightCurve:
@@ -135,7 +135,7 @@ ES_FireRightCurve:
   Skills:
     - particlesphere{p=redstone;color=#A5FFFF;size=0.9;amount=8;radius=0.12} @ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0}
     - sound{s=entity.breeze.shoot;v=0.4;p=1.45} @self
-    - missile{onTick=ES_MissileTick;onHit=ES_MissileHit;v=3.5;in=25;startdir=@Forward{f=8;rot=90};g=0;i=1;hR=0.25;vR=0.25;mr=16;md=60;id=0;syo=0;sfo=0;tyo=1;origin=@ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
+    - missile{onStart=ES_MissileStart;onTick=ES_MissileTick;onHit=ES_MissileHit;v=8;in=8;ho=90;vO=0;g=0;i=1;hR=0.25;vR=0.25;mr=16;md=60;id=0;syo=1.7;sfo=0.5;tyo=2;origin=@ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
 
 ES_FireLeftCurve:
   Conditions:
@@ -147,21 +147,26 @@ ES_FireLeftCurve:
   Skills:
     - particlesphere{p=redstone;color=#A5FFFF;size=0.9;amount=8;radius=0.12} @ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0}
     - sound{s=entity.breeze.shoot;v=0.4;p=1.85} @self
-    - missile{onTick=ES_MissileTick;onHit=ES_MissileHit;v=3.5;in=25;startdir=@Forward{f=8;rot=-90};g=0;i=1;hR=0.25;vR=0.25;mr=16;md=60;id=0;syo=0;sfo=0;tyo=1;origin=@ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
-
-ES_MissileTick:
-  Skills:
-    - particles{p=redstone;color=#36DDFF;size=0.65;amount=3;hS=0.025;vS=0.025;speed=0} @origin
-    - particles{p=end_rod;amount=1;hS=0;vS=0;speed=0} @origin
+    - missile{onStart=ES_MissileStart;onTick=ES_MissileTick;onHit=ES_MissileHit;v=8;in=8;ho=-90;vO=0;g=0;i=1;hR=0.25;vR=0.25;mr=16;md=60;id=0;syo=1.7;sfo=0.5;tyo=2;origin=@ModelPart{mid=ent_sorcerer;pid=orb;location=0,1.25,0};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
 
 ES_MissileHit:
   TargetConditions:
     - entitytype{t=PLAYER} true
   Skills:
     - damage{a=4;ignoreinvulnerability=true}
-    - particles{p=redstone;color=#28E8D0;size=0.8;amount=14;hS=0.22;vS=0.3;speed=0.04;y=0.8}
-    - particles{p=end_rod;amount=4;hS=0.12;vS=0.18;speed=0.03;y=0.8}
+    - particles{p=redstone;color=#287BFF;size=0.8;amount=14;hS=0.22;vS=0.3;speed=0.04;y=0.8}
     - sound{s=block.amethyst_block.hit;v=0.4;p=1.65}
+
+ES_MissileStart:
+  Skills:
+    - particles{p=redstone;color=#287BFF;size=0.9;amount=14;hS=0.18;vS=0.18;speed=0.03} @origin
+    - delay 5
+    - modifyProjectile{trait=VELOCITY;action=SET;value=14}
+
+ES_MissileTick:
+  Skills:
+    - particlesphere{p=redstone;color=#287BFF;size=0.7;amount=10;radius=0.18} @origin
+    - particles{p=redstone;color=#FFFFFF;size=0.25;amount=1;hS=0;vS=0;speed=0} @origin
 
 ES_Damaged:
   Conditions:

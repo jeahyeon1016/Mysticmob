@@ -15,10 +15,11 @@
 - [x] 엔트 미니언/워리어 ModelEngine 블루프린트 확인
 - [x] 엔트 미니언/워리어 리소스팩 모델·텍스처 확인
 - [x] 엔트 미니언 검증 코드 확인: `validation/ValidateEntMinion.java`
+- [x] 엔트 소서러 Attack2 미사일 연출 반영: `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml`
 
 ## 현재 판단
 
-엔트 미니언과 워리어는 이미 제작·반영된 상태다. 다음 작업은 신규 제작이 아니라 설정 검증, 서버 테스트, 또는 다음 기획 항목 선정이다.
+엔트 미니언과 워리어는 이미 제작·반영된 상태다. 엔트 소서러 Attack2 미사일 연출은 반영되었고 서버 리로드까지 확인했다.
 
 ## 진행 기록
 
@@ -26,6 +27,7 @@
 |---|---|---|---|
 | 2026-09-07 | 엔트 미니언·워리어 구현 상태 확인 | 완료 | `model/`, `bukkit/plugins/ModelEngine/`, `bukkit/plugins/MythicMobs/` |
 | 2026-09-07 | 엔트 소서러 `.bbmodel`을 ModelEngine 블루프린트에 적용 | 적용 완료 / 리로드 대기 | `bukkit/plugins/ModelEngine/blueprints/ent_sorcerer.bbmodel` |
+| 2026-09-08 | 엔트 소서러 Attack2 3발 미사일 연출 조정 | 완료 / 서버 리로드 확인 | `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml` |
 
 ## 다음 업데이트 규칙
 
