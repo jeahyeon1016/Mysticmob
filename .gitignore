@@ -19,6 +19,7 @@ cadtemp/
 **/.env.*
 !.env.example
 **/secrets.h
+PRIVATE_ENV_SETUP.md
 
 # OS/editor files
 .DS_Store
