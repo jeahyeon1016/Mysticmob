@@ -4,9 +4,10 @@
 
 - 담당 범위: 하드웨어 및 ESP32 펌웨어
 - 4주차 MVP: 완료
-- 소스 저장소: `D:\github\MotorDiagnosis`
+- 소스 저장소: `D:\ai agent`
+- 최신 원격 저장소: https://github.com/jeahyeon1016/ai-agent
 - 작업 브랜치: `feat/esp32-telemetry-integration`
-- PR: https://github.com/ckdudwns/MotorDiagnosis/pull/34
+- 기존 펌웨어 PR: https://github.com/ckdudwns/MotorDiagnosis/pull/34
 
 ## 완료된 작업
 
@@ -41,4 +42,3 @@
 ## 이슈 작성 양식
 
 이슈 작성 시 담당 파트, 담당자, 우선순위, 주차·기능 ID, 현재/변경 상태, 작업 범위, 제외 범위, API 연동, 완료 기준, 검증 방법, 참고 자료를 반드시 기록한다.
-

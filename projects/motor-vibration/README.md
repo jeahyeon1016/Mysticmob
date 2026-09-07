@@ -6,4 +6,4 @@
 2. [현재 상태 및 다음 작업](02_현재상태_인수인계.md)
 3. [작업·이슈 작성 기준](03_작업_이슈_기준.md)
 
-소스코드는 [MotorDiagnosis 저장소](D:/github/MotorDiagnosis)에 있다.
+최신 기준 저장소는 [ai-agent](https://github.com/jeahyeon1016/ai-agent)다.
