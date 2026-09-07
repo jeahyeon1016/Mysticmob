@@ -1,0 +1,371 @@
+# ============================================================
+# 태엽골렘 v8
+# - 평타: 3.2블럭 / 전방 90도 부채꼴
+# - 평타 시작/타격 금속 기계음
+# - 골렘 피격 금속음
+# - 충전 스택별 전기음 속도 증가
+# - 방전 순간 강화 사운드
+# ============================================================
+
+# ------------------------------------------------------------
+# 평타
+# ------------------------------------------------------------
+ClockworkGolem_Melee:
+  Skills:
+    # ~onAttack은 항상 취소.
+    # 스킬 자체 Cooldown을 쓰면 쿨타임 중 cancelevent도 막혀
+    # 바닐라 좀비 평타가 새어 들어올 수 있어서 lock 방식으로 변경.
+    - cancelevent
+    - skill{s=ClockworkGolem_MeleeExecute} @self
+
+ClockworkGolem_MeleeExecute:
+  Conditions:
+    - variableIsSet{var=caster.melee_lock} false
+  Skills:
+    # 26틱 = 1.3초 동안 다음 평타 시작 차단
+    - setvariable{var=caster.melee_lock;value=1;type=INTEGER;duration=26}
+
+    - state{mid=clockwork_golem;s=attack;li=0;lo=2;f=true;p=60} @self
+
+    # 실제 주먹 타격 프레임
+    - delay 11
+
+    # 3.2블럭 내 플레이어를 검사하고 전방 90도만 적중
+    - skill{s=ClockworkGolem_MeleeConeHit} @PlayersInRadius{r=3.2}
+
+ClockworkGolem_MeleeConeHit:
+  TargetConditions:
+    - fieldofview{angle=90} true
+  Skills:
+    - damage{amount=10} @target
+
+    # 주먹이 적중했을 때 무거운 금속 충격음
+    - sound{s=entity.iron_golem.attack;v=0.8;p=0.9} @target
+    - sound{s=block.iron_block.hit;v=0.4;p=0.8} @target
+
+
+# ------------------------------------------------------------
+# 골렘 피격음
+# ------------------------------------------------------------
+ClockworkGolem_HurtSound:
+  Skills:
+    - sound{s=block.chain.hit;v=0.8;p=0.8} @self
+    - sound{s=block.anvil.hit;v=0.45;p=1.35} @self
+
+
+# ------------------------------------------------------------
+# 충전
+# ------------------------------------------------------------
+ClockworkGolem_Charge:
+  Conditions:
+    - variableEquals{var=caster.overloading;value=1} false
+  Skills:
+    - variableadd{var=caster.charge;amount=1}
+    - setvariable{var=caster.recent_hit;value=1;type=INTEGER;duration=100}
+
+    - skill{s=ClockworkGolem_ShowCharge1} @self
+    - skill{s=ClockworkGolem_ShowCharge2} @self
+    - skill{s=ClockworkGolem_ShowCharge3} @self
+    - skill{s=ClockworkGolem_ShowCharge4} @self
+    - skill{s=ClockworkGolem_OverloadCheck} @self
+
+ClockworkGolem_ClearChargeEyes:
+  Skills:
+    - state{mid=clockwork_golem;s=eye_power_1;r=true;i=true} @self
+    - state{mid=clockwork_golem;s=eye_power_2;r=true;i=true} @self
+    - state{mid=clockwork_golem;s=eye_power_3;r=true;i=true} @self
+    - state{mid=clockwork_golem;s=eye_power_4;r=true;i=true} @self
+
+ClockworkGolem_ShowCharge1:
+  Conditions:
+    - variableEquals{var=caster.charge;value=1}
+  Skills:
+    - skill{s=ClockworkGolem_ClearChargeEyes} @self
+    - state{mid=clockwork_golem;s=eye_power_1;li=0;lo=0;p=50} @self
+
+ClockworkGolem_ShowCharge2:
+  Conditions:
+    - variableEquals{var=caster.charge;value=2}
+  Skills:
+    - skill{s=ClockworkGolem_ClearChargeEyes} @self
+    - state{mid=clockwork_golem;s=eye_power_2;li=0;lo=0;p=50} @self
+
+ClockworkGolem_ShowCharge3:
+  Conditions:
+    - variableEquals{var=caster.charge;value=3}
+  Skills:
+    - skill{s=ClockworkGolem_ClearChargeEyes} @self
+    - state{mid=clockwork_golem;s=eye_power_3;li=0;lo=0;p=50} @self
+
+ClockworkGolem_ShowCharge4:
+  Conditions:
+    - variableEquals{var=caster.charge;value=4}
+  Skills:
+    - skill{s=ClockworkGolem_ClearChargeEyes} @self
+    - state{mid=clockwork_golem;s=eye_power_4;li=0;lo=0;p=50} @self
+
+
+# ------------------------------------------------------------
+# 스택별 '찌릿' 반복음
+# 1스택: 24틱(1.2초)
+# 2스택: 16틱(0.8초)
+# 3스택: 10틱(0.5초)
+# 4스택: 5틱(0.25초)
+# ------------------------------------------------------------
+ClockworkGolem_ChargeTick1:
+  Conditions:
+    - variableEquals{var=caster.charge;value=1}
+    - variableEquals{var=caster.overloading;value=1} false
+  Skills:
+    - sound{s=block.redstone_torch.burnout;v=0.35;p=1.25} @self
+
+ClockworkGolem_ChargeTick2:
+  Conditions:
+    - variableEquals{var=caster.charge;value=2}
+    - variableEquals{var=caster.overloading;value=1} false
+  Skills:
+    - sound{s=block.redstone_torch.burnout;v=0.4;p=1.4} @self
+
+ClockworkGolem_ChargeTick3:
+  Conditions:
+    - variableEquals{var=caster.charge;value=3}
+    - variableEquals{var=caster.overloading;value=1} false
+  Skills:
+    - sound{s=block.redstone_torch.burnout;v=0.48;p=1.6} @self
+
+ClockworkGolem_ChargeTick4:
+  Conditions:
+    - variableEquals{var=caster.charge;value=4}
+    - variableEquals{var=caster.overloading;value=1} false
+  Skills:
+    - sound{s=block.redstone_torch.burnout;v=0.58;p=1.85} @self
+
+
+# ------------------------------------------------------------
+# 충전 파티클
+# ------------------------------------------------------------
+ClockworkGolem_ChargeAura:
+  Skills:
+    - skill{s=ClockworkGolem_ChargeParticles1} @self
+    - skill{s=ClockworkGolem_ChargeParticles2} @self
+    - skill{s=ClockworkGolem_ChargeParticles3} @self
+    - skill{s=ClockworkGolem_ChargeParticles4} @self
+
+ClockworkGolem_ChargeParticles1:
+  Conditions:
+    - variableEquals{var=caster.charge;value=1}
+  Skills:
+    - effect:particles{particle=electric_spark;amount=2;hS=0.16;vS=0.10;speed=0.02} @SelfLocation{y=1.75}
+
+ClockworkGolem_ChargeParticles2:
+  Conditions:
+    - variableEquals{var=caster.charge;value=2}
+  Skills:
+    - effect:particles{particle=electric_spark;amount=4;hS=0.22;vS=0.14;speed=0.025} @SelfLocation{y=1.78}
+
+ClockworkGolem_ChargeParticles3:
+  Conditions:
+    - variableEquals{var=caster.charge;value=3}
+  Skills:
+    - effect:particles{particle=electric_spark;amount=7;hS=0.30;vS=0.18;speed=0.035} @SelfLocation{y=1.82}
+
+ClockworkGolem_ChargeParticles4:
+  Conditions:
+    - variableEquals{var=caster.charge;value=4}
+  Skills:
+    - effect:particles{particle=electric_spark;amount=11;hS=0.38;vS=0.24;speed=0.05} @SelfLocation{y=1.86}
+
+
+# ------------------------------------------------------------
+# 5스택 과부하
+# ------------------------------------------------------------
+ClockworkGolem_OverloadCheck:
+  Conditions:
+    - variableEquals{var=caster.charge;value=5}
+  Skills:
+    - skill{s=ClockworkGolem_Overload} @self
+
+ClockworkGolem_Overload:
+  Skills:
+    - setvariable{var=caster.overloading;value=1;type=INTEGER}
+    - skill{s=ClockworkGolem_ClearChargeEyes} @self
+
+    - potion{type=SLOWNESS;duration=32;level=10} @self
+    - state{mid=clockwork_golem;s=overload;li=0;lo=0;f=true;p=80} @self
+
+    # 충전 시작음
+    - sound{s=block.beacon.power_select;v=1.4;p=0.55} @self
+    - sound{s=block.respawn_anchor.charge;v=1.0;p=0.8} @self
+    - effect:particles{particle=electric_spark;amount=18;hS=0.45;vS=0.8;speed=0.05} @SelfLocation{y=1.8}
+
+    # 1.2초 후 실제 방전
+    - delay 24
+
+    - effect:particles{particle=electric_spark;amount=110;hS=2.5;vS=1.3;speed=0.32} @SelfLocation{y=1.2}
+
+    # 방전 순간 강한 전기음
+    - sound{s=entity.lightning_bolt.impact;v=2.0;p=1.1} @self
+    - sound{s=block.respawn_anchor.deplete;v=1.3;p=1.35} @self
+    - sound{s=entity.lightning_bolt.thunder;v=0.8;p=1.5} @self
+
+    - skill{s=ClockworkGolem_DischargeTarget} @PlayersInRadius{r=4}
+    - damage{amount=8} @PlayersInRadius{r=4}
+    - skill{s=ClockworkGolem_Paralyze} @PlayersInRadius{r=4}
+    - skill{s=ClockworkGolem_ShockShake} @PlayersInRadius{r=4}
+    - skill{s=ClockworkGolem_ShockParticles} @PlayersInRadius{r=4}
+
+    - setvariable{var=caster.charge;value=0;type=INTEGER}
+    - delay 8
+    - setvariable{var=caster.overloading;value=0;type=INTEGER}
+
+
+# 플레이어까지 직선 전기선을 잠깐 유지
+ClockworkGolem_DischargeTarget:
+  Skills:
+    - effect:particleline{particle=electric_spark;amount=3;db=0.06;syo=1.8;tyo=1.0} @target
+    - delay 1
+    - effect:particleline{particle=electric_spark;amount=3;db=0.06;syo=1.8;tyo=1.0} @target
+    - delay 1
+    - effect:particleline{particle=electric_spark;amount=3;db=0.06;syo=1.8;tyo=1.0} @target
+    - delay 1
+    - effect:particleline{particle=electric_spark;amount=3;db=0.06;syo=1.8;tyo=1.0} @target
+    - delay 1
+    - effect:particleline{particle=electric_spark;amount=3;db=0.06;syo=1.8;tyo=1.0} @target
+
+ClockworkGolem_Paralyze:
+  Skills:
+    - stun{d=100;f=false;noknockback=true} @target
+    - effect:particles{particle=electric_spark;amount=12;hS=0.4;vS=1;speed=0.05} @target
+    - sound{s=block.redstone_torch.burnout;v=1;p=1.8} @target
+
+
+
+# ------------------------------------------------------------
+# 감전 화면 흔들림
+# 방전 순간 약 0.5초 동안 짧게 부들부들하게 시점 흔들기
+# ------------------------------------------------------------
+ClockworkGolem_ShockShake:
+  Skills:
+    # 마비 시간 5초(100틱) 동안 지속적으로 시점 흔들기
+    # 너무 일정하면 기계적으로 보여서 강도를 약간씩 바꿔 반복
+    - recoil{r=2;pitch=-3to3} @target
+    - delay 4
+    - recoil{r=2;pitch=3to-3} @target
+    - delay 4
+    - recoil{r=3;pitch=-4to4} @target
+    - delay 4
+    - recoil{r=2;pitch=4to-4} @target
+    - delay 4
+    - recoil{r=2;pitch=-3to3} @target
+    - delay 4
+    - recoil{r=3;pitch=3to-3} @target
+    - delay 4
+    - recoil{r=2;pitch=-4to4} @target
+    - delay 4
+    - recoil{r=2;pitch=4to-4} @target
+    - delay 4
+    - recoil{r=3;pitch=-3to3} @target
+    - delay 4
+    - recoil{r=2;pitch=3to-3} @target
+    - delay 4
+    - recoil{r=2;pitch=-4to4} @target
+    - delay 4
+    - recoil{r=3;pitch=4to-4} @target
+    - delay 4
+    - recoil{r=2;pitch=-3to3} @target
+    - delay 4
+    - recoil{r=2;pitch=3to-3} @target
+    - delay 4
+    - recoil{r=3;pitch=-4to4} @target
+    - delay 4
+    - recoil{r=2;pitch=4to-4} @target
+    - delay 4
+    - recoil{r=2;pitch=-3to3} @target
+    - delay 4
+    - recoil{r=3;pitch=3to-3} @target
+    - delay 4
+    - recoil{r=2;pitch=-4to4} @target
+    - delay 4
+    - recoil{r=2;pitch=4to-4} @target
+    - delay 4
+    - recoil{r=3;pitch=-3to3} @target
+    - delay 4
+    - recoil{r=2;pitch=3to-3} @target
+    - delay 4
+    - recoil{r=2;pitch=-4to4} @target
+    - delay 4
+    - recoil{r=3;pitch=4to-4} @target
+
+ClockworkGolem_ShockParticles:
+  Skills:
+    - effect:particles{particle=electric_spark;amount=10;hS=0.5;vS=1.0;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.45;vS=0.9;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.5;vS=1.0;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.45;vS=0.9;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.5;vS=1.0;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.45;vS=0.9;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.5;vS=1.0;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.45;vS=0.9;speed=0.1} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.5;vS=1.0;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=8;hS=0.45;vS=0.9;speed=0.08} @target
+    - delay 4
+    - effect:particles{particle=electric_spark;amount=10;hS=0.5;vS=1.0;speed=0.1} @target
+
+# ------------------------------------------------------------
+# 지락
+# ------------------------------------------------------------
+ClockworkGolem_GroundCheck:
+  Conditions:
+    - variableIsSet{var=caster.recent_hit} false
+    - variableInRange{var=caster.charge;range=>0}
+    - variableEquals{var=caster.overloading;value=1} false
+  Skills:
+    - variablesubtract{var=caster.charge;amount=1}
+    - sound{s=block.redstone_torch.burnout;v=0.45;p=0.8} @self
+    - effect:particles{particle=electric_spark;amount=4;hS=0.25;vS=0.3;speed=0.02} @SelfLocation{y=1.72}
+    - skill{s=ClockworkGolem_ResetChargeVisual} @self
+
+ClockworkGolem_ResetChargeVisual:
+  Skills:
+    - skill{s=ClockworkGolem_ClearChargeEyes} @self
+    - skill{s=ClockworkGolem_ShowCharge1} @self
+    - skill{s=ClockworkGolem_ShowCharge2} @self
+    - skill{s=ClockworkGolem_ShowCharge3} @self
+    - skill{s=ClockworkGolem_ShowCharge4} @self

@@ -1,0 +1,89 @@
+# ============================================================
+# Copper Origin - Stalactite Hitbox v0.42 NO-BARRIER PROXY
+# Invisible gravity entity proxy; no block placement
+# ============================================================
+
+CopperOrigin_StalactiteHitbox_v28:
+  Type: SLIME
+  Display: '&8Stalactite Hitbox'
+  Health: 2048
+  Damage: 0
+
+  # 스폰 순간부터 정확히 0으로 존재
+  Variables:
+    stalactite_hit_count: int/0
+
+  Options:
+    Invisible: true
+    Silent: true
+    NoGravity: true
+    MovementSpeed: 0
+
+    # 화살 판정 때문에 true 유지
+    Collidable: true
+
+    # Slime hitbox 크기
+    Size: 2
+
+    PreventSlimeSplit: true
+
+    # 공식 범위 최대치 1 = 100% 일반 공격 넉백 저항
+    KnockbackResistance: 1
+
+    NoDamageTicks: 0
+    Despawn: false
+    PreventOtherDrops: true
+    PreventItemPickup: true
+
+  AIGoalSelectors:
+    - clear
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    # 한 damage event가 단 하나의 진입점으로만 들어감
+    - skill{s=CopperStalactite_v28_OnHit;sync=true} @self ~onDamaged
+
+
+# ============================================================
+# 종유석 보스 충돌 판정용 invisible gravity proxy
+# 실제 POINTED_DRIPSTONE은 blockdestabilize로 자연 낙하하고,
+# proxy는 블록을 생성하지 않고 STALACTITE_HIT signal만 담당.
+# ============================================================
+
+CopperOrigin_StalactiteDamageProxy_v40:
+  # v0.42: BARRIER FALLING_BLOCK 제거.
+  # 실제 점적석은 기존 blockdestabilize가 떨어뜨리고,
+  # 이 엔티티는 보스 충돌 signal만 담당하므로 월드에 블록으로 굳을 이유가 없다.
+  Type: SLIME
+  Display: '&8Stalactite Damage Proxy'
+  Health: 2048
+  Damage: 0
+
+  Options:
+    Invisible: true
+    Silent: true
+    NoGravity: false
+    MovementSpeed: 0
+    Collidable: false
+    Size: 1
+    PreventSlimeSplit: true
+    KnockbackResistance: 1
+    NoDamageTicks: 0
+    Despawn: true
+    PreventOtherDrops: true
+    PreventItemPickup: true
+
+  AIGoalSelectors:
+    - clear
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    # 중력으로 실제 점적석과 같이 낙하하면서 보스 근처 충돌만 검사.
+    - skill{s=CopperOrigin_StalactiteProxy_HitCheck;sync=true} @self ~onTimer:1
+
+    # 바닥에 닿으면 엔티티만 제거. 블록 설치 가능성 자체가 없음.
+    - skill{s=CopperOrigin_StalactiteDamageProxy_Cleanup;sync=true} @SelfLocation{yoffset=-1} ~onTimer:1

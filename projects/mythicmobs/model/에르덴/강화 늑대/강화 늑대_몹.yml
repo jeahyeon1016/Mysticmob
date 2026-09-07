@@ -1,0 +1,140 @@
+# ============================================================
+# 검정 늑대 / Black Direwolf
+# 일반 몹 - 초반 지역 상위종 / 선공형 근접 몬스터
+# MythicMobs + BetterModel
+# Development v1.5
+#
+# BetterModel model id: direwolf
+# VFX model ids:
+# - direwolfslash
+# - direwolfbite
+#
+# 갈색 늑대와의 차이
+# - 플레이어 선공형
+# - HP / 방어력 / 이동속도 소폭 증가
+# - 전투 중 howl 패턴 사용
+# - howl 시 주변 갈색/검정 늑대에게 5초간 Speed I(+20%) 부여
+# - 리더 지휘가 아니라 상위종의 울음이 주변 늑대의 사냥 본능을 자극하는 컨셉
+# - v1.1: 모델 내부 hitbox 보조 큐브 비표시 + 공격 사거리 상향
+# - v1.2: hitbox 그룹/큐브를 모델 데이터에서 완전히 삭제
+# - v1.3: howl 모션 7.863초로 연장 + 커스텀 하울 사운드 대응
+# - v1.3: 하울 버프가 걸린 검정 늑대는 howl 사용 금지
+# - v1.4: 하울 이속 버프 Speed I(+20%) 5초 -> Speed II(+40%) 8초
+# - v1.4: howl_buff 마커도 8초 유지해 버프 중 재하울 차단 유지
+# - v1.5: 변수 howl_buff 제거, 실제 SPEED 포션 보유 여부로 하울 차단
+# - v1.5: 하울 버프는 Direwolf_Desert_Normal / Direwolf_Black_Normal에게만 직접 적용
+# - v1.5: 플레이어가 하울 버프를 받는 경로 제거
+#
+# 공격:
+# - 할퀴기 2 : 물기 1
+# - 할퀴기: 정면 60도 / 3.5블럭 / 가속 모델 기준 약 0.25초 타점
+# - 물기  : 정면 60도 / 2.5블럭 / 약 0.15초 타점
+# ============================================================
+
+Direwolf_Black_Normal:
+  Type: WOLF
+  Display: '&8검정 늑대'
+  Health: 45
+  Damage: 0
+  Armor: 2
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.32
+    FollowRange: 16
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    KnockbackResistance: 0.12
+
+  # 상위종은 플레이어를 먼저 발견하고 공격한다.
+  AIGoalSelectors:
+    - clear
+    - float
+    - meleeattack
+    - movetowardstarget
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+    - players
+    - attacker
+
+  Skills:
+    # BetterModel 초기화
+    - skill{s=DirewolfBlack_Init} @self ~onSpawnOrLoad
+
+    # Idle / Walk 동기화
+    - skill{s=DirewolfBlack_WalkStart} @self ~onTimer:2
+    - skill{s=DirewolfBlack_IdleStart} @self ~onTimer:2
+
+    # 기본 공격
+    - skill{s=DirewolfBlack_AttackRouter} @self ~onTimer:4
+
+    # 전투 중 하울링 패턴
+    - skill{s=DirewolfBlack_HowlCheck} @self ~onTimer:20
+
+    # 피격 / 사망
+    - sound{s=entity.wolf.hurt;v=0.50;p=0.90} @self ~onDamaged
+    - skill{s=DirewolfBlack_Death} @self ~onDeath
+
+
+# ============================================================
+# 할퀴기 VFX Actor
+# ============================================================
+Direwolf_Black_SlashFX:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    Collidable: false
+    PreventOtherDrops: true
+    PreventItemPickup: true
+
+  AIGoalSelectors:
+    - clear
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - model{mid=direwolfslash;n=false} @self ~onSpawn
+    - state{s=idle;li=0;lo=0} @self ~onSpawn
+    - remove{delay=16} @self ~onSpawn
+
+
+# ============================================================
+# 물기 VFX Actor
+# ============================================================
+Direwolf_Black_BiteFX:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    Collidable: false
+    PreventOtherDrops: true
+    PreventItemPickup: true
+
+  AIGoalSelectors:
+    - clear
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - model{mid=direwolfbite;n=false} @self ~onSpawn
+    - state{s=idle;li=0;lo=0} @self ~onSpawn
+    - remove{delay=18} @self ~onSpawn

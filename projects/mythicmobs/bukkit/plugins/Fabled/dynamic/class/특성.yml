@@ -1,0 +1,75 @@
+'특성': 
+  name: '특성'
+  'action-bar': ''
+  prefix: ''
+  group: 'node'
+  mana: ''
+  'max-level': 200
+  parent: ''
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '0'
+    'health-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+    '용기-base': '0'
+    '용기-scale': '0'
+    '의지-base': '0'
+    '의지-scale': '0'
+    '정신력-base': '0'
+    '정신력-scale': '0'
+    '지혜-base': '0'
+    '지혜-scale': '0'
+    '힘-base': '0'
+    '힘-scale': '0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '붉은 노드'
+  - '푸른 노드'
+  - '청록 노드'
+  - '검은 노드'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '특성'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []

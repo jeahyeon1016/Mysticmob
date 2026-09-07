@@ -1,0 +1,55 @@
+# ============================================================
+# RPG Resource Pack - All Custom Items
+# merged_resourcepack.zip 기준
+#
+# ItemModel ID는 리소스팩 assets/rpg/items/*.json 과 1:1 대응.
+# Id(Material)는 외형과 무관하므로 실제 전투 시스템에 맞게 변경 가능.
+# ============================================================
+
+Lv5_WoodSword:
+  Id: WOODEN_SWORD
+  Display: '&fLv.5 나무 검'
+  Options:
+    ItemModel: rpg:10lv_soward
+    Unbreakable: true
+    HideFlags: true
+
+Lv10_WoodMace:
+  Id: MACE
+  Display: '&fLv.10 나무 철퇴'
+  Options:
+    ItemModel: rpg:lv10_wood_mace
+    Unbreakable: true
+    HideFlags: true
+
+Lv5_WoodDagger:
+  Id: WOODEN_SWORD
+  Display: '&fLv.5 나무 단검'
+  Options:
+    ItemModel: rpg:lv5_wood_dagger
+    Unbreakable: true
+    HideFlags: true
+
+Lv5_WoodSpear:
+  Id: TRIDENT
+  Display: '&fLv.5 나무 창'
+  Options:
+    ItemModel: rpg:lv5_wood_spier
+    Unbreakable: true
+    HideFlags: true
+
+Lv5_WoodWand:
+  Id: STICK
+  Display: '&fLv.5 나무 완드'
+  Options:
+    ItemModel: rpg:lv5_wood_wand
+    Unbreakable: true
+    HideFlags: true
+
+Lv5_WoodCrossbow:
+  Id: CROSSBOW
+  Display: '&fLv.5 나무 석궁'
+  Options:
+    ItemModel: rpg:lv5_wood_crossbow
+    Unbreakable: true
+    HideFlags: true

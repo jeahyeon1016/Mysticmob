@@ -1,0 +1,151 @@
+# ============================================================
+# MOUNTED ORC SKILLS
+# MythicMobs Premium 5.13.0
+# ModelEngine Premium 4.1.0
+# v1.14
+#
+# v1.9 기반 변경
+# - 공격 시작 조건: 2블럭 이내
+# - 실제 타격 반경: 2블럭
+# - 공격 damage의 preventknockback 제거 -> 일반 넉백 복구
+# - 전체 커스텀 사운드 볼륨 v1.10 대비 50% 감소
+# - BindHitbox proxy의 피격량을 부모 MountedOrc에게 전달
+# ============================================================
+
+
+# ============================================================
+# BASIC ATTACK
+# ============================================================
+
+MountedOrc_Attack:
+  Conditions:
+    - variableEquals{var=caster.pattern_busy;value=0} true
+
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2}
+
+  Skills:
+    - setvariable{var=caster.pattern_busy;value=1;t=integer} @self
+
+    # 공격 시작 순간 run 종료 + 기본속도 / walk 복구
+    - auraremove{aura=mounted_orc_run} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:defaultstate{mid=orc_minion;type=walk;state=walk;li=2;lo=2} @self
+
+    # 공격 초반 방향 보정
+    - look{headOnly=false;force=true;immediately=true;repeat=6;repeatInterval=1} @target
+
+    # 공격 전체 모션 약 36틱
+    - stun{d=36;f=false;stopai=true} @self
+    - meg:state{mid=orc_minion;s=attack;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # 공격 준비/휘두름: 오크의 묵직한 포효 + 무기 휘두름 느낌
+    - sound{s=entity.ravager.attack;v=0.525;p=0.82} @self
+    - sound{s=entity.player.attack.sweep;v=0.325;p=0.68} @self
+
+    # 타격 시점: 22틱 ~= 1.1초
+    - delay 22
+    - skill{s=MountedOrc_AttackHit} @PlayersInRadius{r=2}
+
+    # 타격 순간 금속/육중한 충격음
+    - sound{s=entity.iron_golem.damage;v=0.45;p=0.72} @self
+    - sound{s=entity.player.attack.crit;v=0.35;p=0.72} @self
+
+    # 전체 36틱 종료
+    - delay 14
+    - setvariable{var=caster.pattern_busy;value=0;t=integer} @self
+
+
+MountedOrc_AttackHit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - fieldofview{angle=105;rotation=0}
+  Skills:
+    - damage{amount=16}
+
+
+# ============================================================
+# HURT SOUND
+# ============================================================
+
+MountedOrc_HurtSound:
+  Skills:
+    # Silent:true라 바닐라 좀비 피격음 대신 직접 재생
+    - sound{s=entity.ravager.hurt;v=0.475;p=0.82} @self
+    - sound{s=entity.hoglin.hurt;v=0.225;p=0.70} @self
+
+
+# ============================================================
+# RUN
+# ============================================================
+
+MountedOrc_RunStart:
+  Conditions:
+    - variableEquals{var=caster.pattern_busy;value=0} true
+    - hasaura{n=mounted_orc_run} false
+
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>2}
+
+  Skills:
+    - aura{auraName=mounted_orc_run;duration=999999} @self
+    - setspeed{speed=2;type=WALK} @self
+    - meg:defaultstate{mid=orc_minion;type=walk;state=run;li=2;lo=2} @self
+
+    # 달리기 전환 순간만 1회. 타이머 반복 재생 X
+    - sound{s=entity.horse.gallop;v=0.4;p=0.78} @self
+    - sound{s=entity.ravager.step;v=0.225;p=0.72} @self
+
+
+MountedOrc_RunStop:
+  Conditions:
+    - hasaura{n=mounted_orc_run} true
+
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2}
+
+  Skills:
+    - auraremove{aura=mounted_orc_run} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:defaultstate{mid=orc_minion;type=walk;state=walk;li=2;lo=2} @self
+
+
+MountedOrc_RunReset:
+  Skills:
+    - auraremove{aura=mounted_orc_run} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:defaultstate{mid=orc_minion;type=walk;state=walk;li=2;lo=2} @self
+
+
+# ============================================================
+# DEATH
+# ============================================================
+
+MountedOrc_Death:
+  Skills:
+    - auraremove{aura=mounted_orc_run} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:defaultstate{mid=orc_minion;type=walk;state=walk;li=1;lo=1} @self
+    - meg:state{mid=orc_minion;s=attack;remove=true;priority=4} @self
+    - meg:state{mid=orc_minion;s=death;priority=10;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # 죽을 때 오크 + 탈것의 묵직한 사운드 조합
+    - sound{s=entity.ravager.death;v=0.575;p=0.82} @self
+    - sound{s=entity.hoglin.death;v=0.325;p=0.72} @self
+
+
+# ============================================================
+# PROJECTILE HITBOX DAMAGE FORWARD
+# ============================================================
+
+MountedOrc_ProjectileHitboxForward:
+  Skills:
+    # proxy 자신이 받는 원본 피해는 취소
+    - cancelevent
+
+    # 원래 받은 피해량을 부모에게 그대로 전달
+    # proxy에서 이미 계산된 피해를 부모에서 방어력으로 다시 줄이지 않도록 ignoreArmor=true
+    - damage{amount=<skill.var.damage-amount>;ignoreArmor=true;tags=MOUNTED_ORC_PROXY_DAMAGE} @parent

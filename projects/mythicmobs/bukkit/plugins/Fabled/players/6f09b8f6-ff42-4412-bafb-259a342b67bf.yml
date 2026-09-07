@@ -1,0 +1,61 @@
+limit: 10
+active: 1
+health: 49.0
+mana: 49.0
+accounts: 
+  acc1: 
+    classes: 
+      '특성': 
+        level: 1
+        points: 11
+        exp: 0.0
+      '위자드': 
+        level: 30
+        points: 40
+        exp: 0.0
+    skills: 
+      '에테르 블라스트': 
+        level: 0
+      '붉은 노드': 
+        level: 0
+      '검은 노드': 
+        level: 0
+      '마나 리사이클': 
+        level: 0
+      '스태프 숙련': 
+        level: 0
+      '기절 상태': 
+        level: 1
+      '에테르 템페스트': 
+        level: 0
+      '완드 숙련': 
+        level: 0
+      '충격 상태': 
+        level: 1
+      '청록 노드': 
+        level: 0
+      '에테르 레이': 
+        level: 1
+      '푸른 노드': 
+        level: 0
+      '고서 숙련': 
+        level: 0
+      '화상 상태': 
+        level: 1
+      '빙결 상태': 
+        level: 1
+      '에테르 더스트': 
+        level: 0
+      '침묵 상태': 
+        level: 1
+      '에테르 쇼크': 
+        level: 1
+    binds: {}
+    'attrib-points': 29
+    attribs: {}
+    attrstages: {}
+    'text-layout': 
+      0: '에테르 쇼크'
+      1: '에테르 레이'
+    hunger: 1.0
+    persistent: {}

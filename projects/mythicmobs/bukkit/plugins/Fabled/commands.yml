@@ -1,0 +1,298 @@
+class: 
+  name: 'class'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+bind: 
+  name: 'bind'
+  description: 'Binds a skill'
+  permission: 'fabled.basic'
+  args: '<skill>'
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+cast: 
+  name: 'cast'
+  description: 'Casts a skill'
+  permission: 'fabled.basic'
+  args: '<skill>'
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    'not-skill': '&cThat is not a valid skill name'
+    'not-unlocked': '&cYou must level up the skill first'
+changeclass: 
+  name: 'changeclass'
+  description: 'Swaps classes'
+  permission: 'fabled.force'
+  args: '<player> <group> <class>'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+clearbind: 
+  name: 'clearbind'
+  description: 'Clears skill binds'
+  permission: 'fabled.basic'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+customize: 
+  name: 'customize'
+  description: 'Opens GUI editor'
+  permission: 'fabled.gui'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+exp: 
+  name: 'exp'
+  description: 'Gives players exp'
+  permission: 'fabled.level'
+  args: '[player] <add|remove|set> <amount> [group] [-s]'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+info: 
+  name: 'info'
+  description: 'Shows class info'
+  permission: 'fabled.basic'
+  args: '[player]'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    title: '&8--&2 {player} &8-----------'
+    separator: '&8----------------------------'
+    end: '&8----------------------------'
+    category: '&6{group}&7: '
+    'no-class': '&7Not Professed'
+    profession: '&bLv{level} &2{profession}'
+    exp: '&bExp &2{exp}'
+level: 
+  name: 'level'
+  description: 'Gives players levels'
+  permission: 'fabled.level'
+  args: '[player] <add|remove|set> <amount> [group] [-s]'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    'received-level': '&2You have received &6{level} levels &2from &6{player}'
+list: 
+  name: 'list'
+  description: 'Displays accounts'
+  permission: 'fabled.basic'
+  args: '[player]'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+lore: 
+  name: 'lore'
+  description: 'Adds lore to item'
+  permission: 'fabled.lore'
+  args: '<lore>'
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+mana: 
+  name: 'mana'
+  description: 'Gives player mana'
+  permission: 'fabled.mana'
+  args: '[player] <amount>'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+options: 
+  name: 'options'
+  description: 'Views profess options'
+  permission: 'fabled.basic'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    title: '&8--&2 Profess Options &8-----------'
+    category: '&6{category}&7: '
+    option: '&d{option}&7'
+    separator: '&8----------------------------'
+    'no-options': '&7None'
+    end: '&8----------------------------'
+points: 
+  name: 'points'
+  description: 'Gives player points'
+  permission: 'fabled.points'
+  args: '[player] <amount>'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    'received-points': '&2You have received &6{points} skill points &2from &6{player}'
+profess: 
+  name: 'profess'
+  description: 'Professes classes'
+  permission: 'fabled.basic'
+  args: '<class>'
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    'not-available': "&cThere's no profession available at this time"
+    'invalid-class': '&cThat is not a valid class'
+    professed: '&2You are now a &6{class}'
+    'cannot-profess': '&cYou cannot profess to this class currently'
+reload: 
+  name: 'reload'
+  description: 'Reloads the plugin'
+  permission: 'fabled.reload'
+  args: ''
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    done: '&2Fabled has been reloaded'
+reset: 
+  name: 'reset'
+  description: 'Resets account data'
+  permission: 'fabled.reset'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    confirm: "&4This will delete your active account's data entirely"
+    instructions: '&7Type &6/class reset confirm&7 to continue'
+refund: 
+  name: 'refund'
+  description: 'Refound Skill/Attributes points'
+  permission: 'fabled.refund'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    'no-class': '&4You have not professed as any class yet'
+    refunded: '&2Your skill points have been refunded'
+skill: 
+  name: 'skill'
+  description: 'Shows player skills'
+  permission: 'fabled.basic'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+unbind: 
+  name: 'unbind'
+  description: 'Unbinds held item'
+  permission: 'fabled.basic'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+world: 
+  name: 'world'
+  description: 'Moves to world'
+  permission: 'fabled.world'
+  args: '<world>'
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+help: 
+  name: 'help'
+  description: 'Get help for the plugin'
+  permission: 'fabled.basic'
+  args: '<page>'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+forceaccount: 
+  name: 'forceaccount'
+  description: "Changes player's account"
+  permission: 'fabled.force'
+  args: '<player> <accountId>'
+  sender: 'CONSOLE_ONLY'
+  enabled: 'true'
+  cooldown: 0
+forceattr: 
+  name: 'forceattr'
+  description: 'Refunds/gives attributes'
+  permission: 'fabled.force'
+  args: '<player> [attr] [amount]'
+  sender: 'CONSOLE_ONLY'
+  enabled: 'true'
+  cooldown: 0
+forcecast: 
+  name: 'forcecast'
+  description: 'Player casts the skill'
+  permission: 'fabled.force'
+  args: '<player> <skill> [level]'
+  sender: 'CONSOLE_ONLY'
+  enabled: 'true'
+  cooldown: 0
+forcepoints: 
+  name: 'forcepoints'
+  description: 'Adds, subtracts or sets skill points'
+  permission: 'fabled.force'
+  args: '<add|set> [player] <amount> [group]'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+mobcast: 
+  name: 'mobcast'
+  description: 'Mob casts the skill'
+  permission: 'fabled.force'
+  args: '<mob_uuid> <skill> [level]'
+  sender: 'CONSOLE_ONLY'
+  enabled: 'true'
+  cooldown: 0
+forceprofess: 
+  name: 'forceprofess'
+  description: 'Professes a player'
+  permission: 'fabled.force'
+  args: '<player> <class> [-s]'
+  sender: 'CONSOLE_ONLY'
+  enabled: 'true'
+  cooldown: 0
+forcereset: 
+  name: 'forcereset'
+  description: 'Resets player data'
+  permission: 'fabled.force'
+  args: '<player> [account]'
+  sender: 'CONSOLE_ONLY'
+  enabled: 'true'
+  cooldown: 0
+forceskill: 
+  name: 'forceskill'
+  description: 'Modifies skill levels'
+  permission: 'fabled.force'
+  args: '<player> <up|down|reset> <skill>'
+  sender: 'CONSOLE_ONLY'
+  enabled: 'true'
+  cooldown: 0
+  messages: 
+    'skill-upped': '&6에테르 쇼크&2 was upgraded for &6tree_doll'
+acc: 
+  name: 'acc'
+  description: 'Changes account'
+  permission: 'fabled.basic'
+  args: '<accountId>'
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0
+ap: 
+  name: 'ap'
+  description: 'Gives attrib points'
+  permission: 'fabled.attrib'
+  args: '[player] <amount>'
+  sender: 'ANYONE'
+  enabled: 'true'
+  cooldown: 0
+attr: 
+  name: 'attr'
+  description: 'Opens attribute menu'
+  permission: 'fabled.basic'
+  args: ''
+  sender: 'PLAYER_ONLY'
+  enabled: 'true'
+  cooldown: 0

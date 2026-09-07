@@ -1,0 +1,61 @@
+'특성 노드': 
+  name: '특성 노드'
+  'action-bar': ''
+  prefix: ''
+  group: 'node'
+  mana: ''
+  'max-level': 200
+  parent: ''
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '20'
+    'health-scale': '1'
+    'mana-base': '20'
+    'mana-scale': '1'
+    'dexterity-base': '0'
+    'dexterity-scale': '0'
+    'intelligence-base': '0'
+    'intelligence-scale': '0'
+    'spirit-base': '0'
+    'spirit-scale': '0'
+    'strength-base': '0'
+    'strength-scale': '0'
+    'vitality-base': '0'
+    'vitality-scale': '0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '붉은 노드'
+  - '푸른 노드'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '특성 노드'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []

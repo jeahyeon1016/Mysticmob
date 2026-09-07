@@ -25,5 +25,5 @@ cadtemp/
 Thumbs.db
 .vscode/
 
-# Nested/independent repositories
-projects/mythicmobs/
+# Preserved metadata from the nested MythicMobs repository
+projects/mythicmobs/.git.mythicmobs-backup/

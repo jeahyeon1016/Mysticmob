@@ -1,0 +1,44 @@
+OrcKing:
+  Type: ZOMBIE
+  Display: '&4오크킹'
+  Health: 300
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.24
+    FollowRange: 32
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.35
+
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+    - players
+
+  Skills:
+    - meg:model{mid=orc_king;d=false;i=true;lpitch=true;usm=true;save=false} @self ~onSpawn
+    - meg:model{mid=orc_king;d=false;i=true;lpitch=true;usm=true;save=false} @self ~onLoad
+    - skill{s=OK_Init} @self ~onSpawn
+    - skill{s=OK_Init} @self ~onLoad
+    - skill{s=OK_IdleState} @self ~onTimer:5
+    - skill{s=OK_WalkState} @self ~onTimer:5
+    - skill{s=OK_RunState} @target ~onTimer:5
+    - skill{s=OK_CombatRouter} @target ~onTimer:5 ?incombat
+    - skill{s=OK_FastRunStop} @target ~onTimer:2 ?incombat
+    - skill{s=OK_ComboFromDamaged} @trigger ~onDamaged
+    - skill{s=OK_RunnerGain} @trigger ~onDamaged
+    - skill{s=OK_DebugDamage} @trigger ~onDamaged
+    - skill{s=OK_ComboIdleReset} @self ~onTimer:20
+    - skill{s=OK_Death} @self ~onDeath

@@ -1,0 +1,70 @@
+'붉은 노드': 
+  name: '붉은 노드'
+  type: '특성'
+  'max-level': 5
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: 
+  - '푸른 노드'
+  - '청록 노드'
+  - '검은 노드'
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '힘-base': '5'
+    '힘-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭힘 {attr:attr.Amount}&f &f증가'
+  - '&f追秋頭'
+  - '&f追秋頭&c힘 5 이상 특성'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Attribute: 
+              type: 'mechanic'
+              data: 
+                'icon-key': 'attr'
+                counts: 'false'
+                key: 
+                - '힘'
+                - '지혜'
+                operation: 'ADD_NUMBER'
+                'amount-base': '5'
+                'amount-scale': '2'
+                'seconds-base': '1'
+                'seconds-scale': '0'
+                stackable: 'true'
+              preview: 
+                enabled: 'false'
+              children: {}

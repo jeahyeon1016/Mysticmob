@@ -1,0 +1,80 @@
+'스태프 숙련': 
+  name: '스태프 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f스태프의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f스태프를 주 손에 장착 중일 때'
+  - '&f追秋頭&f지혜{attr:buff.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Golden sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '스태프'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '지혜'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '8'
+                    'amount-scale': '3'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}

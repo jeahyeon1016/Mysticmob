@@ -1,0 +1,459 @@
+# ============================================================
+# 고블린 부하 / 고블린 전사 / 고블린 샤먼
+# MythicMobs + BetterModel
+# v1.34
+#
+# 모델 ID:
+# - goblin_worker
+# - goblin_warrior
+# - goblin_shaman
+#
+# 역할:
+# Worker  = 먼저 싸움을 열고 주변 고블린을 부르는 유인/지원형
+# Warrior = 부하의 전투에 합류하는 전열/강공격형
+# Shaman  = 소집에 반응하는 후방 원거리 캐스터
+# ============================================================
+
+Goblin_Worker:
+  Type: ZOMBIE
+  Display: '&a고블린 부하'
+  Health: 28
+  Damage: 4
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.25
+    # 실제 자연 인식은 아래 DetectPlayer 스킬로 7블럭 제한.
+    # 28은 20블럭 소집으로 합류한 개체가 타겟을 유지하며 이동하기 위한 추적 한계.
+    FollowRange: 28
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    KnockbackResistance: 0.05
+
+    PreventSunburn: true
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    # 모델 부착
+    - model{mid=goblin_worker} @self ~onSpawn
+
+    # 스폰 / 전투 애니메이션
+    - state{s=spawn;li=0;lo=0} @self ~onSpawn
+    - skill{s=GoblinWorker_Attack} @target ~onAttack
+
+    # 자연 상태에서는 7블럭 안 플레이어를 최초 발견했을 때 딱 1회 소집
+    # 직접 발견한 일꾼은 소집 후 가까운 워리어에게 도망감
+    - skill{s=GoblinWorker_DetectPlayer} @self ~onTimer:5
+
+    # 워리어 3블럭 안에 도착했는지 계속 검사.
+    # 도착하면 다시 플레이어를 타겟으로 잡아 워리어와 같이 전투.
+    - skill{s=GoblinWorker_FleeCheck} @self ~onTimer:2
+
+    # 다른 고블린에게 소집된 개체는 이 신호를 받고 합류하며 재소집 금지
+    - skill{s=Goblin_ReceiveRally} @self ~onSignal:GOBLIN_RALLY
+
+    # 직접 맞은 경우 공격자에게 어그로.
+    # 단, 최초 1회 워리어에게 도망가는 중에는 목적지 유지.
+    - skill{s=GoblinWorker_AggroOnDamaged} @self ~onDamaged
+    - skill{s=GoblinWorker_HurtSound} @self ~onDamaged
+    - skill{s=GoblinWorker_Death} @self ~onDeath
+
+Goblin_Warrior:
+  Type: ZOMBIE
+  Display: '&2고블린 전사'
+  Health: 70
+  Damage: 8
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.23
+    # 실제 자연 인식은 아래 DetectPlayer 스킬로 7블럭 제한.
+    # 28은 20블럭 소집으로 합류한 개체가 타겟을 유지하며 이동하기 위한 추적 한계.
+    FollowRange: 28
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    KnockbackResistance: 0.25
+
+    PreventSunburn: true
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - model{mid=goblin_warrior} @self ~onSpawn
+    - state{s=spawn;li=0;lo=0} @self ~onSpawn
+
+    # 기본 타격 대신 별도 판정/애니메이션
+    - skill{s=GoblinWarrior_NormalAttack} @target ~onAttack
+
+    # 자연 상태에서는 7블럭 안 플레이어를 최초 발견했을 때 딱 1회 소집
+    - skill{s=GoblinWarrior_DetectPlayer} @self ~onTimer:5
+
+    # 소집 신호를 받고 온 워리어는 재소집하지 않음
+    - skill{s=Goblin_ReceiveRally} @self ~onSignal:GOBLIN_RALLY
+
+    # 전투 중 확률적으로 헤비 어택
+    - skill{s=GoblinWarrior_CombatPattern} @self ~onTimer:10
+
+    # 직접 맞은 경우 공격자에게 어그로
+    - settarget @trigger ~onDamaged
+    - skill{s=GoblinWarrior_HurtSound} @self ~onDamaged
+    - skill{s=GoblinWarrior_Death} @self ~onDeath
+
+
+# ============================================================
+# 샤먼 소환용 언데드 고블린
+# - GOBLIN_RALLY / DetectPlayer / 나팔 호출 없음
+# - 스폰 즉시 플레이어에게 어그로
+# - spawn/resurrect 2.25초 동안은 땅에서 올라오는 연출만 실행
+# ============================================================
+
+Goblin_Undead_Worker:
+  Type: ZOMBIE
+  Display: '&5되살아난 고블린 부하'
+  Health: 28
+  Damage: 4
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.25
+    FollowRange: 40
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.05
+
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - lookatplayers
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - model{mid=goblin_worker_undead} @self ~onSpawn
+
+    # 소환되는 순간부터 플레이어를 전투 타겟으로 지정.
+    # 다만 45틱 동안은 부활 연출 때문에 이동/공격만 잠근다.
+    - settarget @NearestPlayer{r=40} ~onSpawn
+    - setvariable{var=caster.goblin_calling;value=1;type=INTEGER;duration=45} @self ~onSpawn
+    - potion{type=SLOWNESS;duration=45;level=255;particles=false} @self ~onSpawn
+    - state{s=resurrect;li=0;lo=0} @self ~onSpawn
+    - skill{s=GoblinUndead_RiseVFX} @self ~onSpawn
+    - skill{s=GoblinUndead_ReacquireTarget} @self ~onSpawn
+
+    # 기존 부하의 검증된 평타를 그대로 사용.
+    # goblin_calling 변수가 살아있는 45틱 동안은 AttackExecute 조건이 막아줌.
+    - skill{s=GoblinWorker_Attack} @target ~onAttack
+
+    # 소환형은 DetectPlayer / FleeCheck / ReceiveRally 자체가 없음.
+    # 따라서 나팔을 절대 불지 않고 워리어에게 도망가지도 않는다.
+    - settarget @trigger ~onDamaged
+    - skill{s=GoblinUndead_Worker_HurtSound} @self ~onDamaged
+    - skill{s=GoblinUndead_Worker_Death} @self ~onDeath
+
+
+Goblin_Undead_Warrior:
+  Type: ZOMBIE
+  Display: '&5되살아난 고블린 전사'
+  Health: 70
+  Damage: 8
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.23
+    FollowRange: 40
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.25
+
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - lookatplayers
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - model{mid=goblin_warrior_undead} @self ~onSpawn
+
+    # 소환 즉시 플레이어 어그로 확보.
+    - settarget @NearestPlayer{r=40} ~onSpawn
+    - setvariable{var=caster.goblin_calling;value=1;type=INTEGER;duration=45} @self ~onSpawn
+    - potion{type=SLOWNESS;duration=45;level=255;particles=false} @self ~onSpawn
+    - state{s=resurrect;li=0;lo=0} @self ~onSpawn
+    - skill{s=GoblinUndead_RiseVFX} @self ~onSpawn
+    - skill{s=GoblinUndead_ReacquireTarget} @self ~onSpawn
+
+    # 기존 워리어 전투 패턴 사용.
+    # 부활 중에는 goblin_calling 변수 때문에 평타/헤비 둘 다 봉인.
+    - skill{s=GoblinWarrior_NormalAttack} @target ~onAttack
+    - skill{s=GoblinWarrior_CombatPattern} @self ~onTimer:10
+
+    # 나팔/소집 관련 스킬은 의도적으로 전부 제외.
+    - settarget @trigger ~onDamaged
+    - skill{s=GoblinUndead_Warrior_HurtSound} @self ~onDamaged
+    - skill{s=GoblinUndead_Warrior_Death} @self ~onDeath
+
+
+
+
+# ============================================================
+# 고블린 투석병 / Goblin Thrower
+#
+# 특징:
+# - 주변 고블린 소집 / 나팔 패턴 없음
+# - 투석 공격만 사용
+# - 플레이어가 3블럭 이내로 접근하면 우선 도주
+# - 공격 준비/공격 중에는 모든 회전 AI보다 플레이어 조준이 우선
+# ============================================================
+
+Goblin_Thrower:
+  Type: ZOMBIE
+  Display: '&6고블린 투석병'
+  Health: 36
+  Damage: 0
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.24
+    FollowRange: 28
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.08
+
+  AIGoalSelectors:
+    - clear
+
+    # 3블럭 이내 플레이어가 최우선 도주 대상.
+    - fleeplayers{distance=3;speed=1.25}
+
+    # 타겟이 멀리 있을 때만 전투 거리까지 이동.
+    - movetowardstarget
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - model{mid=goblin_thrower} @self ~onSpawn
+    - state{s=spawn;li=0;lo=0} @self ~onSpawn
+
+    # 자연 인식 범위는 Worker/Warrior와 동일하게 7블럭.
+    - skill{s=GoblinThrower_DetectPlayer} @self ~onTimer:5
+
+    # Thrower 자신은 나팔을 불지 않지만,
+    # Worker/Warrior가 20블럭 안에서 나팔을 불면 그 신호를 받고
+    # 같은 플레이어를 인식해 즉시 전투에 합류한다.
+    - skill{s=Goblin_ReceiveRally} @self ~onSignal:GOBLIN_RALLY
+
+    # 공격 준비/공격 중에는 매 틱 플레이어를 강제 조준.
+    - skill{s=GoblinThrower_CastLook} @self ~onTimer:1
+
+    # 유일한 공격 패턴: 투석.
+    - skill{s=GoblinThrower_RockAttack} @target ~onTimer:10
+
+    # 맞으면 공격자를 즉시 타겟으로 잡음.
+    - settarget @trigger ~onDamaged
+    - skill{s=GoblinThrower_HurtSound} @self ~onDamaged
+
+    - state{s=death;li=0;lo=0} @self ~onDeath
+    # 투석병: 부하보다 살짝 낮고 전사보다 가벼운 톤.
+    - sound{s=entity.pillager.death;v=0.80;p=1.16} @self ~onDeath
+    - sound{s=entity.vindicator.death;v=0.16;p=1.22} @self ~onDeath
+
+
+# 투석용 실제 MOB bullet.
+Goblin_Thrower_Rock_Projectile:
+  Type: ARMOR_STAND
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    PreventOtherDrops: true
+
+  Skills:
+    - model{mid=goblin_thrower_rock;n=false} @self ~onSpawn
+    - state{s=idle;li=0;lo=0} @self ~onSpawn
+
+
+# ============================================================
+# 고블린 샤먼
+# ============================================================
+
+Goblin_Shaman:
+  Type: ZOMBIE
+  Display: '&5고블린 샤먼'
+  Health: 45
+  Damage: 0
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.24
+
+    # 자연 인식은 7블럭.
+    # 소집된 경우 최대 27블럭의 플레이어를 타겟으로 유지할 수 있게 넉넉하게 둠.
+    FollowRange: 28
+
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    KnockbackResistance: 0.10
+
+  # 평소 배회 X.
+  # 타겟이 있을 때는 접근하되, 플레이어가 약 5블럭 안으로 붙으면 우선적으로 도망.
+  # 이 거리 유지 AI는 1차 테스트용.
+  AIGoalSelectors:
+    - clear
+
+    # AI 우선순위:
+    # 1. 3블럭 이내 플레이어에게서 도주
+    # 2. 그 외에는 타겟과 거리 조절
+    #
+    # lookatplayers / randomlookaround는 제거.
+    # 스킬 준비/시전 중 시선은 MythicMobs force look이 AI보다 우선해서 강제한다.
+    - fleeplayers{distance=3;speed=1.25}
+    - movetowardstarget
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    # BetterModel
+    - model{mid=goblin_shaman} @self ~onSpawn
+    - state{s=spawn;li=0;lo=0} @self ~onSpawn
+
+    # 자연 상태: 7블럭 내 플레이어를 발견하면 혼자 전투 진입.
+    # 샤먼은 소집을 새로 발생시키지 않고 '소집에 반응'만 함.
+    - skill{s=GoblinShaman_DetectPlayer} @self ~onTimer:5
+
+    # 워커/워리어의 GOBLIN_RALLY 신호에 반응.
+    - skill{s=Goblin_ReceiveRally} @self ~onSignal:GOBLIN_RALLY
+
+    # 캐스팅 중에는 이동이 잠겨 있어도 현재 타겟 플레이어를 계속 바라봄.
+    - skill{s=GoblinShaman_CastLook} @self ~onTimer:1
+
+    # ========================================================
+    # 최종 자살 패턴 최우선 체크
+    # 일반 패턴 타이머보다 먼저 실행되므로 HP 조건을 만족하면
+    # 새로운 일반 패턴보다 자폭 패턴이 우선권을 잡는다.
+    # ========================================================
+    - skill{s=GoblinShaman_FinalSuicideCheck} @self ~onTimer:1
+    - skill{s=GoblinShaman_FinalSuicideCheck} @self ~onDamaged
+    - skill{s=GoblinShaman_FinalInvulnerability} @self ~onDamaged
+
+    # 근접 대응 메커니즘:
+    # 플레이어가 3블럭 안으로 들어오면 fleeplayers AI로 잠깐 도망간 뒤,
+    # 플레이어를 즉시 바라보고 바로 반격 스킬 시전.
+    - skill{s=GoblinShaman_FleeCounter} @self ~onTimer:2
+
+    # 스킬 AI
+    # [메테오 스톰] - 내부 ID Pattern3
+    - skill{s=GoblinShaman_Pattern3} @target ~onTimer:20
+
+    # [화염구] - 내부 ID Pattern1
+    - skill{s=GoblinShaman_Pattern1} @target ~onTimer:15
+
+    # [연쇄 불기둥] - 내부 ID Pattern2
+    - skill{s=GoblinShaman_Pattern2} @target ~onTimer:10
+
+    # [시체 부활] - 내부 ID Pattern4
+    # 부하 1 + 전사 1을 땅에서 되살려 즉시 플레이어에게 붙인다.
+    - skill{s=GoblinShaman_Pattern4_SummonUndead} @self ~onTimer:25
+
+    # 먼저 맞으면 공격자를 타겟으로 잡음
+    - settarget @trigger ~onDamaged
+    - skill{s=GoblinShaman_HurtSound} @self ~onDamaged
+    - skill{s=GoblinShaman_Death} @self ~onDeath
+
+# ============================================================
+# 샤먼 VFX / MOB projectile bullets
+# v1.23
+#
+# 핵심 구조:
+# - 화염구/메테오는 "처음부터 projectile"로 생성
+# - 별도 Charge ArmorStand 없음
+# - bulletType=MOB의 ARMOR_STAND 하나가 정지 -> 충전 -> 발사 -> 충돌까지 담당
+# ============================================================
+
+Goblin_Shaman_Fireball_Projectile:
+  Type: ARMOR_STAND
+  Display: '&c화염구'
+  Health: 1
+  Damage: 0
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    PreventOtherDrops: true
+
+  Skills:
+    - model{mid=goblin_shaman_fireball;n=false} @self ~onSpawn
+    - state{s=idle;li=0;lo=0} @self ~onSpawn
+
+
+Goblin_Shaman_Meteor_Circle:
+  Type: ARMOR_STAND
+  Display: '&5메테오 마법진'
+  Health: 1
+  Damage: 0
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    PreventOtherDrops: true
+
+  Skills:
+    - model{mid=meteor_storm_magic_circle;n=false} @self ~onSpawn
+    - state{s=idle;li=0;lo=0} @self ~onSpawn
+    - remove @self ~onSignal:SHAMAN_METEOR_CLEAR
+    - remove{delay=30} @self ~onSpawn
+
+
+Goblin_Shaman_Meteor_Projectile:
+  Type: ARMOR_STAND
+  Display: '&6메테오'
+  Health: 1
+  Damage: 0
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    PreventOtherDrops: true
+
+  Skills:
+    - model{mid=meteor_storm_meteor;n=false} @self ~onSpawn
+
+    # 같은 MOB bullet에서 충전 애니메이션 시작
+    - state{s=charge;li=0;lo=0} @self ~onSpawn
+
+    # 발사 중에도 charge state 하나만 계속 유지.
+    # scale state를 겹치지 않아 비행 중 크기 출렁임 방지.
+

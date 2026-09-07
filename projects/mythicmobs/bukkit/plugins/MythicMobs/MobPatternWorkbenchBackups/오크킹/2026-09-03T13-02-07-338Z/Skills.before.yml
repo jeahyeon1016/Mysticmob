@@ -1,0 +1,506 @@
+# ============================================================
+# ORC KING - Skills
+# MythicMobs 5.13.0 + ModelEngine 4.1.0
+# Development v0.3
+#
+# User-declared variables only:
+#   caster.combo
+#   caster.runner
+#   caster.count
+#
+# Auxiliary Auras are used only as timers/target markers and are not
+# additional gameplay variables.
+# ============================================================
+
+# ============================================================
+# INIT / MOVEMENT
+# ============================================================
+
+OK_Init:
+  Skills:
+    - setvariable{var=caster.combo;value=0;type=INTEGER} @self
+    - setvariable{var=caster.runner;value=0;type=INTEGER} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+    - auraremove{aura=OK_ComboActivity} @self
+    - auraremove{aura=OK_ComboGainLock} @self
+    - auraremove{aura=OK_RunnerTarget} @PlayersInRadius{r=128}
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - meg:state{mid=orc_king;s=idle;priority=1;override=true;loop=LOOP;force=false;li=2;lo=2} @self
+
+OK_IdleState:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - incombat false
+    - moving false
+  Skills:
+    - meg:state{mid=orc_king;s=walk;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=run;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=idle;priority=1;override=false;loop=LOOP;force=false;li=2;lo=2} @self
+
+OK_WalkState:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - incombat false
+    - moving true
+  Skills:
+    - meg:state{mid=orc_king;s=idle;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=run;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=walk;priority=1;override=false;loop=LOOP;force=false;li=2;lo=2} @self
+
+OK_RunState:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.runner;value=0to9} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>4} true
+  Skills:
+    - meg:state{mid=orc_king;s=idle;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=walk;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=run;priority=1;override=false;loop=LOOP;force=false;li=1;lo=1} @self
+    - setspeed{speed=1;type=WALK} @self
+
+
+# ============================================================
+# COMBO ACTIVITY
+#
+# Any successful interaction refreshes a 10-second Aura.
+# Combo reset only happens after this Aura has fully expired.
+# ============================================================
+
+OK_ComboActivityTouch:
+  Skills:
+    - auraremove{aura=OK_ComboActivity} @self
+    - aura{auraName=OK_ComboActivity;duration=200} @self
+
+# Shared combo gain gate:
+# regardless of whether the event is a player hit (+1) or an Orc King hit (+2),
+# combo can be updated only once during the same 1-second window.
+# This prevents +1 and +2 from stacking into +3 in the same second.
+
+# Player(s) hitting Orc King: +1 when the shared 1-second gate is open.
+OK_ComboFromDamaged:
+  Conditions:
+    - hasaura{n=OK_ComboGainLock} false
+  Skills:
+    - variableadd{var=caster.combo;amount=1} @self
+    - aura{auraName=OK_ComboGainLock;duration=20} @self
+
+# Orc King successfully hitting player(s): +2 when the same shared gate is open.
+OK_ComboFromBossHit:
+  Conditions:
+    - hasaura{n=OK_ComboGainLock} false
+  Skills:
+    - variableadd{var=caster.combo;amount=2} @self
+    - aura{auraName=OK_ComboGainLock;duration=20} @self
+
+# Called once per second, but only resets after 10 full seconds with no
+# received hit and no successful Orc King hit.
+OK_ComboIdleReset:
+  Conditions:
+    - variableInRange{var=caster.combo;value=>0} true
+    - hasaura{n=OK_ComboActivity} false
+  Skills:
+    - setvariable{var=caster.combo;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# NORMAL PATTERN ROUTER
+#
+# combo 0~10  : Attack1 : Attack2 = 2 : 1 when both are in range.
+# combo 11~20 : Attack3 / Throw / Glaive Smash unlocked.
+# combo >20   : Summon additionally unlocked.
+#
+# Range bands are separated so randomskill does not select an attack that
+# cannot reach the current target.
+# ============================================================
+
+OK_CombatRouter:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.runner;value=0to9} true
+  Skills:
+    - skill{s=OK_Router_Base} @target ?variableInRange{var=caster.combo;value=0to10}
+    - skill{s=OK_Router_Mid} @target ?variableInRange{var=caster.combo;value=11to20}
+    - skill{s=OK_Router_High} @target ?variableInRange{var=caster.combo;value=>20}
+
+OK_Router_Base:
+  Skills:
+    - randomskill{skills=OK_Attack1 2,OK_Attack2 1} @target ?targetwithin{d=3}
+    - skill{s=OK_Attack1} @target ?targetwithin{d=4} ?targetnotwithin{d=3}
+
+OK_Router_Mid:
+  Skills:
+    - randomskill{skills=OK_Attack1 1,OK_Attack2 1,OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1} @target ?targetwithin{d=3}
+    - randomskill{skills=OK_Attack1 1,OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1} @target ?targetwithin{d=4} ?targetnotwithin{d=3}
+    - randomskill{skills=OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1} @target ?targetwithin{d=5} ?targetnotwithin{d=4}
+    - randomskill{skills=OK_Throw 1,OK_GlaiveSmash 1} @target ?targetwithin{d=10} ?targetnotwithin{d=5}
+    - skill{s=OK_Throw} @target ?targetwithin{d=24} ?targetnotwithin{d=10}
+
+OK_Router_High:
+  Skills:
+    - randomskill{skills=OK_Attack1 1,OK_Attack2 1,OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1,OK_Summon 1} @target ?targetwithin{d=3}
+    - randomskill{skills=OK_Attack1 1,OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1,OK_Summon 1} @target ?targetwithin{d=4} ?targetnotwithin{d=3}
+    - randomskill{skills=OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1,OK_Summon 1} @target ?targetwithin{d=5} ?targetnotwithin{d=4}
+    - randomskill{skills=OK_Throw 1,OK_GlaiveSmash 1,OK_Summon 1} @target ?targetwithin{d=10} ?targetnotwithin{d=5}
+    - randomskill{skills=OK_Throw 1,OK_Summon 1} @target ?targetwithin{d=24} ?targetnotwithin{d=10}
+    - skill{s=OK_Summon} @target ?targetnotwithin{d=24}
+
+
+# ============================================================
+# ATTACK 1
+# animation 1.50s
+# hit requested 0.84s -> nearest server tick = 17t = 0.85s
+# range 4, -90 ~ +90 = 180 degrees
+# ============================================================
+
+OK_Attack1:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to4} true
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fAttack1 &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - meg:state{mid=orc_king;s=attack1;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 17
+    - damage{a=10} @LivingInCone{a=180;r=4;rot=0;target=players}
+    - skill{s=OK_ComboActivityTouch} @LivingInCone{a=180;r=4;rot=0;target=players}
+    - skill{s=OK_ComboFromBossHit} @LivingInCone{a=180;r=4;rot=0;target=players}
+    - delay 13
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# ATTACK 2
+# animation 1.50s
+# hit requested 0.73s -> nearest server tick = 15t = 0.75s
+# range 3, -90 ~ +120 = 210 degrees
+# Project convention: rot < 0 is left, therefore center = -15 degrees.
+# ============================================================
+
+OK_Attack2:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to3} true
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fAttack2 &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - meg:state{mid=orc_king;s=attack2;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 15
+    - damage{a=10} @LivingInCone{a=210;r=3;rot=-15;target=players}
+    - skill{s=OK_ComboActivityTouch} @LivingInCone{a=210;r=3;rot=-15;target=players}
+    - skill{s=OK_ComboFromBossHit} @LivingInCone{a=210;r=3;rot=-15;target=players}
+    - delay 15
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# ATTACK 3 - STAB
+# animation 1.50s
+# hit 0.75s = 15t
+# requested reverse-fan shape has no safe direct targeter in this file set,
+# so the user's fallback is used: narrow 60-degree cone, range 5.
+# ============================================================
+
+OK_Attack3:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.combo;value=>11} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to5} true
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fAttack3 &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - meg:state{mid=orc_king;s=attack3;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 15
+    - damage{a=10} @LivingInCone{a=60;r=5;rot=0;target=players}
+    - skill{s=OK_ComboActivityTouch} @LivingInCone{a=60;r=5;rot=0;target=players}
+    - skill{s=OK_ComboFromBossHit} @LivingInCone{a=60;r=5;rot=0;target=players}
+    - delay 15
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# THROW
+# animation 1.67s
+# release requested 0.72s -> nearest server tick = 14t = 0.70s
+# Homing missile; inertia is kept low so it corrects toward moving target.
+# Gravity is kept small to retain a thrown-spear arc.
+# ============================================================
+
+OK_Throw:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.combo;value=>11} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to24} true
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fThrow &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - meg:state{mid=orc_king;s=throw;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 14
+    - missile{onTick=OK_SpearTick;onHit=OK_SpearHit;v=18;in=0.65;g=0.04;i=1;hR=0.45;vR=0.55;md=80;mr=32;syo=1.55;sfo=1.0;tyo=1.0;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false;hitTarget=true;requireLineOfSight=false} @target
+    - delay 19
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+# Particle spear: dense center + tip/trail impression.
+OK_SpearTick:
+  Skills:
+    - effect:particles{p=dust;color=#6E6E6E;size=1.05;amount=2;hS=0.02;vS=0.02;speed=0} @origin
+    - effect:particles{p=dust;color=#B8B8B8;size=0.70;amount=1;hS=0.01;vS=0.01;speed=0} @origin
+    - effect:particles{p=crit;amount=1;hS=0.02;vS=0.02;speed=0} @origin
+
+# Projectile callbacks inherit the actually-collided entity.
+OK_SpearHit:
+  Skills:
+    - damage{a=10}
+    - skill{s=OK_ComboActivityTouch} @self
+    - skill{s=OK_ComboFromBossHit} @self
+
+
+# ============================================================
+# SUMMON
+# animation 3.42s
+# summon begins at 1.25s = 25t.
+# Two Orc_Archer mobs spawn exactly 2 blocks to left/right.
+#
+# The requested 1.25~2.63s 'run in / emerge from hiding' sequence and 70%
+# summoned-archer damage require the Orc_Archer mob/skill + archer BBModel files.
+# This file intentionally does NOT invent a second archer mob type.
+# ============================================================
+
+OK_Summon:
+  Cooldown: 30
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.combo;value=>20} true
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fSummon &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=summon;priority=5;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 25
+    - summon{type=Orc_Archer;amount=1;radius=0} @Forward{f=0;sideOffset=2}
+    - summon{type=Orc_Archer;amount=1;radius=0} @Forward{f=0;sideOffset=-2}
+    # 1.25s -> 3.40s animation hold (43 additional ticks)
+    - delay 43
+    - variablesubtract{var=caster.combo;amount=10} @self
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# GLAIVE SMASH - STRONG ATTACK
+# animation 3.67s
+# 1.12s -> nearest tick 22 = begin fast tracking
+# 1.63s -> nearest tick 33 = stop tracking
+# 2.00s -> tick 40 = one damage event
+# range 4, -90 ~ +90
+# ============================================================
+
+OK_GlaiveSmash:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.combo;value=>11} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to10} true
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fGlaiveSmash &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - meg:state{mid=orc_king;s=glaive_smash;priority=6;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # 1.10s: begin short, fast chase.
+    - delay 22
+    - setAI{ai=true} @self
+    - setspeed{speed=2;type=WALK} @self
+    - look{headOnly=false;force=true;immediately=true;repeat=10;repeatInterval=1} @target
+
+    # 1.65s: stop completely.
+    - delay 11
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    # 2.00s: single strong hit.
+    - delay 7
+    - damage{a=15} @LivingInCone{a=180;r=4;rot=0;target=players}
+    - skill{s=OK_ComboActivityTouch} @LivingInCone{a=180;r=4;rot=0;target=players}
+    - skill{s=OK_ComboFromBossHit} @LivingInCone{a=180;r=4;rot=0;target=players}
+
+    # Finish the 3.67s animation: 73t total is the nearest usable end.
+    - delay 33
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# RUNNER
+#
+# Qualifying hit:
+# - attacker is a PLAYER
+# - attacker is >= 6 blocks away
+# - global gain gate = 0.5s -> at most 2 gains / second
+# - +1 : +2 weight = 1 : 2
+#
+# Every qualifying hit updates OK_RunnerTarget to the LAST ranged attacker.
+# ============================================================
+
+OK_RunnerGain:
+  Cooldown: 0.5
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>6} true
+  Skills:
+    - auraremove{aura=OK_RunnerTarget} @PlayersInRadius{r=128}
+    - aura{auraName=OK_RunnerTarget;duration=1200} @trigger
+    - randomskill{skills=OK_RunnerGain1 1,OK_RunnerGain2 2} @self
+
+OK_RunnerGain1:
+  Skills:
+    - variableadd{var=caster.runner;amount=1} @self
+
+OK_RunnerGain2:
+  Skills:
+    - variableadd{var=caster.runner;amount=2} @self
+
+# Starts only when the marked LAST ranged attacker is still >5 blocks away.
+OK_RunnerStart:
+  Conditions:
+    - variableInRange{var=caster.runner;value=>10} true
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - hasaura{n=OK_RunnerTarget} true
+    - distance{d=>5} true
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fRunnerThrow &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+
+    # Requested threat change: clear everyone, then set LAST ranged attacker to 200.
+    - clearThreat{} @self
+    - threat{amount=200;mode=set} @target
+    - setTarget @target
+
+    # Runner throw at the same 0.72s release timing.
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    - meg:state{mid=orc_king;s=throw;priority=7;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 14
+
+    # Runner spear pierces players (stopAtEntity=false) but disappears on block/ground.
+    - missile{onTick=OK_SpearTick;onHit=OK_SpearHit;v=20;in=0.55;g=0.04;i=1;hR=0.45;vR=0.55;md=100;mr=40;syo=1.55;sfo=1.0;tyo=1.0;stopAtBlock=true;stopAtEntity=false;hitPlayers=true;hitNonPlayers=false;hitTarget=true;requireLineOfSight=false} @target
+
+    # Throw animation ends around 1.65s; immediately enter 1.5x fast run.
+    - delay 19
+    - setspeed{speed=1.5;type=WALK} @self
+    - setAI{ai=true} @self
+    - meg:state{mid=orc_king;s=run;priority=7;override=true;loop=LOOP;force=true;li=1;lo=1} @self
+
+# During fast run, force actual target to the marked Runner target while allowing
+# other players' natural Threat to accumulate for a later cover/aggro swap.
+OK_RunnerMaintain:
+  Conditions:
+    - variableInRange{var=caster.runner;value=>10} true
+    - variableEquals{var=caster.count;value=1} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - hasaura{n=OK_RunnerTarget} true
+    - distance{d=>2} true
+  Skills:
+    - setTarget @target
+    - setspeed{speed=1.5;type=WALK} @self
+    - meg:state{mid=orc_king;s=run;priority=7;override=false;loop=LOOP;force=false;li=1;lo=1} @self
+
+# Reaching within 2 blocks ends Runner mode.
+# Marked player's threat is overwritten to 30; other players keep whatever
+# natural Threat they accumulated during the chase, enabling a melee cover swap.
+OK_FastRunStop:
+  Conditions:
+    - variableInRange{var=caster.runner;value=>10} true
+    - variableEquals{var=caster.count;value=1} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - hasaura{n=OK_RunnerTarget} true
+    - distance{d=0to2} true
+  Skills:
+    - threat{amount=30;mode=set} @target
+    - setspeed{speed=1;type=WALK} @self
+    - meg:state{mid=orc_king;s=run;r=true;i=true} @self
+    - setvariable{var=caster.runner;value=0;type=INTEGER} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fRunnerEnd &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - auraremove{aura=OK_RunnerTarget} @target
+
+
+# ============================================================
+# DEBUG
+# OP-only. Shows attacker, received damage, combo/runner and current top threat
+# target. MythicMobs YAML does not expose a dependable per-player numeric threat
+# placeholder here, so no fake numeric threat value is printed.
+# ============================================================
+
+OK_DebugDamage:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - haspermission{p=minecraft.command.op} true
+  Skills:
+    - message{m="&8[OrcKing DEBUG] &f<trigger.name> &7-> damage=&e<skill.var.damage-amount-post{default=<skill.var.damage-amount>}> &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| ThreatTop=&e<caster.tt.top>"}
+
+
+# ============================================================
+# DEATH
+# ============================================================
+
+OK_Death:
+  Skills:
+    - setvariable{var=caster.count;value=99;type=INTEGER} @self
+    - message{m="&8[OrcKing VAR] &fDeath &7| combo=&e<caster.var.combo> &7| runner=&e<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInWorld ?haspermission{p=minecraft.command.op}
+    - setspeed{speed=0;type=WALK} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=idle;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=walk;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=run;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=death;priority=10;override=true;loop=ONCE;force=true;li=1;lo=1} @self

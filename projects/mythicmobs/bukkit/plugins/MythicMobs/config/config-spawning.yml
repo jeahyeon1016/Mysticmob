@@ -1,0 +1,25 @@
+Configuration:
+  Spawners:
+    DisableCommandSaving: false
+  RandomSpawning:
+    DisableVanillaSpawns: false
+    GenerateSpawnPoints: false
+    SpawnRadiusPerPlayer: 64
+    SpawnRadiusPerPlayerMin: 12
+    SpawnRadiusPerPlayerY: 16
+    PlayerClusterDistance: 24.0
+    LimitMultiplier: 1.2
+    LocalGroupMultiplier: 0.1
+    SpawningLimit: -1
+    LocalSpawningLimit: -1
+    IgnoreVanillaMobs: false
+    IgnoreUnnaturalMobs: false
+    ReplaceObeysCap: false
+    SharedCooldown: true
+    MaxGenerationAttempts: 10
+    
+    # Generator used for ADD method. Can be NONE, CLUSTER, or LEGACY
+    Generator: NONE
+    
+    # Maximum milliseconds per tick spent on spawning
+    MaxGenerationTime: 5

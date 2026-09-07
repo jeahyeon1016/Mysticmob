@@ -1,0 +1,156 @@
+# ============================================================
+# Wild Bear Skills
+# v1.8
+#
+# 변경:
+# - 7블럭 이상 벌어지면 빠른 추격 돌진 추가
+# - CounterSwipe가 피격시킨 @trigger를 바라본 뒤 발동
+# ============================================================
+
+Bear_Normal_Init:
+  Skills:
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - state{mid=bear2;s=idle;f=true} @self
+
+# ------------------------------------------------------------
+# Idle / Walk
+# ------------------------------------------------------------
+Bear_Normal_WalkStart:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.anim_move;value=0} true
+    - moving true
+  Skills:
+    - setvariable{var=caster.anim_move;value=1;type=INTEGER} @self
+    - state{mid=bear2;s=walk;f=true} @self
+
+Bear_Normal_IdleStart:
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - variableEquals{var=caster.anim_move;value=1} true
+    - moving false
+  Skills:
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=bear2;s=idle;f=true} @self
+
+# ------------------------------------------------------------
+# 기본 공격 - 한 발 할퀴기
+# 현재 타겟 3블럭 이내
+# 실제 타격은 전방 110도 / 3블럭 부채꼴
+# ------------------------------------------------------------
+Bear_Normal_BasicAttack:
+  Cooldown: 1.35
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+    - targetwithin{d=3} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+
+    - look{headOnly=false;immediately=true} @target
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=bear2;s=attack;f=true} @self
+
+    - delay 7
+    - skill{s=Bear_Normal_BasicHit} @self
+
+    - delay 9
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=bear2;s=idle;f=true} @self
+
+Bear_Normal_BasicHit:
+  Skills:
+    # 전방 3블럭 / 좌우 110도 부채꼴.
+    # 프로젝트에서 실제 사용 중인 LivingInCone 문법으로 처리.
+    - damage{a=9} @LivingInCone{a=110;r=3;rot=0;target=players}
+    - throw{velocity=0.65;velocityY=0.10} @LivingInCone{a=110;r=3;rot=0;target=players}
+
+# ------------------------------------------------------------
+# 양발 반격
+#
+# 플레이어가 곰을 타격
+# -> 즉시 공격자(@trigger)를 바라봄
+# -> 정지
+# -> 양발 반격 모션
+# -> 약 1.3초에 곰 주변 반경 5블럭 전체 피해
+# ------------------------------------------------------------
+Bear_Normal_CounterSwipe:
+  Cooldown: 4
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+
+    # 자신을 때린 플레이어를 먼저 바라본다.
+    - look{headOnly=false;immediately=true} @trigger
+
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    - state{mid=bear2;s=skill;f=true} @self
+    - sound{s=entity.polar_bear.warning;v=1.25;p=0.80} @self
+
+    # 원본 skill 모션 타격 지점
+    - delay 26
+    - damage{a=7} @PlayersInRadius{r=5}
+    - throw{velocity=1.20;velocityY=0.28} @PlayersInRadius{r=5}
+
+    - delay 20
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=bear2;s=idle;f=true} @self
+
+# ------------------------------------------------------------
+# 원거리 추격 돌진
+#
+# - 현재 전투 타겟과 7블럭 이상 벌어졌을 때 사용
+# - 너무 먼 타겟(18블럭 이상)에는 사용하지 않음
+# - 4초 쿨타임
+# - 공격/반격 중에는 발동하지 않음
+#
+# v1.8:
+# leap 방식은 이동 벡터와 몸 방향이 따로 놀면서
+# 곰의 엉덩이가 플레이어 쪽을 보는 문제가 있어 제거.
+# AI 추적을 유지한 채 순간적으로 이동속도를 크게 올려,
+# 곰이 플레이어를 직접 바라보며 달려오게 한다.
+# ------------------------------------------------------------
+Bear_Normal_LongDash:
+  Cooldown: 4
+  TargetConditions:
+    - distance{d=>=7} true
+    - distance{d=<18} true
+  Conditions:
+    - variableEquals{var=caster.busy;value=0} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=1;type=INTEGER} @self
+
+    # 돌진 시작 방향을 타겟 쪽으로 정렬
+    - look{headOnly=false;immediately=true} @target
+
+    # AI는 끄지 않는다.
+    # 기존 추적 AI가 플레이어 방향으로 몸을 돌린 채 고속 접근한다.
+    - state{mid=bear2;s=walk;f=true} @self
+    - sound{s=entity.polar_bear.warning;v=0.85;p=0.82} @self
+    - effect:particles{particle=cloud;amount=8;hS=0.45;vS=0.18;speed=0.04} @self
+    - potion{type=SPEED;duration=14;level=4;particles=false} @self
+
+    # 약 0.7초간 고속 추격
+    - delay 14
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+
+# ------------------------------------------------------------
+# 사망 - 그대로 풀석 주저앉기
+# ------------------------------------------------------------
+Bear_Normal_Death:
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - state{mid=bear2;s=death;f=true} @self
+    - sound{s=entity.polar_bear.death;v=1.0;p=0.85} @self

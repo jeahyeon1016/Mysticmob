@@ -1,0 +1,3333 @@
+loaded: 'true'
+'고서 숙련': 
+  name: '고서 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f고서의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f완드를 주 손에 장착 중일 때'
+  - '&f追秋頭&f정신력{attr:buff.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Golden sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '스태프'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '지혜'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '4'
+                    'amount-scale': '2'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                'Attribute-b': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '용기'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '4'
+                    'amount-scale': '1'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'대검 숙련': 
+  name: '대검 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f대검의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f대검을 주 손에 장착 중일 때'
+  - '&f追秋頭&f힘{attr:buff.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Diamond sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '대검'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '힘'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '8'
+                    'amount-scale': '3'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'마나 리사이클': 
+  name: '마나 리사이클'
+  type: '패시브'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '25'
+    'cooldown-scale': '-1'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭스킬 적중 시 주변의 잔존마력을 흡수하여'
+  - '&f追秋頭자신의 자원으로 치환한다'
+  - '&f追秋頭'
+  - '&f追秋頭스킬 적중 시'
+  - '&f追秋頭 마나 {attr:mana.value}&f 회복'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Skill Damage': 
+      type: 'trigger'
+      data: 
+        mana: 'true'
+        cooldown: 'true'
+        target: 'true'
+        'dmg-min': '0'
+        'dmg-max': '9999999'
+        category: []
+      preview: 
+        enabled: 'false'
+      children: 
+        Mana: 
+          type: 'mechanic'
+          data: 
+            'icon-key': 'mana'
+            counts: 'true'
+            type: 'Mana'
+            'value-base': '5'
+            'value-scale': '0.3'
+          preview: 
+            enabled: 'false'
+          children: {}
+        Particle: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            particle: 'Dust'
+            'dust-color': '#66bdff'
+            'dust-size': '1'
+            arrangement: 'Sphere'
+            'radius-base': '1'
+            'radius-scale': '0'
+            'particles-base': '4'
+            'particles-scale': '0'
+            'visible-radius': '25'
+            dx: '0'
+            dy: '1'
+            dz: '0'
+            amount: '1'
+            speed: '0.1'
+            forward: '0'
+            upward: '1'
+            right: '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+'망치 숙련': 
+  name: '망치 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f망치의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f망치를 주 손에 장착 중일 때'
+  - '&f追秋頭&f의지{attr:buff.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Iron axe'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '망치'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '의지'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '8'
+                    'amount-scale': '3'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'스태프 숙련': 
+  name: '스태프 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f스태프의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f스태프를 주 손에 장착 중일 때'
+  - '&f追秋頭&f지혜{attr:buff.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Golden sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '스태프'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '지혜'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '8'
+                    'amount-scale': '3'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'양손검 숙련': 
+  name: '양손검 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f양손검의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f양손검을 주 손에 장착 중일 때'
+  - '&f追秋頭민첩{attr:buff.amount}&f, 힘{attr:buff2.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Diamond sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '양손검'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '민첩'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '2'
+                    'amount-scale': '1'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                'Attribute-b': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff2'
+                    counts: 'true'
+                    key: 
+                    - '힘'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '2'
+                    'amount-scale': '1'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'에테르 더스트': 
+  name: '에테르 더스트'
+  type: '패시브'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '5'
+    'cooldown-scale': '-0.1'
+    'mana-base': '3'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭우클릭으로 에테르를 응집시켜'
+  - '&f追秋頭 에테르 마력을 발사해'
+  - '&f追秋頭단일 적에게 마법 피해를 입힌다'
+  - '&f追秋頭발사 된 에테르는 산탄으로 발사된다'
+  - '&f追秋頭'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Right Click': 
+      type: 'trigger'
+      data: 
+        mana: 'true'
+        cooldown: 'true'
+        crouch: 'Both'
+      preview: 
+        enabled: 'false'
+      children: 
+        'Particle Projectile': 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            pierce: 'false'
+            group: 'Enemy'
+            steps: '1'
+            'collision-radius-base': '0.5'
+            'collision-radius-scale': '0'
+            'gravity-base': '-0.02'
+            'gravity-scale': '0'
+            'drag-base': '0.06'
+            'drag-scale': '0'
+            period: '1'
+            homing: 'false'
+            'velocity-base': '1'
+            'velocity-scale': '0'
+            'lifespan-base': '5'
+            'lifespan-scale': '0'
+            'distance-base': '9'
+            'distance-scale': '0'
+            'on-expire': 'false'
+            spread: 'Horizontal Cone'
+            'amount-base': '4'
+            'amount-scale': '0'
+            'angle-base': '60'
+            'angle-scale': '0'
+            'forward-base': '0'
+            'forward-scale': '0'
+            'upward-base': '0'
+            'upward-scale': '0'
+            'right-base': '0'
+            'right-scale': '0'
+            particle: 'Dust'
+            'dust-color': '#5762ff'
+            'dust-size': '1'
+            arrangement: 'Sphere'
+            'radius-base': '0.1'
+            'radius-scale': '0'
+            'particles-base': '4'
+            'particles-scale': '0'
+            'visible-radius': '25'
+            dx: '0'
+            dy: '0'
+            dz: '0'
+            amount: '1'
+            speed: '0'
+            'use-effect': 'false'
+          preview: 
+            enabled: 'false'
+            period: '5'
+            'per-target': 'false'
+            path: 'false'
+          children: 
+            'Damage Lore': 
+              type: 'mechanic'
+              data: 
+                'icon-key': 'damage'
+                counts: 'true'
+                hand: 'Main'
+                regex: '强 공격 피해姜: {value}'
+                'multiplier-base': '0.6'
+                'multiplier-scale': '0.03'
+                true: 'false'
+                classifier: 'ap'
+                knockback: 'true'
+                'ignore-divinity': 'false'
+                cause: 'Entity Attack'
+              preview: 
+                enabled: 'false'
+              children: {}
+        Sound: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            sound: 'Custom'
+            custom: 'shock'
+            'volume-base': '100'
+            'volume-scale': '0'
+            'pitch-base': '0.5'
+            'pitch-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+'에테르 레이': 
+  name: '에테르 레이'
+  type: '공격'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '13'
+    'cooldown-scale': '0'
+    'mana-base': '9'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f전방으로 에테르 마력을 방출해'
+  - '&f追秋頭&f적 다수에게 마법 피해를 입힌다'
+  - '&f追秋頭피격된 적은 경직, 정신 집중이 중단된다'
+  - '&f追秋頭[광선 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Cast-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        'MythicMob Skill': 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            skill: 'sk_ray'
+          preview: 
+            enabled: 'false'
+          children: {}
+        Channel: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            still: 'true'
+            'time-base': '0.75'
+            'time-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Repeat: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                'repetitions-base': '10'
+                'repetitions-scale': '0'
+                period: '0.1'
+                delay: '0'
+                'stop-on-fail': 'false'
+              preview: 
+                enabled: 'false'
+              children: 
+                'Particle Projectile': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    pierce: 'true'
+                    group: 'Enemy'
+                    steps: '1'
+                    'collision-radius-base': '1.2'
+                    'collision-radius-scale': '0'
+                    'gravity-base': '0'
+                    'gravity-scale': '0'
+                    'drag-base': '0'
+                    'drag-scale': '0'
+                    period: '1'
+                    homing: 'false'
+                    'velocity-base': '5'
+                    'velocity-scale': '0'
+                    'lifespan-base': '1'
+                    'lifespan-scale': '0'
+                    'distance-base': '6'
+                    'distance-scale': '0'
+                    'on-expire': 'false'
+                    spread: 'Horizontal Cone'
+                    'amount-base': '1'
+                    'amount-scale': '0'
+                    'angle-base': '30'
+                    'angle-scale': '0'
+                    'forward-base': '0'
+                    'forward-scale': '0'
+                    'upward-base': '0'
+                    'upward-scale': '0'
+                    'right-base': '0'
+                    'right-scale': '0'
+                    particle: 'Dust color transition'
+                    'dust-color': '#9a75f0'
+                    'final-dust-color': '#41ecb9'
+                    'dust-size': '1'
+                    arrangement: 'Sphere'
+                    'radius-base': '1'
+                    'radius-scale': '0'
+                    'particles-base': '5'
+                    'particles-scale': '0'
+                    'visible-radius': '25'
+                    dx: '0'
+                    dy: '0'
+                    dz: '0'
+                    amount: '1'
+                    speed: '0.1'
+                    'use-effect': 'false'
+                  preview: 
+                    enabled: 'false'
+                    period: '5'
+                    'per-target': 'false'
+                    path: 'false'
+                  children: 
+                    'Damage Lore': 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': 'damage'
+                        counts: 'true'
+                        hand: 'Main'
+                        regex: '强 공격 피해姜: {value}'
+                        'multiplier-base': '0.1'
+                        'multiplier-scale': '0.006'
+                        true: 'false'
+                        classifier: 'ap'
+                        knockback: 'false'
+                        'ignore-divinity': 'false'
+                        cause: 'Entity Attack'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+                    Interrupt: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+            Sound: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                sound: 'Custom'
+                custom: 'lay'
+                'volume-base': '100'
+                'volume-scale': '0'
+                'pitch-base': '1'
+                'pitch-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+            Channel: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                still: 'true'
+                'time-base': '1'
+                'time-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+        Sound: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            sound: 'Ambient cave'
+            'volume-base': '100'
+            'volume-scale': '0'
+            'pitch-base': '2'
+            'pitch-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+'에테르 블라스트': 
+  name: '에테르 블라스트'
+  type: '공격'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '8'
+    'cooldown-scale': '0'
+    'mana-base': '25'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f주위로 마법진을 생성해'
+  - '&f追秋頭&f적 다수에게 마법 피해를 입힌다'
+  - '&f追秋頭[광선 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Cast-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Area: 
+          type: 'target'
+          data: 
+            'icon-key': ''
+            'radius-base': '17'
+            'radius-scale': '0'
+            group: 'Enemy'
+            wall: 'true'
+            invulnerable: 'false'
+            caster: 'False'
+            'max-base': '4'
+            'max-scale': '0'
+            random: 'true'
+          preview: 
+            enabled: 'false'
+            'per-target': 'false'
+            circle: 'false'
+            sphere: 'false'
+          children: 
+            Offset: 
+              type: 'target'
+              data: 
+                'icon-key': ''
+                'forward-base': '0'
+                'forward-scale': '0'
+                'upward-base': '0'
+                'upward-scale': '0'
+                'right-base': '0'
+                'right-scale': '0'
+                group: 'enemy'
+                wall: 'false'
+                invulnerable: 'false'
+                caster: 'false'
+              preview: 
+                enabled: 'false'
+                'per-target': 'false'
+              children: 
+                Delay: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    'delay-base': '0.5'
+                    'delay-scale': '0'
+                    cleanup: 'true'
+                    'single-instance': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: 
+                    Area: 
+                      type: 'target'
+                      data: 
+                        'icon-key': ''
+                        'radius-base': '2'
+                        'radius-scale': '0'
+                        group: 'Enemy'
+                        wall: 'false'
+                        invulnerable: 'false'
+                        caster: 'False'
+                        'max-base': '99'
+                        'max-scale': '0'
+                        random: 'false'
+                      preview: 
+                        enabled: 'false'
+                        'per-target': 'false'
+                        circle: 'false'
+                        sphere: 'false'
+                      children: 
+                        'Damage Lore': 
+                          type: 'mechanic'
+                          data: 
+                            'icon-key': 'damage'
+                            counts: 'true'
+                            hand: 'Main'
+                            regex: '强 공격 피해姜: {value}'
+                            'multiplier-base': '1.05'
+                            'multiplier-scale': '0.12'
+                            true: 'false'
+                            classifier: 'ap'
+                            knockback: 'false'
+                            'ignore-divinity': 'false'
+                            cause: 'Entity Attack'
+                          preview: 
+                            enabled: 'false'
+                          children: {}
+                    Sound: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        sound: 'Custom'
+                        custom: 'lay'
+                        'volume-base': '100'
+                        'volume-scale': '0'
+                        'pitch-base': '2'
+                        'pitch-scale': '0'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+            'MythicMob Skill': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                skill: 'sk_blast'
+              preview: 
+                enabled: 'false'
+              children: {}
+'에테르 쇼크': 
+  name: '에테르 쇼크'
+  type: '공격'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '6'
+    'cooldown-scale': '-0.15'
+    'mana-base': '7'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f전방으로 에테르 마력을 발사해'
+  - '&f追秋頭&f단일 적에게 마법 피해를 입힌다'
+  - '&f追秋頭[탄환 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭투사체는 10칸 이내의 적을 추적 '
+  - '&f追秋頭투사체 {attr:amount.Repetitions}개'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Cast-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Repeat: 
+          type: 'mechanic'
+          data: 
+            'icon-key': 'amount'
+            counts: 'true'
+            'repetitions-base': '1.2'
+            'repetitions-scale': '0.2'
+            period: '0.15'
+            delay: '0'
+            'stop-on-fail': 'false'
+          preview: 
+            enabled: 'false'
+          children: 
+            'Particle Projectile': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                pierce: 'false'
+                group: 'Enemy'
+                steps: '2'
+                'collision-radius-base': '0.5'
+                'collision-radius-scale': '0'
+                'gravity-base': '0'
+                'gravity-scale': '0'
+                'drag-base': '0'
+                'drag-scale': '0'
+                period: '1'
+                homing: 'true'
+                target: 'Nearest'
+                'homing-distance-base': '10'
+                'homing-distance-scale': '0'
+                'correction-base': '0.1'
+                'correction-scale': '0'
+                wall: 'false'
+                'velocity-base': '1'
+                'velocity-scale': '0'
+                'lifespan-base': '5'
+                'lifespan-scale': '0'
+                'distance-base': '15'
+                'distance-scale': '0'
+                'on-expire': 'false'
+                spread: 'Cone'
+                'amount-base': '1'
+                'amount-scale': '0'
+                'angle-base': '30'
+                'angle-scale': '0'
+                'forward-base': '0'
+                'forward-scale': '0'
+                'upward-base': '0'
+                'upward-scale': '0'
+                'right-base': '0'
+                'right-scale': '0'
+                particle: 'Dust color transition'
+                'dust-color': '#8870ff'
+                'final-dust-color': '#33e7ff'
+                'dust-size': '1'
+                arrangement: 'Sphere'
+                'radius-base': '0.2'
+                'radius-scale': '0'
+                'particles-base': '5'
+                'particles-scale': '0'
+                'visible-radius': '60'
+                dx: '0'
+                dy: '0'
+                dz: '0'
+                amount: '1'
+                speed: '0'
+                'use-effect': 'false'
+              preview: 
+                enabled: 'false'
+                period: '5'
+                'per-target': 'false'
+                path: 'false'
+              children: 
+                'Damage Lore': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'damage'
+                    counts: 'true'
+                    hand: 'Main'
+                    regex: '强 공격 피해姜: {value}'
+                    'multiplier-base': '0.16'
+                    'multiplier-scale': '0.02'
+                    true: 'false'
+                    classifier: 'ap'
+                    knockback: 'false'
+                    'ignore-divinity': 'false'
+                    cause: 'Projectile'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+            Sound: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                sound: 'Custom'
+                custom: 'shock'
+                'volume-base': '100'
+                'volume-scale': '0'
+                'pitch-base': '1'
+                'pitch-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+'에테르 오브 유니티': 
+  name: '에테르 오브 유니티'
+  type: '패시브'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '120'
+    'cooldown-scale': '0'
+    'mana-base': '30'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'fire_charge'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭잠시동안 마법진을 최대 출력으로 개방해'
+  - '&f追秋頭자신의 스킬 적중에 추가로 발사되는'
+  - '&f追秋頭탄환을 발사한다.'
+  - '&f追秋頭[탄환 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭{attr:unitytime.Seconds}&f 초 동안姜{attr:damage.Multiplier}&f의 江마법 피해를'
+  - '&f追秋頭주는 추가 탄환 생성'
+  - '&f追秋頭투사체는 10칸 이내의 적을 추적 '
+  - '&f追秋頭25%의 확률로 탄환 2개 생성'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Skill Damage': 
+      type: 'trigger'
+      data: 
+        mana: 'false'
+        cooldown: 'false'
+        target: 'true'
+        'dmg-min': '0'
+        'dmg-max': '9999999999'
+        category: []
+      preview: 
+        enabled: 'false'
+      children: 
+        Flag: 
+          type: 'condition'
+          data: 
+            'icon-key': ''
+            type: 'Set'
+            key: 'unity'
+          preview: 
+            enabled: 'false'
+          children: 
+            Chance: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'chance-base': '25'
+                'chance-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: 
+                'Value Random': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    key: 'yran'
+                    integer: 'false'
+                    type: 'Triangular'
+                    'min-base': '0.3'
+                    'min-scale': '0'
+                    'max-base': '3'
+                    'max-scale': '0'
+                    save: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                'Value Random-b': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    key: 'ran'
+                    integer: 'false'
+                    type: 'Triangular'
+                    'min-base': '-3'
+                    'min-scale': '0'
+                    'max-base': '3'
+                    'max-scale': '0'
+                    save: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                'Armor Stand': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    key: ''
+                    'duration-base': '0.1'
+                    'duration-scale': '0'
+                    name: 'Armor Stand'
+                    'name-visible': 'false'
+                    follow: 'false'
+                    marker: 'false'
+                    gravity: 'false'
+                    tiny: 'false'
+                    arms: 'false'
+                    base: 'false'
+                    visible: 'false'
+                    'forward-base': '0'
+                    'forward-scale': '0'
+                    'upward-base': 'yran'
+                    'upward-scale': '0'
+                    'right-base': 'ran'
+                    'right-scale': '0'
+                  preview: 
+                    enabled: 'false'
+                  children: 
+                    'MythicMob Skill': 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        skill: 'sk_tempest'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+                    Delay: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        'delay-base': '0.3'
+                        'delay-scale': '0'
+                        cleanup: 'true'
+                        'single-instance': 'false'
+                      preview: 
+                        enabled: 'false'
+                      children: 
+                        'Particle Projectile': 
+                          type: 'mechanic'
+                          data: 
+                            'icon-key': ''
+                            counts: 'true'
+                            pierce: 'false'
+                            group: 'Enemy'
+                            steps: '1'
+                            'collision-radius-base': '0.5'
+                            'collision-radius-scale': '0'
+                            'gravity-base': '0'
+                            'gravity-scale': '0'
+                            'drag-base': '0'
+                            'drag-scale': '0'
+                            period: '1'
+                            homing: 'true'
+                            target: 'Nearest'
+                            'homing-distance-base': '10'
+                            'homing-distance-scale': '0'
+                            'correction-base': '0.1'
+                            'correction-scale': '0'
+                            wall: 'false'
+                            'velocity-base': '1'
+                            'velocity-scale': '0'
+                            'lifespan-base': '5'
+                            'lifespan-scale': '0'
+                            'distance-base': '13'
+                            'distance-scale': '0'
+                            'on-expire': 'false'
+                            spread: 'Cone'
+                            'amount-base': '1'
+                            'amount-scale': '0'
+                            'angle-base': '30'
+                            'angle-scale': '0'
+                            'forward-base': '0'
+                            'forward-scale': '0'
+                            'upward-base': '0'
+                            'upward-scale': '0'
+                            'right-base': '0'
+                            'right-scale': '0'
+                            particle: 'Dust color transition'
+                            'dust-color': '#fe62e2'
+                            'final-dust-color': '#77fd7a'
+                            'dust-size': '1'
+                            arrangement: 'Sphere'
+                            'radius-base': '0.1'
+                            'radius-scale': '0'
+                            'particles-base': '2'
+                            'particles-scale': '0'
+                            'visible-radius': '25'
+                            dx: '0'
+                            dy: '0'
+                            dz: '0'
+                            amount: '1'
+                            speed: '0'
+                            'use-effect': 'false'
+                          preview: 
+                            enabled: 'false'
+                            period: '5'
+                            'per-target': 'false'
+                            path: 'false'
+                          children: 
+                            'Damage Lore': 
+                              type: 'mechanic'
+                              data: 
+                                'icon-key': 'damage'
+                                counts: 'true'
+                                hand: 'Main'
+                                regex: '强 공격 피해姜: {value}'
+                                'multiplier-base': '0.11'
+                                'multiplier-scale': '0.03'
+                                true: 'false'
+                                classifier: 'ap'
+                                knockback: 'false'
+                                'ignore-divinity': 'false'
+                                cause: 'Entity Attack'
+                              preview: 
+                                enabled: 'false'
+                              children: {}
+                        Sound: 
+                          type: 'mechanic'
+                          data: 
+                            'icon-key': ''
+                            counts: 'true'
+                            sound: 'Custom'
+                            custom: 'bulletlazer'
+                            'volume-base': '25'
+                            'volume-scale': '0'
+                            'pitch-base': '2'
+                            'pitch-scale': '0'
+                          preview: 
+                            enabled: 'false'
+                          children: {}
+            'Value Random': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: 'ran'
+                integer: 'false'
+                type: 'Triangular'
+                'min-base': '-3'
+                'min-scale': '0'
+                'max-base': '3'
+                'max-scale': '0'
+                save: 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+            'Value Random-b': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: 'yran'
+                integer: 'false'
+                type: 'Triangular'
+                'min-base': '0.3'
+                'min-scale': '0'
+                'max-base': '2'
+                'max-scale': '0'
+                save: 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+            'Value Random-c': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: 'for'
+                integer: 'false'
+                type: 'Triangular'
+                'min-base': '-1'
+                'min-scale': '0'
+                'max-base': '1'
+                'max-scale': '0'
+                save: 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+            'Armor Stand': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: ''
+                'duration-base': '0.1'
+                'duration-scale': '0'
+                name: 'Armor Stand'
+                'name-visible': 'false'
+                follow: 'false'
+                marker: 'false'
+                gravity: 'false'
+                tiny: 'false'
+                arms: 'false'
+                base: 'false'
+                visible: 'false'
+                'forward-base': 'for'
+                'forward-scale': '0'
+                'upward-base': 'yran'
+                'upward-scale': '0'
+                'right-base': 'ran'
+                'right-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: 
+                'MythicMob Skill': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    skill: 'sk_tempest'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                Delay: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    'delay-base': '0.3'
+                    'delay-scale': '0'
+                    cleanup: 'true'
+                    'single-instance': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: 
+                    'Particle Projectile': 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        pierce: 'false'
+                        group: 'Enemy'
+                        steps: '1'
+                        'collision-radius-base': '0.5'
+                        'collision-radius-scale': '0'
+                        'gravity-base': '0'
+                        'gravity-scale': '0'
+                        'drag-base': '0'
+                        'drag-scale': '0'
+                        period: '1'
+                        homing: 'true'
+                        target: 'Nearest'
+                        'homing-distance-base': '10'
+                        'homing-distance-scale': '0'
+                        'correction-base': '0.1'
+                        'correction-scale': '0'
+                        wall: 'false'
+                        'velocity-base': '1'
+                        'velocity-scale': '0'
+                        'lifespan-base': '5'
+                        'lifespan-scale': '0'
+                        'distance-base': '13'
+                        'distance-scale': '0'
+                        'on-expire': 'false'
+                        spread: 'Cone'
+                        'amount-base': '1'
+                        'amount-scale': '0'
+                        'angle-base': '30'
+                        'angle-scale': '0'
+                        'forward-base': '0'
+                        'forward-scale': '0'
+                        'upward-base': '0'
+                        'upward-scale': '0'
+                        'right-base': '0'
+                        'right-scale': '0'
+                        particle: 'Dust color transition'
+                        'dust-color': '#fe62e2'
+                        'final-dust-color': '#77fd7a'
+                        'dust-size': '1'
+                        arrangement: 'Sphere'
+                        'radius-base': '0.1'
+                        'radius-scale': '0'
+                        'particles-base': '2'
+                        'particles-scale': '0'
+                        'visible-radius': '25'
+                        dx: '0'
+                        dy: '0'
+                        dz: '0'
+                        amount: '1'
+                        speed: '0'
+                        'use-effect': 'false'
+                      preview: 
+                        enabled: 'false'
+                        period: '5'
+                        'per-target': 'false'
+                        path: 'false'
+                      children: 
+                        'Damage Lore': 
+                          type: 'mechanic'
+                          data: 
+                            'icon-key': 'damage'
+                            counts: 'true'
+                            hand: 'Main'
+                            regex: '强 공격 피해姜: {value}'
+                            'multiplier-base': '0.11'
+                            'multiplier-scale': '0.03'
+                            true: 'false'
+                            classifier: 'ap'
+                            knockback: 'false'
+                            'ignore-divinity': 'false'
+                            cause: 'Entity Attack'
+                          preview: 
+                            enabled: 'false'
+                          children: {}
+                    Sound: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        sound: 'Custom'
+                        custom: 'bulletlazer'
+                        'volume-base': '25'
+                        'volume-scale': '0'
+                        'pitch-base': '1'
+                        'pitch-scale': '0'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+    'Cast-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Flag: 
+          type: 'mechanic'
+          data: 
+            'icon-key': 'unitytime'
+            counts: 'true'
+            key: 'unity'
+            'seconds-base': '5'
+            'seconds-scale': '1'
+          preview: 
+            enabled: 'false'
+          children: {}
+        'Particle Animation': 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            steps: '1'
+            frequency: '0.05'
+            angle: '0'
+            start: '0'
+            'duration-base': '5'
+            'duration-scale': '1'
+            'h-translation-base': '0'
+            'h-translation-scale': '0'
+            'v-translation-base': '0'
+            'v-translation-scale': '0'
+            'h-cycles': '1'
+            'v-cycles': '1'
+            particle: 'Dust color transition'
+            'dust-color': '#ff3333'
+            'final-dust-color': '#2ae5fe'
+            'dust-size': '1'
+            arrangement: 'Sphere'
+            'radius-base': '1'
+            'radius-scale': '0'
+            'particles-base': '20'
+            'particles-scale': '0'
+            'visible-radius': '25'
+            dx: '0'
+            dy: '0.3'
+            dz: '0'
+            amount: '1'
+            speed: '0'
+            forward: '0'
+            upward: '1'
+            right: '0'
+            '-with-rotation': 'false'
+          preview: 
+            enabled: 'false'
+          children: {}
+'에테르 템페스트': 
+  name: '에테르 템페스트'
+  type: '패시브'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '15'
+    'cooldown-scale': '-0.4'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f스킬 사용 시 후속 연계로 에테르를'
+  - '&f追秋頭&f발사해 단일 적에게 마법 피해를 입힌다'
+  - '&f追秋頭광선 스킬과는 연계되지 않는다'
+  - '&f追秋頭[탄환 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭투사체는 10칸 이내의 적을 추적 '
+  - '&f追秋頭투사체 {attr:amount.Repetitions}개'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Skill Cast': 
+      type: 'trigger'
+      data: 
+        mana: 'true'
+        cooldown: 'true'
+        cancel: 'false'
+        'allowed-classes': []
+        'allowed-skills': 
+        - '!에테르 레이'
+        - '!에테르 블라스트'
+        - '!에테르 허리케인'
+        - '!텔레포트'
+      preview: 
+        enabled: 'false'
+      children: 
+        Repeat: 
+          type: 'mechanic'
+          data: 
+            'icon-key': 'amount'
+            counts: 'true'
+            'repetitions-base': '6'
+            'repetitions-scale': '0.1'
+            period: '0.1'
+            delay: '0'
+            'stop-on-fail': 'false'
+          preview: 
+            enabled: 'false'
+          children: 
+            'Value Random': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: 'ran'
+                integer: 'false'
+                type: 'Triangular'
+                'min-base': '-3'
+                'min-scale': '0'
+                'max-base': '3'
+                'max-scale': '0'
+                save: 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+            'Value Random-b': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: 'yran'
+                integer: 'false'
+                type: 'Triangular'
+                'min-base': '0.3'
+                'min-scale': '0'
+                'max-base': '2'
+                'max-scale': '0'
+                save: 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+            'Armor Stand': 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: ''
+                'duration-base': '0.1'
+                'duration-scale': '0'
+                name: 'Armor Stand'
+                'name-visible': 'false'
+                follow: 'false'
+                marker: 'false'
+                gravity: 'false'
+                tiny: 'false'
+                arms: 'false'
+                base: 'false'
+                visible: 'false'
+                'forward-base': '0'
+                'forward-scale': '0'
+                'upward-base': 'yran'
+                'upward-scale': '0'
+                'right-base': 'ran'
+                'right-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: 
+                'MythicMob Skill': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    skill: 'sk_tempest'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                Delay: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    'delay-base': '0.3'
+                    'delay-scale': '0'
+                    cleanup: 'true'
+                    'single-instance': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: 
+                    'Particle Projectile': 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        pierce: 'false'
+                        group: 'Enemy'
+                        steps: '1'
+                        'collision-radius-base': '0.5'
+                        'collision-radius-scale': '0'
+                        'gravity-base': '0'
+                        'gravity-scale': '0'
+                        'drag-base': '0'
+                        'drag-scale': '0'
+                        period: '1'
+                        homing: 'true'
+                        target: 'Nearest'
+                        'homing-distance-base': '10'
+                        'homing-distance-scale': '0'
+                        'correction-base': '0.1'
+                        'correction-scale': '0'
+                        wall: 'false'
+                        'velocity-base': '1'
+                        'velocity-scale': '0'
+                        'lifespan-base': '5'
+                        'lifespan-scale': '0'
+                        'distance-base': '13'
+                        'distance-scale': '0'
+                        'on-expire': 'false'
+                        spread: 'Cone'
+                        'amount-base': '1'
+                        'amount-scale': '0'
+                        'angle-base': '30'
+                        'angle-scale': '0'
+                        'forward-base': '0'
+                        'forward-scale': '0'
+                        'upward-base': '0'
+                        'upward-scale': '0'
+                        'right-base': '0'
+                        'right-scale': '0'
+                        particle: 'Dust color transition'
+                        'dust-color': '#fe62e2'
+                        'final-dust-color': '#77fd7a'
+                        'dust-size': '1'
+                        arrangement: 'Sphere'
+                        'radius-base': '0.1'
+                        'radius-scale': '0'
+                        'particles-base': '2'
+                        'particles-scale': '0'
+                        'visible-radius': '25'
+                        dx: '0'
+                        dy: '0'
+                        dz: '0'
+                        amount: '1'
+                        speed: '0'
+                        'use-effect': 'false'
+                      preview: 
+                        enabled: 'false'
+                        period: '5'
+                        'per-target': 'false'
+                        path: 'false'
+                      children: 
+                        'Damage Lore': 
+                          type: 'mechanic'
+                          data: 
+                            'icon-key': 'damage'
+                            counts: 'true'
+                            hand: 'Main'
+                            regex: '强 공격 피해姜: {value}'
+                            'multiplier-base': '0.11'
+                            'multiplier-scale': '0.03'
+                            true: 'false'
+                            classifier: 'ap'
+                            knockback: 'false'
+                            'ignore-divinity': 'false'
+                            cause: 'Entity Attack'
+                          preview: 
+                            enabled: 'false'
+                          children: {}
+                    Sound: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        sound: 'Custom'
+                        custom: 'shock'
+                        'volume-base': '75'
+                        'volume-scale': '0'
+                        'pitch-base': '2'
+                        'pitch-scale': '0'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+'에테르 허리케인': 
+  name: '에테르 허리케인'
+  type: '공격'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '14'
+    'cooldown-scale': '0'
+    'mana-base': '30'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f주위로 마법진을 생성해'
+  - '&f追秋頭&f적 다수에게 마법 피해를 입힌다'
+  - '&f追秋頭[광선 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Cast-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Repeat: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'repetitions-base': '4'
+            'repetitions-scale': '0'
+            period: '1'
+            delay: '0'
+            'stop-on-fail': 'false'
+          preview: 
+            enabled: 'false'
+          children: 
+            Area: 
+              type: 'target'
+              data: 
+                'icon-key': ''
+                'radius-base': '20'
+                'radius-scale': '0'
+                group: 'Enemy'
+                wall: 'true'
+                invulnerable: 'false'
+                caster: 'False'
+                'max-base': '7'
+                'max-scale': '0'
+                random: 'true'
+              preview: 
+                enabled: 'false'
+                'per-target': 'false'
+                circle: 'false'
+                sphere: 'false'
+              children: 
+                Offset: 
+                  type: 'target'
+                  data: 
+                    'icon-key': ''
+                    'forward-base': '0'
+                    'forward-scale': '0'
+                    'upward-base': '0'
+                    'upward-scale': '0'
+                    'right-base': '0'
+                    'right-scale': '0'
+                    group: 'enemy'
+                    wall: 'false'
+                    invulnerable: 'false'
+                    caster: 'false'
+                  preview: 
+                    enabled: 'false'
+                    'per-target': 'false'
+                  children: 
+                    Delay: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        'delay-base': '0.5'
+                        'delay-scale': '0'
+                        cleanup: 'true'
+                        'single-instance': 'false'
+                      preview: 
+                        enabled: 'false'
+                      children: 
+                        Area: 
+                          type: 'target'
+                          data: 
+                            'icon-key': ''
+                            'radius-base': '2'
+                            'radius-scale': '0'
+                            group: 'Enemy'
+                            wall: 'false'
+                            invulnerable: 'false'
+                            caster: 'False'
+                            'max-base': '99'
+                            'max-scale': '0'
+                            random: 'false'
+                          preview: 
+                            enabled: 'false'
+                            'per-target': 'false'
+                            circle: 'false'
+                            sphere: 'false'
+                          children: 
+                            'Damage Lore': 
+                              type: 'mechanic'
+                              data: 
+                                'icon-key': 'damage'
+                                counts: 'true'
+                                hand: 'Main'
+                                regex: '强 공격 피해姜: {value}'
+                                'multiplier-base': '0.95'
+                                'multiplier-scale': '0.18'
+                                true: 'false'
+                                classifier: 'ap'
+                                knockback: 'false'
+                                'ignore-divinity': 'false'
+                                cause: 'Entity Attack'
+                              preview: 
+                                enabled: 'false'
+                              children: {}
+                        Sound: 
+                          type: 'mechanic'
+                          data: 
+                            'icon-key': ''
+                            counts: 'true'
+                            sound: 'Custom'
+                            custom: 'lay'
+                            'volume-base': '100'
+                            'volume-scale': '0'
+                            'pitch-base': '2'
+                            'pitch-scale': '0'
+                          preview: 
+                            enabled: 'false'
+                          children: {}
+                'MythicMob Skill': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    skill: 'sk_blast'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+            Stat: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: 'move-speed'
+                operation: 'MULTIPLY_PERCENTAGE'
+                'amount-base': '0.35'
+                'amount-scale': '0'
+                'seconds-base': '0.3'
+                'seconds-scale': '0'
+                stackable: 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+            Potion: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                potion: 'Jump boost'
+                ambient: 'true'
+                'tier-base': '8889999'
+                'tier-scale': '0'
+                'seconds-base': '0.3'
+                'seconds-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+'완드 숙련': 
+  name: '완드 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f완드의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f완드를 주 손에 장착 중일 때'
+  - '&f追秋頭&f정신력{attr:buff.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Golden sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '완드'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '정신력'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '8'
+                    'amount-scale': '3'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'태도 숙련': 
+  name: '태도 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f한손검의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f한손검을 주 손에 장착 중일 때'
+  - '&f追秋頭민첩{attr:buff.amount}&f, 용기{attr:buff2.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Diamond sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '태도'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '민첩'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '4'
+                    'amount-scale': '1'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                'Attribute-b': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff2'
+                    counts: 'true'
+                    key: 
+                    - '용기'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '4'
+                    'amount-scale': '2'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'한손검 숙련': 
+  name: '한손검 숙련'
+  type: '마스터리'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f한손검의 숙련도를 증가시킨다'
+  - '&f追秋頭'
+  - '&f追秋頭&f한손검을 주 손에 장착 중일 때'
+  - '&f追秋頭민첩{attr:buff.amount}&f증가'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Item: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                'check-mat': 'true'
+                material: 'Diamond sword'
+                'check-data': 'false'
+                'check-custom-data': 'false'
+                'check-lore': 'true'
+                lore: '한손검'
+                'check-name': 'false'
+                regex: 'true'
+              preview: 
+                enabled: 'false'
+              children: 
+                Attribute: 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': 'buff'
+                    counts: 'true'
+                    key: 
+                    - '민첩'
+                    operation: 'ADD_NUMBER'
+                    'amount-base': '8'
+                    'amount-scale': '3'
+                    'seconds-base': '1'
+                    'seconds-scale': '0'
+                    stackable: 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'기절 상태': 
+  name: '기절 상태'
+  type: '상태이상'
+  'max-level': 1
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '0'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&d{name} &7({level}/{max})'
+  - '&2Type: &6{type}'
+  - ''
+  - '{req:level}Level: {attr:level}'
+  - '{req:cost}Cost: {attr:cost}'
+  - ''
+  - '&2Mana: {attr:mana}'
+  - '&2Cooldown: {attr:cooldown}'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Status: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                type: 'Active'
+                status: 'Stun'
+              preview: 
+                enabled: 'false'
+              children: 
+                'Particle Animation': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    steps: '8'
+                    frequency: '0.05'
+                    angle: '360'
+                    start: '-90'
+                    'duration-base': '1'
+                    'duration-scale': '0'
+                    'h-translation-base': '0'
+                    'h-translation-scale': '0'
+                    'v-translation-base': '0'
+                    'v-translation-scale': '0'
+                    'h-cycles': '1'
+                    'v-cycles': '1'
+                    particle: 'Cloud'
+                    arrangement: 'Sphere'
+                    'radius-base': '0.1'
+                    'radius-scale': '0'
+                    'particles-base': '1'
+                    'particles-scale': '0'
+                    'visible-radius': '25'
+                    dx: '0'
+                    dy: '0'
+                    dz: '0'
+                    amount: '1'
+                    speed: '0'
+                    forward: '0.5'
+                    upward: '2'
+                    right: '0'
+                    '-with-rotation': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                'Particle Animation-b': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    steps: '8'
+                    frequency: '0.05'
+                    angle: '360'
+                    start: '90'
+                    'duration-base': '1'
+                    'duration-scale': '0'
+                    'h-translation-base': '0'
+                    'h-translation-scale': '0'
+                    'v-translation-base': '0'
+                    'v-translation-scale': '0'
+                    'h-cycles': '1'
+                    'v-cycles': '1'
+                    particle: 'Cloud'
+                    arrangement: 'Sphere'
+                    'radius-base': '0.1'
+                    'radius-scale': '0'
+                    'particles-base': '1'
+                    'particles-scale': '0'
+                    'visible-radius': '25'
+                    dx: '0'
+                    dy: '0'
+                    dz: '0'
+                    amount: '1'
+                    speed: '0'
+                    forward: '0.5'
+                    upward: '2'
+                    right: '0'
+                    '-with-rotation': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'빙결 상태': 
+  name: '빙결 상태'
+  type: '상태이상'
+  'max-level': 1
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '0'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  msg: '&6{player} > &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&d{name} &7({level}/{max})'
+  - '&2Type: &6{type}'
+  - ''
+  - '{req:level}Level: {attr:level}'
+  - '{req:cost}Cost: {attr:cost}'
+  - ''
+  - '&2Mana: {attr:mana}'
+  - '&2Cooldown: {attr:cooldown}'
+  desc: []
+  components: 
+    'Environment Damage': 
+      type: 'trigger'
+      data: 
+        mana: 'false'
+        cooldown: 'false'
+        type: 
+        - 'Freeze'
+      preview: 
+        enabled: 'false'
+      children: 
+        Flag: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            key: 'frozen'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+    Flag: 
+      type: 'trigger'
+      data: 
+        mana: 'false'
+        cooldown: 'false'
+        flags: 
+        - 'frozen'
+        'min-duration': '0'
+        inverse: 'false'
+      preview: 
+        enabled: 'false'
+      children: 
+        Particle: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            particle: 'Block'
+            material: 'Blue ice'
+            arrangement: 'Sphere'
+            'radius-base': '1'
+            'radius-scale': '0'
+            'particles-base': '20'
+            'particles-scale': '0'
+            'visible-radius': '25'
+            dx: '0'
+            dy: '0'
+            dz: '0'
+            amount: '1'
+            speed: '0.1'
+            forward: '0'
+            upward: '1'
+            right: '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+        Chance: 
+          type: 'condition'
+          data: 
+            'icon-key': ''
+            'chance-base': '33'
+            'chance-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Cooldown: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'false'
+                skill: 'all'
+                type: 'Seconds'
+                'value-base': '-3'
+                'value-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+'화상 상태': 
+  name: '화상 상태'
+  type: '상태이상'
+  'max-level': 1
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '0'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&d{name} &7({level}/{max})'
+  - '&2Type: &6{type}'
+  - ''
+  - '{req:level}Level: {attr:level}'
+  - '{req:cost}Cost: {attr:cost}'
+  - ''
+  - '&2Mana: {attr:mana}'
+  - '&2Cooldown: {attr:cooldown}'
+  desc: []
+  components: 
+    Flag: 
+      type: 'trigger'
+      data: 
+        mana: 'false'
+        cooldown: 'false'
+        flags: 
+        - 'fire'
+        'min-duration': '0'
+        inverse: 'false'
+      preview: 
+        enabled: 'false'
+      children: 
+        Particle: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            particle: 'Soul fire flame'
+            arrangement: 'Sphere'
+            'radius-base': '1'
+            'radius-scale': '0'
+            'particles-base': '20'
+            'particles-scale': '0'
+            'visible-radius': '25'
+            dx: '0'
+            dy: '0'
+            dz: '0'
+            amount: '1'
+            speed: '0'
+            forward: '0'
+            upward: '1'
+            right: '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+        Chance: 
+          type: 'condition'
+          data: 
+            'icon-key': ''
+            'chance-base': '33'
+            'chance-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Damage: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                type: 'Percent Left'
+                'value-base': '5'
+                'value-scale': '0'
+                true: 'true'
+                classifier: 'default'
+                knockback: 'false'
+                'no-shake': 'false'
+                'ignore-divinity': 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+    'Environment Damage': 
+      type: 'trigger'
+      data: 
+        mana: 'false'
+        cooldown: 'false'
+        type: 
+        - 'Fire'
+        - 'Campfire'
+        - 'Lava'
+        - 'Fire tick'
+        - 'Hot floor'
+      preview: 
+        enabled: 'false'
+      children: 
+        Flag: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            key: 'fire'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+'침묵 상태': 
+  name: '침묵 상태'
+  type: '상태이상'
+  'max-level': 1
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '0'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&d{name} &7({level}/{max})'
+  - '&2Type: &6{type}'
+  - ''
+  - '{req:level}Level: {attr:level}'
+  - '{req:cost}Cost: {attr:cost}'
+  - ''
+  - '&2Mana: {attr:mana}'
+  - '&2Cooldown: {attr:cooldown}'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Status: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                type: 'Active'
+                status: 'Silence'
+              preview: 
+                enabled: 'false'
+              children: 
+                'Particle Animation': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    steps: '8'
+                    frequency: '0.05'
+                    angle: '360'
+                    start: '-90'
+                    'duration-base': '1'
+                    'duration-scale': '0'
+                    'h-translation-base': '0'
+                    'h-translation-scale': '0'
+                    'v-translation-base': '0'
+                    'v-translation-scale': '0'
+                    'h-cycles': '1'
+                    'v-cycles': '1'
+                    particle: 'Ash'
+                    arrangement: 'Sphere'
+                    'radius-base': '0.1'
+                    'radius-scale': '0'
+                    'particles-base': '1'
+                    'particles-scale': '0'
+                    'visible-radius': '25'
+                    dx: '0'
+                    dy: '0'
+                    dz: '0'
+                    amount: '1'
+                    speed: '0'
+                    forward: '0.5'
+                    upward: '0'
+                    right: '0'
+                    '-with-rotation': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+'충격 상태': 
+  name: '충격 상태'
+  type: '상태이상'
+  'max-level': 1
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '0'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  msg: '&6{player} > &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&d{name} &7({level}/{max})'
+  - '&2Type: &6{type}'
+  - ''
+  - '{req:level}Level: {attr:level}'
+  - '{req:cost}Cost: {attr:cost}'
+  - ''
+  - '&2Mana: {attr:mana}'
+  - '&2Cooldown: {attr:cooldown}'
+  desc: []
+  components: 
+    'Environment Damage': 
+      type: 'trigger'
+      data: 
+        mana: 'false'
+        cooldown: 'false'
+        type: 
+        - 'Fall'
+      preview: 
+        enabled: 'false'
+      children: 
+        Flag: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            key: 'crash'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+    Flag: 
+      type: 'trigger'
+      data: 
+        mana: 'false'
+        cooldown: 'false'
+        flags: 
+        - 'crash'
+        'min-duration': '0'
+        inverse: 'false'
+      preview: 
+        enabled: 'false'
+      children: 
+        Particle: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'false'
+            particle: 'Block'
+            material: 'Blackstone'
+            arrangement: 'Circle'
+            direction: 'XZ'
+            'radius-base': '1'
+            'radius-scale': '0'
+            'particles-base': '20'
+            'particles-scale': '0'
+            'visible-radius': '25'
+            dx: '0'
+            dy: '0'
+            dz: '0'
+            amount: '1'
+            speed: '0.1'
+            forward: '0'
+            upward: '0'
+            right: '0'
+          preview: 
+            enabled: 'false'
+          children: {}
+        Chance: 
+          type: 'condition'
+          data: 
+            'icon-key': ''
+            'chance-base': '50'
+            'chance-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Status: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'false'
+                status: 'Root'
+                'duration-base': '1'
+                'duration-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+'붉은 노드': 
+  name: '붉은 노드'
+  type: '특성'
+  'max-level': 5
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: 
+  - '푸른 노드'
+  - '청록 노드'
+  - '검은 노드'
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '힘-base': '5'
+    '힘-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭힘 {attr:attr.Amount}&f &f증가'
+  - '&f追秋頭'
+  - '&f追秋頭&c힘 5 이상 특성'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Attribute: 
+              type: 'mechanic'
+              data: 
+                'icon-key': 'attr'
+                counts: 'false'
+                key: 
+                - '힘'
+                - '지혜'
+                operation: 'ADD_NUMBER'
+                'amount-base': '5'
+                'amount-scale': '2'
+                'seconds-base': '1'
+                'seconds-scale': '0'
+                stackable: 'true'
+              preview: 
+                enabled: 'false'
+              children: {}
+'푸른 노드': 
+  name: '푸른 노드'
+  type: '특성'
+  'max-level': 5
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: 
+  - '붉은 노드'
+  - '청록 노드'
+  - '검은 노드'
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '용기-base': '5'
+    '용기-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭용기 {attr:attr.Amount}&f &f증가'
+  - '&f追秋頭'
+  - '&f追秋頭&c용기 5 이상 특성'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Attribute: 
+              type: 'mechanic'
+              data: 
+                'icon-key': 'attr'
+                counts: 'false'
+                key: 
+                - '용기'
+                operation: 'ADD_NUMBER'
+                'amount-base': '5'
+                'amount-scale': '2'
+                'seconds-base': '1'
+                'seconds-scale': '0'
+                stackable: 'true'
+              preview: 
+                enabled: 'false'
+              children: {}
+'검은 노드': 
+  name: '검은 노드'
+  type: '특성'
+  'max-level': 5
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: 
+  - '붉은 노드'
+  - '청록 노드'
+  - '푸른 노드'
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭민첩 {attr:attr.Amount}&f &f증가'
+  - '&f追秋頭'
+  - '&f追秋頭&c민첩 5 이상 특성'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Attribute: 
+              type: 'mechanic'
+              data: 
+                'icon-key': 'attr'
+                counts: 'false'
+                key: 
+                - '민첩'
+                operation: 'ADD_NUMBER'
+                'amount-base': '5'
+                'amount-scale': '2'
+                'seconds-base': '1'
+                'seconds-scale': '0'
+                stackable: 'true'
+              preview: 
+                enabled: 'false'
+              children: {}
+'청록 노드': 
+  name: '청록 노드'
+  type: '특성'
+  'max-level': 5
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: 
+  - '붉은 노드'
+  - '푸른 노드'
+  - '검은 노드'
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '지혜-base': '5'
+    '지혜-scale': '0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭지혜 {attr:attr.Amount}&f &f증가'
+  - '&f追秋頭'
+  - '&f追秋頭&c지혜 5 이상 특성'
+  - '&f追抽頭'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Attribute: 
+              type: 'mechanic'
+              data: 
+                'icon-key': 'attr'
+                counts: 'false'
+                key: 
+                - '지혜'
+                operation: 'ADD_NUMBER'
+                'amount-base': '5'
+                'amount-scale': '2'
+                'seconds-base': '1'
+                'seconds-scale': '0'
+                stackable: 'true'
+              preview: 
+                enabled: 'false'
+              children: {}

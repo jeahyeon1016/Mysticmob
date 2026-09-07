@@ -1,0 +1,33 @@
+# ============================================================
+# POISON SLIME - SKILLS
+# MythicMobs 5.13.0 + ModelEngine 4.1.0
+# Model ID: rpg_poison_slime_cube
+# ============================================================
+
+# walk 0.75초 착지 키프레임마다 50% 확률로 발사한다. 확률은 대상별이 아닌 착지마다 한 번 판정한다.
+PoisonSlime_TryShootMucus:
+  Skills:
+    - skill{s=PoisonSlime_ShootMucus} @self ?chance{chance=0.5}
+
+# 몸 높이에서 반경 15블록 내 가까운 플레이어 최대 3명에게 각각 1발 발사.
+PoisonSlime_ShootMucus:
+  Skills:
+    - sound{s=entity.slime.squish;v=0.8;p=0.8} @self
+    - projectile{onTick=PoisonSlime_MucusTick;onHit=PoisonSlime_MucusHit;v=12;g=0.25;i=1;hR=0.5;vR=0.5;mr=20;syo=0.6;tyo=0.8;stopAtBlock=true;stopAtEntity=true} @PlayersInRadius{r=15;limit=3;sort=NEAREST}
+
+# 점액 궤적 파티클 (보라색 입자 + 마녀 입자)
+PoisonSlime_MucusTick:
+  Skills:
+    - effect:particles{particle=redstone;color=#9932CC;amount=3;hS=0.1;vS=0.1;speed=0} @origin
+    - effect:particles{particle=witch;amount=1;hS=0.05;vS=0.05;speed=0} @origin
+
+# 플레이어 피격 시 데미지 + 독 1 (5초 = 100틱) + 파티클 및 사운드
+PoisonSlime_MucusHit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    - damage{a=4}
+    - potion{type=POISON;duration=100;level=0}
+    - sound{s=entity.slime.squish;v=1.0;p=0.6}
+    - effect:particles{particle=redstone;color=#800080;amount=15;hS=0.3;vS=0.3;speed=0.05}
+    - effect:particles{particle=slime;amount=8;hS=0.2;vS=0.2;speed=0.1}

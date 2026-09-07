@@ -1,0 +1,424 @@
+loaded: 'true'
+'매지션': 
+  name: '매지션'
+  'action-bar': ''
+  prefix: '&6매지션'
+  group: 'class'
+  mana: '&2Mana'
+  'max-level': 30
+  parent: '시민'
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '20'
+    'health-scale': '1'
+    'mana-base': '20'
+    'mana-scale': '1'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+    '용기-base': '0'
+    '용기-scale': '0'
+    '의지-base': '0'
+    '의지-scale': '0'
+    '정신력-base': '0'
+    '정신력-scale': '0'
+    '지혜-base': '0'
+    '지혜-scale': '0'
+    '힘-base': '0'
+    '힘-scale': '0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '에테르 쇼크'
+  - '에테르 레이'
+  - '마나 리사이클'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '매지션'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []
+'시민': 
+  name: '시민'
+  'action-bar': ''
+  prefix: '&6시민'
+  group: 'class'
+  mana: '&2MP'
+  'max-level': 1
+  parent: ''
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '20'
+    'health-scale': '1'
+    'mana-base': '20'
+    'mana-scale': '1'
+    'dexterity-base': '0'
+    'dexterity-scale': '0'
+    'intelligence-base': '0'
+    'intelligence-scale': '0'
+    'spirit-base': '0'
+    'spirit-scale': '0'
+    'strength-base': '0'
+    'strength-scale': '0'
+    'vitality-base': '0'
+    'vitality-scale': '0'
+    '용기-base': '0'
+    '용기-scale': '0'
+    '정신력-base': '0'
+    '정신력-scale': '0'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+    '의지-base': '0'
+    '의지-scale': '0'
+    '지혜-base': '0'
+    '지혜-scale': '0'
+    '힘-base': '0'
+    '힘-scale': '0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '화상 상태'
+  - '빙결 상태'
+  - '기절 상태'
+  - '침묵 상태'
+  - '충격 상태'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '시민'
+  'exp-source': 305
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []
+'위자드': 
+  name: '위자드'
+  'action-bar': ''
+  prefix: '&6위자드'
+  group: 'class'
+  mana: '&2Mana'
+  'max-level': 70
+  parent: '매지션'
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '20'
+    'health-scale': '1'
+    'mana-base': '20'
+    'mana-scale': '1'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+    '용기-base': '0'
+    '용기-scale': '0'
+    '의지-base': '0'
+    '의지-scale': '0'
+    '정신력-base': '0'
+    '정신력-scale': '0'
+    '지혜-base': '0'
+    '지혜-scale': '0'
+    '힘-base': '0'
+    '힘-scale': '0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '고서 숙련'
+  - '스태프 숙련'
+  - '완드 숙련'
+  - '마나 리사이클'
+  - '에테르 레이'
+  - '에테르 쇼크'
+  - '에테르 템페스트'
+  - '에테르 블라스트'
+  - '에테르 더스트'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '위자드'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []
+'하이캐스터': 
+  name: '하이캐스터'
+  'action-bar': ''
+  prefix: '&6하이캐스터'
+  group: 'class'
+  mana: '&2Mana'
+  'max-level': 110
+  parent: '위자드'
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '20'
+    'health-scale': '1'
+    'mana-base': '20'
+    'mana-scale': '1'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+    '용기-base': '0'
+    '용기-scale': '0'
+    '의지-base': '0'
+    '의지-scale': '0'
+    '정신력-base': '0'
+    '정신력-scale': '0'
+    '지혜-base': '0'
+    '지혜-scale': '0'
+    '힘-base': '0'
+    '힘-scale': '0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '고서 숙련'
+  - '스태프 숙련'
+  - '완드 숙련'
+  - '마나 리사이클'
+  - '에테르 레이'
+  - '에테르 쇼크'
+  - '에테르 템페스트'
+  - '에테르 블라스트'
+  - '에테르 더스트'
+  - '에테르 오브 유니티'
+  - '에테르 오브 유니티'
+  - '에테르 허리케인'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '하이캐스터'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []
+'특성 노드': 
+  name: '특성 노드'
+  'action-bar': ''
+  prefix: ''
+  group: 'node'
+  mana: ''
+  'max-level': 200
+  parent: ''
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '20'
+    'health-scale': '1'
+    'mana-base': '20'
+    'mana-scale': '1'
+    'dexterity-base': '0'
+    'dexterity-scale': '0'
+    'intelligence-base': '0'
+    'intelligence-scale': '0'
+    'spirit-base': '0'
+    'spirit-scale': '0'
+    'strength-base': '0'
+    'strength-scale': '0'
+    'vitality-base': '0'
+    'vitality-scale': '0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '붉은 노드'
+  - '푸른 노드'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '특성 노드'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []
+'특성': 
+  name: '특성'
+  'action-bar': ''
+  prefix: ''
+  group: 'node'
+  mana: ''
+  'max-level': 200
+  parent: ''
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '0'
+    'health-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+    '용기-base': '0'
+    '용기-scale': '0'
+    '의지-base': '0'
+    '의지-scale': '0'
+    '정신력-base': '0'
+    '정신력-scale': '0'
+    '지혜-base': '0'
+    '지혜-scale': '0'
+    '힘-base': '0'
+    '힘-scale': '0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '붉은 노드'
+  - '푸른 노드'
+  - '청록 노드'
+  - '검은 노드'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '특성'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []

@@ -1,0 +1,240 @@
+OK_Init:
+  Skills:
+    - setvariable{var=caster.combo;type=INTEGER;value=0} @self
+    - setvariable{var=caster.runner;type=INTEGER;value=0} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setspeed{speed=1;type=WALK} @self
+
+OK_IdleState:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - incombat false
+    - moving false
+  Skills:
+    - meg:state{mid=orc_king;s=walk;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=run;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=idle;priority=1;override=true;loop=LOOP;force=false;li=2;lo=2} @self
+
+OK_WalkState:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - incombat false
+    - moving true
+  Skills:
+    - meg:state{mid=orc_king;s=idle;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=run;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=walk;priority=1;override=true;loop=LOOP;force=false;li=2;lo=2} @self
+
+OK_RunState:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - incombat true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>4}
+  Skills:
+    - meg:state{mid=orc_king;s=idle;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=walk;r=true;i=true} @self
+    - meg:state{mid=orc_king;s=run;priority=1;override=true;loop=LOOP;force=false;li=1;lo=1} @self
+    - setspeed{speed=1;type=WALK} @self
+
+OK_CombatRouter:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  Skills:
+    - randomskill{skills=OK_Attack1 2,OK_Attack2 1} @target ?variableInRange{var=caster.combo;value=0to10}
+    - randomskill{skills=OK_Attack1 1,OK_Attack2 1,OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1} @target ?variableInRange{var=caster.combo;value=11to20}
+    - randomskill{skills=OK_Attack1 1,OK_Attack2 1,OK_Attack3 1,OK_Throw 1,OK_GlaiveSmash 1,OK_Summon 1} @target ?variableInRange{var=caster.combo;value=>20}
+
+OK_Attack1:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to4}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=attack1;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 17
+    - damage{a=10} @LivingInCone{a=180;r=4;rot=0;target=players}
+    - delay 13
+    - setspeed{speed=1;type=WALK} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+OK_Attack2:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to3}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=attack2;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 15
+    - damage{a=10} @LivingInCone{a=210;r=3;rot=-15;target=players}
+    - delay 15
+    - setspeed{speed=1;type=WALK} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+OK_Attack3:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to5}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=attack3;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 15
+    - damage{a=10} @LivingInCone{a=60;r=5;rot=0;target=players}
+    - delay 15
+    - setspeed{speed=1;type=WALK} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+OK_Throw:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to24}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=throw;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 14
+    - missile{onTick=OK_SpearTick;onHit=OK_SpearHit;v=18;i=2;g=0.08;hR=0.35;vR=0.35;mr=32;syo=1.55;sfo=1.0;tyo=1.0;stopAtBlock=true;stopAtEntity=true;ham=PLAYERS_ONLY} @target
+    - delay 19
+    - setspeed{speed=1;type=WALK} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+OK_SpearTick:
+  Skills:
+    - effect:particles{particle=crit;amount=3;hS=0.02;vS=0.02;speed=0} @origin
+
+OK_SpearHit:
+  Skills:
+    - damage{a=10} @target
+
+OK_Summon:
+  Cooldown: 30
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.combo;value=>20} true
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=summon;priority=5;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 25
+    - summon{type=Orc_Archer;amount=1;radius=0} @Forward{f=0;sideOffset=2}
+    - summon{type=Orc_Archer;amount=1;radius=0} @Forward{f=0;sideOffset=-2}
+    - delay 43
+    - variablesubtract{var=caster.combo;amount=10} @self
+    - setspeed{speed=1;type=WALK} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+OK_GlaiveSmash:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to10}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=glaive_smash;priority=6;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 22
+    - setspeed{speed=2;type=WALK} @self
+    - look{headOnly=false;force=true;immediately=true;repeat=10;repeatInterval=1} @target
+    - delay 11
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - delay 7
+    - damage{a=15} @LivingInCone{a=180;r=4;rot=0;target=players}
+    - delay 33
+    - setspeed{speed=1;type=WALK} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+OK_ComboFromDamaged:
+  Cooldown: 1
+  Skills:
+    - variableadd{var=caster.combo;amount=1} @self
+
+OK_ComboIdleReset:
+  Conditions:
+    - variableInRange{var=caster.combo;value=>0} true
+  Skills:
+    - setvariable{var=caster.combo;type=INTEGER;value=0} @self
+
+OK_RunnerGain:
+  Cooldown: 0.5
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>6}
+  Skills:
+    - randomskill{skills=OK_RunnerGain1 1,OK_RunnerGain2 2} @self
+    - skill{s=OK_RunnerStart} @trigger
+
+OK_RunnerGain1:
+  Skills:
+    - variableadd{var=caster.runner;amount=1} @self
+
+OK_RunnerGain2:
+  Skills:
+    - variableadd{var=caster.runner;amount=2} @self
+
+OK_RunnerStart:
+  Conditions:
+    - variableInRange{var=caster.runner;value=>10} true
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>5}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - clearThreat{} @self
+    - threat{amount=200;mode=set} @trigger
+    - setTarget @trigger
+    - setspeed{speed=0;type=WALK} @self
+    - meg:state{mid=orc_king;s=throw;priority=7;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - delay 14
+    - missile{onTick=OK_SpearTick;onHit=OK_SpearHit;v=20;i=1.5;g=0.08;hR=0.35;vR=0.35;mr=40;syo=1.55;sfo=1.0;tyo=1.0;stopAtBlock=true;stopAtEntity=false;ham=PLAYERS_ONLY} @trigger
+    - delay 19
+    - setspeed{speed=1.5;type=WALK} @self
+    - meg:state{mid=orc_king;s=run;priority=3;override=true;loop=LOOP;force=true;li=1;lo=1} @self
+
+OK_FastRunStop:
+  Conditions:
+    - variableInRange{var=caster.runner;value=>9} true
+    - variableEquals{var=caster.count;value=1} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2}
+  Skills:
+    - setspeed{speed=1;type=WALK} @self
+    - meg:state{mid=orc_king;s=run;r=true;i=true} @self
+    - threat{amount=30;mode=set} @target
+    - setvariable{var=caster.runner;type=INTEGER;value=0} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+OK_DebugDamage:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - haspermission{p=minecraft.command.op} true
+  Skills:
+    - message{m='&8[OrcKing Debug] &f<trigger.name> &7damage=&e<skill.var.damage-amount-post{default=<skill.var.damage-amount>}>'}
+
+OK_Death:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=99} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=orc_king;s=death;priority=10;override=true;loop=ONCE;force=true;li=1;lo=1} @self

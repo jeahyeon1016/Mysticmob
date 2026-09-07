@@ -1,0 +1,173 @@
+# ============================================================
+# Viking Field Boss
+# v2.0 - Rage System + Axe Recovery Failsafe
+# MythicMobs 5.13.0 + ModelEngine
+#
+# VARIABLES
+# count
+#   0 = 행동 가능
+#   1 = 일반공격 / 점프 준비
+#   2 = 점프 공중
+#   3 = 점프 착지 후딜
+#
+# runner
+#   7블럭 밖 공격자에게 피격될 때 +1
+#   5스택 -> 마지막 공격자 Threat 100
+#   실제 JumpAttack 시작 시 0으로 소비
+#
+# no_hand
+#   0 = 오른손 도끼 있음
+#   1 = 도끼를 던져 오른손이 비어 있음
+#
+# combo
+#   0~5
+#   기본공격이 주 타겟에게 적중할 때 +1
+#   5스택 도달 시 HP 30 회복 + rage 1스택
+#   5스택 -> 다음 근접공격이 Attack1 -> Attack2 콤보
+#
+# rage
+#   0~5
+#   combo 5스택 도달 때마다 +1
+#   1스택당 이동속도 +20%
+#   1스택당 모든 패턴 데미지 +20%
+# ============================================================
+
+Viking_Miniboss:
+  Type: HUSK
+  Display: '&6[FieldBoss] &c바이킹 전사'
+  Health: 1800
+  Damage: 0
+
+  BossBar:
+    Enabled: true
+    Title: '&c바이킹 전사'
+    Range: 48
+    Color: RED
+    DarkenSky: false
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    FollowRange: 48
+    MovementSpeed: 0.27
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    Silent: true
+    LockPitch: true
+    Despawn: false
+    NoDamageTicks: 0
+    KnockbackResistance: 0.78
+
+  AIGoalSelectors:
+    - clear
+    - float
+    - meleeattack
+    - movetowardstarget
+    - randomstroll
+    - lookatplayers
+    - randomlookaround
+
+  AITargetSelectors:
+    - clear
+    - players
+
+  Skills:
+    # ========================================================
+    # MODEL / INIT
+    # ========================================================
+    - meg:model{mid=viking_miniboss;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onSpawn
+    - meg:model{mid=viking_miniboss;d=true;i=true;lpitch=true;usm=true;save=true} @self ~onLoad
+
+    - skill{s=Viking_Init} @self ~onSpawn
+    - skill{s=Viking_Init} @self ~onLoad
+
+    # 전투 중 기본 추격 모션 = walk_oneaxe
+    - meg:defaultstate{mid=viking_miniboss;type=walk;state=walk_oneaxe;li=2;lo=2} @self ~onEnterCombat
+    - message{m="&2[COMBAT ENTER] &frunner=&b<caster.var.runner> &7| count=&e<caster.var.count>"} @PlayersInRadius{r=48} ~onEnterCombat
+
+    # clearThreat로 잠깐 DropCombat이 떠도 runner는 유지한다.
+    # no_hand=1(도끼 회수 중)이면 count를 건드리면 회수가 끊기므로 유지한다.
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ~onDropCombat ?variableEquals{var=caster.no_hand;value=0}
+    - setvariable{var=caster.combo;value=0;type=INTEGER} @self ~onDropCombat
+    - meg:defaultstate{mid=viking_miniboss;type=walk;state=walk;li=2;lo=2} @self ~onDropCombat ?variableEquals{var=caster.no_hand;value=0}
+    - message{m="&4[COMBAT DROP] &frunner=&b<caster.var.runner> &7| no_hand=&6<caster.var.no_hand> &7| count=&e<caster.var.count>"} @PlayersInRadius{r=48} ~onDropCombat
+
+    # ========================================================
+    # COMBAT
+    # 점프 조건은 JumpAttack 자체가 직접 검사한다.
+    # runner>=5면 Melee 쪽이 막히므로 점프가 먼저 소비된다.
+    # ========================================================
+    - skill{s=Viking_JumpAttack} @target ~onTimer:2 ?incombat
+
+    # 중거리 도끼 투척: 5~18블럭.
+    # 강한 원거리 공격 / Cooldown 30초.
+    # count=1은 도끼 회수가 끝날 때까지 유지된다.
+    - skill{s=Viking_AxeThrow} @target ~onTimer:6 ?incombat
+
+    - skill{s=Viking_Melee} @target ~onTimer:4 ?incombat ?targetwithin{d=4}
+
+    # 점프 착지는 실제 onGround를 매틱 확인.
+    - skill{s=Viking_JumpLandCheck} @self ~onTimer:1
+
+    # no_hand=1 동안 떨어진 도끼를 MIR로 직접 찾아 회수.
+    # 이 MIR 타겟은 Viking_AxeRecover 내부로 inherited target으로 전달된다.
+    # 내부에서 @target을 쓰면 플레이어(몹의 전투 타겟)로 덮어써지므로 사용하지 않는다.
+    - skill{s=Viking_AxeRecover} @MIR{r=64;t=Viking_Miniboss_Axe_Landed;sort=NEAREST;limit=1;targetarmorstands=true;targetmarkers=true} ~onTimer:2
+
+    # ========================================================
+    # DAMAGED
+    # ========================================================
+    # 원거리 Runner 스택 -> 5스택이면 이 스킬 안에서 바로 Threat 재설정.
+    - skill{s=Viking_RunnerStack;sync=true} @trigger ~onDamaged
+
+    # walk_oneaxe 접근 중 정면 -90~90 피해 무효.
+    - skill{s=Viking_WalkGuard;sync=true} @trigger ~onDamaged
+
+    - skill{s=Viking_CancelFallDamage;sync=true} @self ~onDamaged
+    - skill{s=Viking_HurtSound} @self ~onDamaged
+
+    # 바닐라 HUSK 평타 취소.
+    - skill{s=Viking_CancelVanillaAttack;sync=true} @self ~onAttack
+
+    # DEBUG
+    - skill{s=Viking_DebugState} @self ~onTimer:10
+
+    # rage가 1 이상이면 현재 스택에 비례한 분노 파티클 표시.
+    - skill{s=Viking_RageParticles} @self ~onTimer:10
+
+    - skill{s=Viking_Death} @self ~onDeath
+
+# ============================================================
+# AXE LANDED
+#
+# 투척 Missile이 종료된 위치에 생성.
+# BlockHit뿐 아니라 자연 수명 종료에서도 생성되어 회수 락을 방지한다.
+# ============================================================
+
+Viking_Miniboss_Axe_Landed:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+
+  Options:
+    Marker: true
+    Invisible: true
+    Invincible: true
+    Silent: true
+    NoGravity: true
+    Collidable: false
+    PreventOtherDrops: true
+    PreventItemPickup: true
+
+  AIGoalSelectors:
+    - clear
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - meg:model{mid=viking_miniboss_axeland;d=false;i=true;lpitch=true;usm=true;save=false} @self ~onSpawn
+

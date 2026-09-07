@@ -1,0 +1,73 @@
+# count: 0=대기/추격, 1=공격 또는 공격 후 대기, 9=사망
+# attack1: 0.75초(15틱), 전방 180도 / 3.5블록
+# attack2: 0.71초(14틱), 전방 240도 / 3.5블록
+
+EW_Init:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - meg:model{mid=ent_warrior;d=false;i=true;lpitch=true;usm=true;save=false} @self
+    - meg:defaultstate{mid=ent_warrior;type=idle;state=idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=ent_warrior;type=walk;state=walk;li=2;lo=2} @self
+    - meg:defaultstate{mid=ent_warrior;type=death;state=death} @self
+
+EW_AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - incombat true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - health{h=>0} true
+    - distance{d=<3.5} true
+    - lineofsight true
+  Skills:
+    - randomskill{skills=EW_Attack1 7,EW_Attack2 3} @self
+
+EW_Attack1:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - look{headOnly=false;immediately=true} @target
+    - setspeed{speed=0} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=ent_warrior;s=attack1;priority=3;li=0;lo=0} @self
+    - delay 15
+    - damage{a=10} @LivingInCone{a=180;r=3.5;rot=0;target=players}
+    - sound{s=entity.player.attack.sweep;v=0.75;p=0.85} @self
+    - delay 20
+    - meg:state{mid=ent_warrior;s=attack1;remove=true} @self
+    - setspeed{speed=1} @self
+    - delay 40
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+EW_Attack2:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - look{headOnly=false;immediately=true} @target
+    - setspeed{speed=0} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - meg:state{mid=ent_warrior;s=attack2;priority=3;li=0;lo=0} @self
+    - delay 14
+    - damage{a=10} @LivingInCone{a=240;r=3.5;rot=0;target=players}
+    - sound{s=entity.iron_golem.attack;v=0.90;p=0.60} @self
+    - delay 18
+    - meg:state{mid=ent_warrior;s=attack2;remove=true} @self
+    - setspeed{speed=1} @self
+    - delay 40
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+EW_HurtSound:
+  Skills:
+    - sound{s=block.wood.hit;v=1.2;p=0.65} @self
+    - sound{s=entity.zombie.hurt;v=0.45;p=0.40} @self
+
+EW_Death:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=9} @self
+    - setAI{ai=false} @self
+    - meg:state{mid=ent_warrior;s=attack1;remove=true} @self
+    - meg:state{mid=ent_warrior;s=attack2;remove=true} @self
+    - sound{s=block.wood.break;v=1.3;p=0.55} @self
+    - sound{s=entity.zombie.death;v=0.7;p=0.45} @self

@@ -1,0 +1,194 @@
+# count: 0=이동/대기, 1=attack1, 2=attack2, 9=사망
+# 공용 공격 쿨다운 60틱(3초). attack1 판정 15틱, attack2 발사 13/14/15틱.
+# 지팡이 끝의 기존 orb 파트를 미사일 발사 원점으로 사용한다.
+
+ES_Init:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.es_age;type=INTEGER;value=0} @self
+    - setvariable{var=caster.es_cooldown;type=INTEGER;value=0} @self
+    - meg:model{mid=ent_sorcerer;d=false;i=true;lpitch=true;usm=true;save=false} @self
+    - meg:defaultstate{mid=ent_sorcerer;type=idle;state=idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=ent_sorcerer;type=walk;state=walk;li=2;lo=2} @self
+    - meg:defaultstate{mid=ent_sorcerer;type=death;state=death} @self
+
+ES_Tick:
+  Conditions:
+    - variableEquals{var=caster.count;value=9} false
+  Skills:
+    - variablesubtract{var=caster.es_cooldown;amount=1} @self ?variableInRange{var=caster.es_cooldown;value=>0}
+    - variableadd{var=caster.es_age;amount=1} @self ?variableInRange{var=caster.count;value=1to2}
+    - skill{s=ES_Attack1Tick} @self ?variableEquals{var=caster.count;value=1}
+    - skill{s=ES_Attack2Tick} @self ?variableEquals{var=caster.count;value=2}
+    - skill{s=ES_Move} @target ?variableEquals{var=caster.count;value=0} ?incombat
+    - skill{s=ES_AttackRouter} @target ?variableEquals{var=caster.count;value=0} ?incombat
+
+# 7~9칸에서는 정지, 7칸 미만에서는 fleeplayers, 9칸 초과에서는 접근한다.
+ES_Move:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - health{h=>0} true
+  Skills:
+    - setspeed{speed=1;type=WALK} @self
+    - skill{s=ES_HoldDistance} @target
+
+ES_HoldDistance:
+  TargetConditions:
+    - distance{d=7to9} true
+  Skills:
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;immediately=true} @target
+
+ES_AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.es_cooldown;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - health{h=>0} true
+    - distance{d=<9.01} true
+    - lineofsight true
+  Skills:
+    - skill{s=ES_Attack1} @target
+    - skill{s=ES_Attack2} @target
+
+ES_Attack1:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableEquals{var=caster.es_cooldown;value=0} true
+  TargetConditions:
+    - distance{d=<3.51} true
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - setvariable{var=caster.es_age;type=INTEGER;value=0} @self
+    - setvariable{var=caster.es_cooldown;type=INTEGER;value=60} @self
+    - skill{s=ES_Freeze} @self
+    - look{headOnly=false;immediately=true} @target
+    - meg:state{mid=ent_sorcerer;s=attack1;priority=3;li=0;lo=0} @self
+    - sound{s=entity.evoker.prepare_attack;v=0.55;p=1.25} @self
+
+ES_Attack1Tick:
+  Skills:
+    - look{headOnly=false;immediately=true} @target
+    - particles{p=redstone;color=#36DDFF;size=0.75;amount=3;hS=0.05;vS=0.05;speed=0} @ModelPart{mid=ent_sorcerer;pid=orb} ?variableInRange{var=caster.es_age;value=1to14}
+    - skill{s=ES_Attack1Hit} @self ?variableEquals{var=caster.es_age;value=15}
+    - skill{s=ES_Unlock} @self ?variableInRange{var=caster.es_age;value=>=35}
+
+ES_Attack1Hit:
+  Skills:
+    - damage{a=8} @LivingInCone{a=120;r=3.5;rot=0;target=players}
+    - throw{velocity=1.65;velocityY=0.16} @LivingInCone{a=120;r=3.5;rot=0;target=players}
+    - particles{p=redstone;color=#28E8D0;size=1.1;amount=22;hS=0.8;vS=0.35;speed=0.06} @Forward{f=2;yo=1}
+    - particles{p=sweep_attack;amount=3;hS=0.5;vS=0.2;speed=0} @Forward{f=1.8;yo=1}
+    - sound{s=entity.player.attack.knockback;v=1;p=0.8} @self
+    - sound{s=block.amethyst_block.hit;v=0.7;p=0.75} @self
+
+ES_Attack2:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableEquals{var=caster.es_cooldown;value=0} true
+  TargetConditions:
+    - distance{d=3.5to9} true
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=2} @self
+    - setvariable{var=caster.es_age;type=INTEGER;value=0} @self
+    - setvariable{var=caster.es_cooldown;type=INTEGER;value=60} @self
+    - skill{s=ES_Freeze} @self
+    - look{headOnly=false;immediately=true} @target
+    - meg:state{mid=ent_sorcerer;s=attack2;priority=3;li=0;lo=0} @self
+    - sound{s=block.amethyst_block.chime;v=0.45;p=1.25} @self
+
+ES_Attack2Tick:
+  Skills:
+    - look{headOnly=false;immediately=true} @target
+    - skill{s=ES_Attack2Charge} @self ?variableInRange{var=caster.es_age;value=1to12}
+    - skill{s=ES_FireMissile} @target ?variableInRange{var=caster.es_age;value=13to15}
+    - skill{s=ES_Unlock} @self ?variableInRange{var=caster.es_age;value=>=32}
+
+ES_Attack2Charge:
+  Skills:
+    - particlesphere{p=redstone;color=#36DDFF;size=0.7;amount=10;radius=0.28} @ModelPart{mid=ent_sorcerer;pid=orb}
+    - particles{p=enchant;amount=2;hS=0.08;vS=0.08;speed=0.05} @ModelPart{mid=ent_sorcerer;pid=orb}
+
+ES_FireMissile:
+  Conditions:
+    - variableEquals{var=caster.count;value=2} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - health{h=>0} true
+    - lineofsight true
+  Skills:
+    - particlesphere{p=redstone;color=#A5FFFF;size=0.9;amount=8;radius=0.12} @ModelPart{mid=ent_sorcerer;pid=orb}
+    - sound{s=entity.breeze.shoot;v=0.45;p=1.65} @self
+    - projectile{onTick=ES_MissileTick;onHit=ES_MissileHit;v=14;g=0;i=1;hR=0.25;vR=0.25;mr=16;md=40;syo=0;sfo=0;tyo=1;origin=@ModelPart{mid=ent_sorcerer;pid=orb};fromorigin=true;stopAtBlock=true;stopAtEntity=true;hitPlayers=true;hitNonPlayers=false} @target
+
+ES_MissileTick:
+  Skills:
+    - particles{p=redstone;color=#36DDFF;size=0.65;amount=3;hS=0.025;vS=0.025;speed=0} @origin
+    - particles{p=end_rod;amount=1;hS=0;vS=0;speed=0} @origin
+
+ES_MissileHit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    - damage{a=4}
+    - particles{p=redstone;color=#28E8D0;size=0.8;amount=14;hS=0.22;vS=0.3;speed=0.04;y=0.8}
+    - particles{p=end_rod;amount=4;hS=0.12;vS=0.18;speed=0.03;y=0.8}
+    - sound{s=block.amethyst_block.hit;v=0.4;p=1.65}
+
+ES_Damaged:
+  Conditions:
+    - variableEquals{var=caster.count;value=9} false
+  Skills:
+    - skill{s=ES_AddThreat} @trigger
+    - sound{s=block.wood.hit;v=0.8;p=0.8} @self
+    - sound{s=entity.zombie.hurt;v=0.3;p=0.65} @self
+
+ES_AddThreat:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    - threat{amount=100}
+
+ES_ResetCombat:
+  Conditions:
+    - variableEquals{var=caster.count;value=9} false
+  Skills:
+    - skill{s=ES_StopAttack} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.es_age;type=INTEGER;value=0} @self
+    - setvariable{var=caster.es_cooldown;type=INTEGER;value=0} @self
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+
+ES_Freeze:
+  Skills:
+    - setAI{ai=false} @self
+    - setspeed{speed=0;type=WALK} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+ES_StopAttack:
+  Skills:
+    - meg:state{mid=ent_sorcerer;s=attack1;remove=true} @self
+    - meg:state{mid=ent_sorcerer;s=attack2;remove=true} @self
+
+ES_Unlock:
+  Conditions:
+    - variableEquals{var=caster.count;value=9} false
+  Skills:
+    - skill{s=ES_StopAttack} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.es_age;type=INTEGER;value=0} @self
+    - setspeed{speed=1;type=WALK} @self
+    - setAI{ai=true} @self
+
+ES_Death:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=9} @self
+    - skill{s=ES_StopAttack} @self
+    - setAI{ai=false} @self
+    - meg:state{mid=ent_sorcerer;s=death;priority=10;li=0;lo=0} @self
+    - particles{p=redstone;color=#36DDFF;size=0.7;amount=16;hS=0.4;vS=0.3;speed=0;y=1} @self
+    - particles{p=end_rod;amount=6;hS=0.18;vS=0.25;speed=0.03} @ModelPart{mid=ent_sorcerer;pid=orb}
+    - sound{s=block.wood.break;v=1.1;p=0.65} @self
+    - sound{s=block.amethyst_block.chime;v=0.35;p=0.65} @self

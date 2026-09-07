@@ -1,0 +1,66 @@
+# ============================================================
+# 야생 곰 / Wild Bear
+# 일반 몹 - 후공형
+# MythicMobs + BetterModel
+# v1.8
+#
+# BetterModel model: bear2
+#
+# Animations:
+# - idle
+# - walk
+# - attack : 한 발 할퀴기
+# - skill  : 양발 반격
+# - death  : 그대로 힘이 풀려 주저앉기
+#
+# 변경:
+# - 피격 후 대쉬 제거
+# - 양발 반격 시 공격자를 먼저 바라본 뒤 반격
+# ============================================================
+
+Bear_Normal:
+  Type: POLAR_BEAR
+  Display: '&6야생 곰'
+  Health: 75
+  Damage: 0
+
+  Options:
+    Silent: true
+    MovementSpeed: 0.23
+    FollowRange: 20
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    KnockbackResistance: 0.55
+
+  AIGoalSelectors:
+    - clear
+    - float
+    - meleeattack
+    - movetowardstarget
+    - randomstroll
+
+  # 후공형: 자신을 먼저 때린 대상만 공격
+  AITargetSelectors:
+    - clear
+    - attacker
+
+  Skills:
+    - model{mid=bear2} @self ~onSpawn
+    - skill{s=Bear_Normal_Init} @self ~onSpawn
+
+    - skill{s=Bear_Normal_WalkStart} @self ~onTimer:2
+    - skill{s=Bear_Normal_IdleStart} @self ~onTimer:2
+
+    # 전방 3블럭 기본 공격 - 좌우 판정 확장
+    - skill{s=Bear_Normal_BasicAttack} @self ~onTimer:2
+
+    # 피격 시 공격자를 바라보고 양발 반격
+    - skill{s=Bear_Normal_CounterSwipe} @self ~onDamaged
+
+    # 전투 중 타겟이 7블럭 이상 벌어지면 빠르게 추격 돌진
+    - skill{s=Bear_Normal_LongDash} @target ~onTimer:5
+
+    # 사망
+    - skill{s=Bear_Normal_Death} @self ~onDeath
+
+    - sound{s=entity.polar_bear.hurt;v=1;p=0.90} @self ~onDamaged

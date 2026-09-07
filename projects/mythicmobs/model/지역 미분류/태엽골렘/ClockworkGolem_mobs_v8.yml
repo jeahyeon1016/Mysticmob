@@ -1,0 +1,45 @@
+ClockworkGolem:
+  Type: ZOMBIE
+  Display: '&6태엽골렘'
+  Health: 40
+  Damage: 10
+
+  Options:
+    MovementSpeed: 0.18
+    FollowRange: 24
+    KnockbackResistance: 0.5
+    PreventOtherDrops: true
+    PreventSunburn: true
+    Silent: true
+
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - movetowardstarget
+
+  AITargetSelectors:
+    - clear
+    - attacker
+
+  Skills:
+    - meg:model{mid=clockwork_golem;h=false;save=true} @self ~onSpawn
+
+    - setvariable{var=caster.charge;value=0;type=INTEGER} @self ~onSpawn
+    - setvariable{var=caster.overloading;value=0;type=INTEGER} @self ~onSpawn
+
+    - skill{s=ClockworkGolem_Charge} @self ~onDamaged
+    - skill{s=ClockworkGolem_HurtSound} @self ~onDamaged
+
+    - skill{s=ClockworkGolem_GroundCheck} @self ~onTimer:20
+    - skill{s=ClockworkGolem_ChargeAura} @self ~onTimer:10
+
+    # 충전음: 스택이 높을수록 호출 간격이 짧아짐
+    - skill{s=ClockworkGolem_ChargeTick1} @self ~onTimer:24
+    - skill{s=ClockworkGolem_ChargeTick2} @self ~onTimer:16
+    - skill{s=ClockworkGolem_ChargeTick3} @self ~onTimer:10
+    - skill{s=ClockworkGolem_ChargeTick4} @self ~onTimer:5
+
+    # 기본 공격 이벤트 취소 + 커스텀 판정
+    - skill{s=ClockworkGolem_Melee;sync=true} @trigger ~onAttack
+
+    - state{mid=clockwork_golem;s=death;li=0;lo=0;f=true;p=100} @self ~onDeath

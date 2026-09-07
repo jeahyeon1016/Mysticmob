@@ -1,0 +1,64 @@
+'매지션': 
+  name: '매지션'
+  'action-bar': ''
+  prefix: '&6매지션'
+  group: 'class'
+  mana: '&2Mana'
+  'max-level': 30
+  parent: '시민'
+  'needs-permission': 'false'
+  attributes: 
+    'health-base': '20'
+    'health-scale': '1'
+    'mana-base': '20'
+    'mana-scale': '1'
+    '민첩-base': '0'
+    '민첩-scale': '0'
+    '용기-base': '0'
+    '용기-scale': '0'
+    '의지-base': '0'
+    '의지-scale': '0'
+    '정신력-base': '0'
+    '정신력-scale': '0'
+    '지혜-base': '0'
+    '지혜-scale': '0'
+    '힘-base': '0'
+    '힘-scale': '0'
+  'mana-regen': 1.0
+  'skill-tree': 'CUSTOM'
+  blacklist: []
+  skills: 
+  - '에테르 쇼크'
+  - '에테르 레이'
+  - '마나 리사이클'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '매지션'
+  'exp-source': 273
+  'combo-starters': 
+    P: 
+      inverted: 'true'
+      whitelist: []
+    S: 
+      inverted: 'true'
+      whitelist: []
+    LS: 
+      inverted: 'true'
+      whitelist: []
+    Q: 
+      inverted: 'true'
+      whitelist: []
+    L: 
+      inverted: 'true'
+      whitelist: []
+    F: 
+      inverted: 'true'
+      whitelist: []
+    R: 
+      inverted: 'true'
+      whitelist: []
+    RS: 
+      inverted: 'true'
+      whitelist: []

@@ -1,0 +1,33 @@
+# MythicMobs 5.13.0 / ModelEngine 4.1.0
+# 테스트값: 체력 80, attack1 피해 8, attack2 발당 피해 4.
+EntSorcerer:
+  Type: ZOMBIE
+  Display: '&3엔트 소서러'
+  Health: 80
+  Damage: 0
+  Modules:
+    ThreatTable: true
+  Options:
+    MovementSpeed: 0.18
+    KnockbackResistance: 0.65
+    FollowRange: 24
+    Silent: true
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    PreventRandomEquipment: true
+  AIGoalSelectors:
+    - 0 clear
+    - 1 float
+    - 2 fleeplayers{distance=7;speed=1.1;safespeed=1.1}
+    - 3 MoveWithinDistanceOfTarget{minrange=8;maxrange=24;speed=1}
+    - 4 lookattarget
+  AITargetSelectors:
+    - 0 clear
+    - 1 players
+  Skills:
+    - skill{s=ES_Init} @self ~onSpawn
+    - skill{s=ES_Tick} @self ~onTimer:1
+    - skill{s=ES_Damaged} @trigger ~onDamaged
+    - skill{s=ES_ResetCombat} @self ~onDropCombat
+    - skill{s=ES_Death} @self ~onDeath

@@ -1,0 +1,178 @@
+# ============================================================
+# CopperOrigin Mobs v0.98 - P3 DAMAGE SAFETY + PARTICLE VIS
+# ============================================================
+# ============================================================
+# 구리의 근원 / Copper Origin
+# MythicMobs + BetterModel v0.95 REMAPMODEL NO-FLICKER PHASES
+#
+# 목표:
+# - 외형/BetterModel 없이 전투 패턴부터 검증
+# - 현재 구현 범위: P1 + 종유석 그로기 구조
+# - P2/P3, 구리화, 산화수는 다음 단계
+# ============================================================
+
+CopperOriginBoss:
+  Type: IRON_GOLEM
+  Display: '&6구리의 근원'
+  Health: 100
+  Damage: 0
+  Armor: 8
+  Faction: CopperOrigin
+  BossBar:
+    Enabled: true
+    Title: '&6구리의 근원'
+    Range: 45
+    Color: YELLOW
+    Style: SEGMENTED_10
+
+  Options:
+    MovementSpeed: 0.17
+    FollowRange: 32
+    KnockbackResistance: 1
+    PreventOtherDrops: true
+    PreventRandomEquipment: true
+    Silent: false
+    Despawn: false
+
+  # 바닐라 평타 피해는 0으로 두고,
+  # 실제 공격 판정은 아래 커스텀 스킬이 담당.
+  AITargetSelectors:
+    - clear
+    - players
+
+  AIGoalSelectors:
+    - clear
+    - meleeattack
+    - movetowardstarget
+
+  Skills:
+    - skill{s=CopperOrigin_Death;sync=true} @self ~onDeath
+    # P1 모델을 한 번만 부착. P2/P3는 skill의 remapmodel로 파츠/텍스처만 교체.
+    - model{mid=copper_origin_p1} @self ~onSpawn
+    - skill{s=CopperOrigin_PhaseVisualInit} @self ~onSpawn
+    - skill{s=CopperOrigin_Init} @self ~onSpawn
+
+    # 스폰 수면/기상 중 위치 고정
+    - skill{s=CopperOrigin_BM_DormantHold} @self ~onTimer:2
+
+    # 페이즈 전환 중 완전 고정: 이전 패턴 후딜이 남아 있어도 AI/이동 재개 금지
+    - skill{s=CopperOrigin_TransitionHold} @self ~onTimer:1
+
+    # 페이즈 체크
+    - skill{s=CopperOrigin_P2ThresholdLock} @self ~onTimer:2
+    - skill{s=CopperOrigin_P3ThresholdLock} @self ~onTimer:2
+    - skill{s=CopperOrigin_PhaseCheck} @self ~onTimer:2
+    - skill{s=CopperOrigin_Phase3Check} @self ~onTimer:2
+
+    # P3 궁극기 체력 트리거 (22%, 10%에서 각 1회)
+
+    # 3페 포효 궁극기: HP 22% / 10%에서 각각 1회
+    - skill{s=CopperOrigin_P3_Roar1Check} @self ~onTimer:2
+    - skill{s=CopperOrigin_P3_Roar2Check} @self ~onTimer:2
+
+    # 궁극기 진행 중 보스 완전 고정 + 근접 접근 지속 밀쳐내기
+    - skill{s=CopperOrigin_P3_RoarHold} @self ~onTimer:2
+    - skill{s=CopperOrigin_P3_RoarRepel} @self ~onTimer:4
+
+    # 3페 무적/봉인 잔류 안전장치
+    - skill{s=CopperOrigin_P3_RoarInvulnSafety} @self ~onTimer:2
+    - skill{s=CopperOrigin_P3_DamageLockSafety} @self ~onTimer:2
+
+    # 채팅 대신 체력 봉인 상태를 파티클로 지속 표시
+    - skill{s=CopperOrigin_DamageLockVisual} @self ~onTimer:10
+
+    # 기본 idle 동기화 (공격/궁극기 중에는 조건에서 제외)
+    # 이동 상태가 바뀔 때만 walk/combat_idle 전환
+    - skill{s=CopperOrigin_BM_WalkStart} @self ~onTimer:2
+    - skill{s=CopperOrigin_BM_IdleStart} @self ~onTimer:2
+
+    # 정지 상태 복귀 안전장치 (1초 간격)
+    - skill{s=CopperOrigin_BM_IdleEnsure} @self ~onTimer:20
+
+    # Bone visibility 안전장치: reload/재추적 후에도 현재 페이즈 외형 복원 (5초 간격)
+    - skill{s=CopperOrigin_PhaseVisualEnsureP1} @self ~onTimer:100
+    - skill{s=CopperOrigin_PhaseVisualEnsureP2} @self ~onTimer:100
+    - skill{s=CopperOrigin_PhaseVisualEnsureP3} @self ~onTimer:100
+
+    # 일반 페이즈 공격 라우터 복구
+    - skill{s=CopperOrigin_P1Router} @target ~onTimer:20
+    - skill{s=CopperOrigin_P2Router} @target ~onTimer:20
+    - skill{s=CopperOrigin_P3Router} @target ~onTimer:14
+
+    # 전투 라우터
+
+    # 구리화 시각/디버프 갱신
+    - skill{s=CopperOrigin_CopperizationTick} @PlayersInRadius{r=35} ~onTimer:10
+
+    # 그로기 중 이동/바닐라 접근을 억제
+
+    # 수면 상태에서 첫 피격 시 기상
+    - skill{s=CopperOrigin_BM_WakeOnHit;sync=true} @self ~onDamaged
+
+    # 낙하 피해 등 불필요한 자해 방지
+    - skill{s=CopperOrigin_CancelFallDamage;sync=true} @self ~onDamaged
+    - skill{s=CopperOrigin_DripstoneDamageCheck;sync=true} @self ~onDamaged
+    - skill{s=CopperOrigin_StalactiteHit;sync=true} @self ~onSignal:STALACTITE_HIT
+    - skill{s=CopperOrigin_PhaseCheck;sync=true} @self ~onDamaged
+    - skill{s=CopperOrigin_Phase3Check;sync=true} @self ~onDamaged
+    - skill{s=CopperOrigin_P3_SourcePassive;sync=true} @self ~onDamaged
+
+
+# ============================================================
+# 산화수 고정 지점 마커
+# 플레이어를 추적하지 않고 생성 위치에 고정됨.
+# ============================================================
+
+CopperOriginOxidationMarker:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+  Options:
+    Invisible: true
+    Marker: true
+    NoGravity: true
+    Invincible: true
+    Silent: true
+    Collidable: false
+    Despawn: true
+  AIGoalSelectors:
+    - clear
+  AITargetSelectors:
+    - clear
+  Skills:
+    - skill{s=CopperOrigin_OxidationMarker_Start} @self ~onSpawn
+
+    # 시각은 매우 자주 갱신해서 분출구가 끊겨 보이지 않게 함.
+    - skill{s=CopperOrigin_OxidationMarker_Visual} @self ~onTimer:2
+
+    # 정화는 기획대로 약 0.8초마다 1스택 감소.
+    - skill{s=CopperOrigin_OxidationMarker_Cleanse} @self ~onTimer:16
+
+
+
+# ============================================================
+# P3 구리 포효 낙석 지점 마커
+# 생성 위치에 고정되어 일반 낙석/습윤석 중 하나를 실행.
+# ============================================================
+
+CopperOriginRoarMarker:
+  Type: ARMOR_STAND
+  Display: ''
+  Health: 1
+  Damage: 0
+  Options:
+    Invisible: true
+    Marker: true
+    NoGravity: true
+    Invincible: true
+    Silent: true
+    Collidable: false
+    Despawn: true
+  AIGoalSelectors:
+    - clear
+  AITargetSelectors:
+    - clear
+  Skills:
+    - addtag{t=copper_origin_roar_marker} @self ~onSpawn
+    - skill{s=CopperOrigin_P3_RoarMarkerStart} @self ~onSpawn

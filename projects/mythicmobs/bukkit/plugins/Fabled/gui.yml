@@ -1,0 +1,26 @@
+ATTRIBUTES: 
+  rows: 1
+  pages: 1
+  slots: 
+    1: 
+      dexterity: 3
+      strength: 4
+      vitality: 0
+      spirit: 1
+      intelligence: 2
+'st하이캐스터': 
+  rows: 3
+  pages: 1
+  slots: 
+    1: 
+      '에테르 레이': 10
+      '에테르 쇼크': 12
+'st위자드': 
+  rows: 3
+  pages: 1
+  slots: 
+    1: 
+      '에테르 레이': 11
+      '에테르 더스트': 9
+      '에테르 템페스트': 15
+      '에테르 쇼크': 13

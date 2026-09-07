@@ -1,0 +1,97 @@
+# BetterModel Configuration
+#
+# This file contains all the configuration options for the BetterModel plugin.
+# For detailed information on each option, please refer to the official documentation.
+
+# Debugging options for development and troubleshooting.
+# Enable these only if you are diagnosing issues.
+debug:
+  # Toggles debug messages for hitbox creation and interaction.
+  hitbox: false
+  # Toggles detailed stack traces for exceptions handled by the plugin.
+  exception: false
+  # Toggles debug messages related to resource pack generation.
+  pack: false
+  # Toggles debug messages for model tracker lifecycle and updates.
+  tracker: false
+
+# Visual indicator settings.
+indicator:
+  # Shows a progress bar during resource pack generation.
+  progress_bar: true
+
+# Core feature modules.
+# Disable modules you don't need to save resources.
+module:
+  # Enables general entity models.
+  model: true
+  # Enables player-specific animations and models (e.g., custom limbs).
+  player-animation: true
+
+# Resource pack generation settings.
+pack:
+  # Obfuscates model and texture names in the resource pack to prevent easy extraction.
+  use-obfuscation: true
+
+# Toggles metrics collection via bStats (https://bstats.org/plugin/bukkit/BetterModel/24237).
+# Disabling this helps us less to improve the plugin.
+metrics: true
+
+# Enables sight-trace culling: models are only rendered if there is a clear line of sight.
+sight-trace: true
+
+# Merges the generated resource pack with packs from other plugins.
+merge-with-external-resources: true
+
+# The base item used for custom model data.
+# It's recommended to use an item that is not commonly used for other purposes.
+item: leather_horse_armor
+
+# Maximum distance (in blocks) for sending animation packets. -1 for default server view distance.
+max-sight: -1
+# Minimum distance (in blocks) before animation packets are sent.
+min-sight: 5
+
+# The namespace used for resource pack assets (e.g., assets/bettermodel/...).
+namespace: bettermodel
+
+# The format of the generated resource pack.
+# 'zip': A standard .zip file.
+# 'folder': A raw folder structure (useful for merging or debugging).
+pack-type: zip
+
+# The location where the resource pack file or folder will be generated, relative to the server root.
+build-folder-location: BetterModel/build
+
+# If enabled, models attached to invisible mobs will also be invisible.
+follow-mob-invisibility: true
+
+# If enabled, utilizes Purpur's AFK API to pause animations for AFK players.
+use-purpur-afk: true
+
+# Checks for new plugin versions on startup and notifies admins.
+version-check: true
+
+# The default movement controller for mountable models.
+# 'walk': Standard ground-based movement.
+# 'fly': Flying movement.
+default-mount-controller: walk
+
+# The time in ticks between inserted keyframes for smooth interpolation (lerp).
+# Lower values result in smoother but potentially more resource-intensive animations.
+lerp-frame-time: 3
+
+# Prevents players from swapping hotbar slots if they have a custom player model or animation active.
+cancel-player-model-inventory: false
+
+# The delay in ticks before a player's original entity is hidden after a model is applied.
+# This can help prevent visual glitches.
+player-hide-delay: 3
+
+# The number of packets to bundle together before sending.
+# Higher values can reduce network overhead but may increase perceived latency. 0 to disable.
+packet-bundling-size: 16
+
+# Enables strict loading mode. If true, the plugin will fail to load models with unsupported features.
+# If false, it will attempt to load them by ignoring unsupported parts, which may cause visual issues.
+enable-strict-loading: false

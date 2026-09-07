@@ -1,0 +1,204 @@
+'에테르 허리케인': 
+  name: '에테르 허리케인'
+  type: '공격'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '14'
+    'cooldown-scale': '0'
+    'mana-base': '30'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f주위로 마법진을 생성해'
+  - '&f追秋頭&f적 다수에게 마법 피해를 입힌다'
+  - '&f追秋頭[광선 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Cast-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Repeat: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'repetitions-base': '4'
+            'repetitions-scale': '0'
+            period: '1'
+            delay: '0'
+            'stop-on-fail': 'false'
+          preview: 
+            enabled: 'false'
+          children: 
+            Area: 
+              type: 'target'
+              data: 
+                'icon-key': ''
+                'radius-base': '20'
+                'radius-scale': '0'
+                group: 'Enemy'
+                wall: 'true'
+                invulnerable: 'false'
+                caster: 'False'
+                'max-base': '7'
+                'max-scale': '0'
+                random: 'true'
+              preview: 
+                enabled: 'false'
+                'per-target': 'false'
+                circle: 'false'
+                sphere: 'false'
+              children: 
+                Offset: 
+                  type: 'target'
+                  data: 
+                    'icon-key': ''
+                    'forward-base': '0'
+                    'forward-scale': '0'
+                    'upward-base': '0'
+                    'upward-scale': '0'
+                    'right-base': '0'
+                    'right-scale': '0'
+                    group: 'enemy'
+                    wall: 'false'
+                    invulnerable: 'false'
+                    caster: 'false'
+                  preview: 
+                    enabled: 'false'
+                    'per-target': 'false'
+                  children: 
+                    Delay: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                        'delay-base': '0.5'
+                        'delay-scale': '0'
+                        cleanup: 'true'
+                        'single-instance': 'false'
+                      preview: 
+                        enabled: 'false'
+                      children: 
+                        Area: 
+                          type: 'target'
+                          data: 
+                            'icon-key': ''
+                            'radius-base': '2'
+                            'radius-scale': '0'
+                            group: 'Enemy'
+                            wall: 'false'
+                            invulnerable: 'false'
+                            caster: 'False'
+                            'max-base': '99'
+                            'max-scale': '0'
+                            random: 'false'
+                          preview: 
+                            enabled: 'false'
+                            'per-target': 'false'
+                            circle: 'false'
+                            sphere: 'false'
+                          children: 
+                            'Damage Lore': 
+                              type: 'mechanic'
+                              data: 
+                                'icon-key': 'damage'
+                                counts: 'true'
+                                hand: 'Main'
+                                regex: '强 공격 피해姜: {value}'
+                                'multiplier-base': '0.95'
+                                'multiplier-scale': '0.18'
+                                true: 'false'
+                                classifier: 'ap'
+                                knockback: 'false'
+                                'ignore-divinity': 'false'
+                                cause: 'Entity Attack'
+                              preview: 
+                                enabled: 'false'
+                              children: {}
+                        Sound: 
+                          type: 'mechanic'
+                          data: 
+                            'icon-key': ''
+                            counts: 'true'
+                            sound: 'Custom'
+                            custom: 'lay'
+                            'volume-base': '100'
+                            'volume-scale': '0'
+                            'pitch-base': '2'
+                            'pitch-scale': '0'
+                          preview: 
+                            enabled: 'false'
+                          children: {}
+                'MythicMob Skill': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    skill: 'sk_blast'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+            Stat: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                key: 'move-speed'
+                operation: 'MULTIPLY_PERCENTAGE'
+                'amount-base': '0.35'
+                'amount-scale': '0'
+                'seconds-base': '0.3'
+                'seconds-scale': '0'
+                stackable: 'false'
+              preview: 
+                enabled: 'false'
+              children: {}
+            Potion: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                potion: 'Jump boost'
+                ambient: 'true'
+                'tier-base': '8889999'
+                'tier-scale': '0'
+                'seconds-base': '0.3'
+                'seconds-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}

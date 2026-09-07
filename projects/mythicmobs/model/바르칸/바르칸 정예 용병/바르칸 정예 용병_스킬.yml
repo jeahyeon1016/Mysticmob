@@ -1,0 +1,832 @@
+# ============================================================
+# Viking Field Boss - Skills
+# v2.0 - Rage System + Axe Recovery Failsafe
+#
+# 읽는 순서
+# 1. INIT / DEBUG
+# 2. WALK_ONEAXE 방어
+# 3. RUNNER
+# 4. MELEE / COMBO
+# 5. AXE THROW
+# 6. JUMP
+# 7. COMMON
+#
+# VARIABLES
+# count
+#   0 = 행동 가능
+#   1 = 일반 패턴 / AxeThrow 비행 및 회수 이동
+#   2 = Jump 공중
+#   3 = Jump 착지 후딜
+#   4 = Axe grab 모션
+#
+# runner
+#   원거리 압박 스택
+#
+# no_hand
+#   0 = 오른손 도끼 있음
+#   1 = 도끼를 던져 오른손이 비어 있음
+#
+# combo
+#   0 = 기본
+#   1 = 1스택
+#   2 = 2스택
+#   3 = 3스택
+#   4 = 4스택
+#   5 = 최대 / HP 30 회복 + rage 1 / 다음 근접공격은 Attack Combo
+#
+# rage
+#   0~5
+#   combo가 5스택에 도달할 때마다 +1
+#   스택당 이동속도 +20%
+#   스택당 모든 공격 데미지 +20%
+#
+# 기본공격이 주 타겟에게 적중할 때 combo +1.
+# Attack2는 2타라 둘 다 맞으면 2스택.
+# combo가 높을수록 기본공격 후딜이 짧아진다.
+#
+# 임시 데미지
+# Attack1 = 18
+# Attack2 = 12 + 14
+# Jump = 28
+# AxeThrow = 45
+# ============================================================
+
+
+# ============================================================
+# 1. INIT / DEBUG
+# ============================================================
+
+Viking_Init:
+  Skills:
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+    - setvariable{var=caster.runner;value=0;type=INTEGER} @self
+    - setvariable{var=caster.no_hand;value=0;type=INTEGER} @self
+    - setvariable{var=caster.combo;value=0;type=INTEGER} @self
+    - setvariable{var=caster.rage;value=0;type=INTEGER} @self
+
+    # 재소환/리로드 시 오른손 도끼를 원본으로 복구.
+    - meg:changepart{mid=viking_miniboss;pid=right_hand;nmid=viking_miniboss;npid=right_hand} @self
+
+    - meg:defaultstate{mid=viking_miniboss;type=idle;state=idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=viking_miniboss;type=walk;state=walk;li=2;lo=2} @self
+
+    - message{m="&a[VIKING INIT] &fcount=0 / runner=0 / no_hand=0 / combo=0 / rage=0"} @PlayersInRadius{r=48}
+
+
+Viking_DebugState:
+  Skills:
+    - message{m="&8[VIKING] &7count=&e<caster.var.count> &7| runner=&b<caster.var.runner> &7| no_hand=&6<caster.var.no_hand> &7| combo=&d<caster.var.combo> &7| rage=&c<caster.var.rage> &7| ThreatTOP=&c<caster.tt.top>"} @PlayersInRadius{r=48}
+
+
+# ============================================================
+# 2. WALK_ONEAXE
+#
+# 전투 중 타겟이 4블럭 밖이면 walk_oneaxe로 접근.
+# 접근 중 정면 -90 ~ +90 공격은 무효.
+# ============================================================
+
+Viking_WalkGuard:
+  Conditions:
+    - isCancelled false
+    - incombat true
+    - variableEquals{var=caster.count;value=0} true
+    - variableEquals{var=caster.no_hand;value=0} true
+    - targetwithin{d=4} false
+  TargetConditions:
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - cancelevent
+    - sound{s=item.axe.scrape;v=0.85;p=0.72} @self
+    - sound{s=block.anvil.hit;v=0.28;p=1.55} @self
+    - message{m="&9[PATTERN] &fwalk_oneaxe BLOCK"} @PlayersInRadius{r=48}
+
+
+# ============================================================
+# 3. RUNNER
+#
+# 7블럭 밖 공격을 맞을 때마다 runner +1.
+# 5스택이 되는 순간:
+#   clearThreat
+#   마지막 공격자(Trigger) Threat = 100
+#
+# CombatDrop에서는 runner를 초기화하지 않는다.
+# 실제 JumpAttack이 시작될 때만 runner=0으로 소비한다.
+# ============================================================
+
+Viking_RunnerStack:
+  TriggerConditions:
+    - distance{d=>7} true
+  Skills:
+    - variableadd{var=caster.runner;amount=1} @self
+    - message{m="&b[RUNNER] &fstack=&e<caster.var.runner> &7| attacker=&c<trigger.name>"} @PlayersInRadius{r=48}
+
+    # runner가 5 이상이 된 그 DamageEvent 안에서 바로 타겟 재구성.
+    - clearThreat{} @self ?variableInRange{var=caster.runner;value=>=5}
+    - threat{amount=100;mode=set} @Trigger ?variableInRange{var=caster.runner;value=>=5}
+    - message{m="&c[RUNNER LOCK] &f<trigger.name> &7Threat=100"} @PlayersInRadius{r=48} ?variableInRange{var=caster.runner;value=>=5}
+
+
+# ============================================================
+# 4. MELEE / COMBO
+#
+# runner<5일 때만 근접공격 가능.
+#
+# combo 0~4:
+#   0 ~ 3.5블럭 = Attack1 / Attack2 랜덤
+#   3.5 ~ 4블럭 = Attack1
+#
+# combo 5:
+#   다음 근접공격 = Attack1 -> Attack2 연속 콤보
+#   콤보 시작 순간 combo=0
+#
+# 기본공격 적중으로 combo가 쌓일수록 후딜이 짧아진다.
+# ============================================================
+
+Viking_Melee:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableEquals{var=caster.no_hand;value=0} true
+    - variableInRange{var=caster.runner;value=<5}
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to4}
+  Skills:
+    # 3스택이면 일반 평타보다 콤보를 최우선 실행.
+    - skill{s=Viking_AttackCombo} @target ?variableInRange{var=caster.combo;value=>=5}
+
+    # combo 0~4 / 3.5 이내면 Attack1/2 랜덤.
+    # 위 콤보가 실행됐다면 count=1이라 선택된 공격은 자동 차단된다.
+    - randomskill{skills=Viking_Attack1,Viking_Attack2} @target ?variableInRange{var=caster.combo;value=<5} ?targetwithin{d=3.5}
+
+    # 3.5~4블럭은 Attack1.
+    # 3.5 이내에서는 randomskill이 먼저 count=1로 바꾸므로 자동 차단.
+    - skill{s=Viking_Attack1} @target ?variableInRange{var=caster.combo;value=<5}
+
+
+# ------------------------------------------------------------
+# Attack1
+# 사거리 4 / -90~90 / 0.83초 타격
+# ------------------------------------------------------------
+
+Viking_Attack1:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - distance{d=0to4}
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&6[PATTERN] &fAttack1 &7| count=1"} @PlayersInRadius{r=48}
+
+    - potion{type=SLOWNESS;duration=25;level=255;particles=false} @self
+    - look{headOnly=false;force=true;immediately=true;repeat=18;repeatInterval=1} @target
+    - meg:state{mid=viking_miniboss;s=attack1;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # 0.83s ~= 17t
+    - delay 17
+    - skill{s=Viking_Attack1_Hit} @PlayersInRadius{r=4}
+
+    # 주 타겟이 실제 판정 안에 있으면 combo +1.
+    - skill{s=Viking_ComboGain} @target ?targetwithin{d=4}
+
+    - sound{s=entity.player.attack.sweep;v=1.05;p=0.72} @self
+    - sound{s=item.axe.scrape;v=0.55;p=0.72} @self
+
+    # combo가 높을수록 후딜 감소.
+    # combo 0~1 : 총 25t
+    # combo 2   : 총 22t
+    # combo 3~5 : 총 19t
+    - delay 8 ?variableInRange{var=caster.combo;value=<2}
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ?variableInRange{var=caster.combo;value=<2}
+
+    - delay 5 ?variableEquals{var=caster.combo;value=2}
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ?variableEquals{var=caster.combo;value=2}
+
+    - delay 2 ?variableInRange{var=caster.combo;value=>=3}
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ?variableInRange{var=caster.combo;value=>=3}
+
+
+Viking_Attack1_Hit:
+  TargetConditions:
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - damage{a=18} ?variableEquals{var=caster.rage;value=0}
+    - damage{a=21.6} ?variableEquals{var=caster.rage;value=1}
+    - damage{a=25.2} ?variableEquals{var=caster.rage;value=2}
+    - damage{a=28.8} ?variableEquals{var=caster.rage;value=3}
+    - damage{a=32.4} ?variableEquals{var=caster.rage;value=4}
+    - damage{a=36} ?variableInRange{var=caster.rage;value=>=5}
+
+
+# ------------------------------------------------------------
+# Attack2
+# 사거리 3.5 / -90~90
+# 1타 0.58초 / 2타 0.92초
+# ------------------------------------------------------------
+
+Viking_Attack2:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - distance{d=0to3.5}
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - message{m="&6[PATTERN] &fAttack2 &7| count=1"} @PlayersInRadius{r=48}
+
+    - potion{type=SLOWNESS;duration=25;level=255;particles=false} @self
+    - look{headOnly=false;force=true;immediately=true;repeat=20;repeatInterval=1} @target
+    - meg:state{mid=viking_miniboss;s=attack2;priority=3;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # 1타: 0.58s ~= 12t
+    - delay 12
+    - skill{s=Viking_Attack2_Hit1} @PlayersInRadius{r=3.5}
+    - skill{s=Viking_ComboGain} @target ?targetwithin{d=3.5}
+    - sound{s=entity.player.attack.sweep;v=0.95;p=0.82} @self
+
+    # 2타: 0.92s ~= 18t
+    - delay 6
+    - skill{s=Viking_Attack2_Hit2} @PlayersInRadius{r=3.5}
+    - skill{s=Viking_ComboGain} @target ?targetwithin{d=3.5}
+    - sound{s=entity.player.attack.strong;v=1.10;p=0.65} @self
+
+    # combo가 높을수록 후딜 감소.
+    # combo 0~1 : 총 25t
+    # combo 2   : 총 22t
+    # combo 3~5 : 총 19t
+    - delay 7 ?variableInRange{var=caster.combo;value=<2}
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ?variableInRange{var=caster.combo;value=<2}
+
+    - delay 4 ?variableEquals{var=caster.combo;value=2}
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ?variableEquals{var=caster.combo;value=2}
+
+    - delay 1 ?variableInRange{var=caster.combo;value=>=3}
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ?variableInRange{var=caster.combo;value=>=3}
+
+
+Viking_Attack2_Hit1:
+  TargetConditions:
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - damage{a=12} ?variableEquals{var=caster.rage;value=0}
+    - damage{a=14.4} ?variableEquals{var=caster.rage;value=1}
+    - damage{a=16.8} ?variableEquals{var=caster.rage;value=2}
+    - damage{a=19.2} ?variableEquals{var=caster.rage;value=3}
+    - damage{a=21.6} ?variableEquals{var=caster.rage;value=4}
+    - damage{a=24} ?variableInRange{var=caster.rage;value=>=5}
+
+
+Viking_Attack2_Hit2:
+  TargetConditions:
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - damage{a=14} ?variableEquals{var=caster.rage;value=0}
+    - damage{a=16.8} ?variableEquals{var=caster.rage;value=1}
+    - damage{a=19.6} ?variableEquals{var=caster.rage;value=2}
+    - damage{a=22.4} ?variableEquals{var=caster.rage;value=3}
+    - damage{a=25.2} ?variableEquals{var=caster.rage;value=4}
+    - damage{a=28} ?variableInRange{var=caster.rage;value=>=5}
+
+
+
+# ------------------------------------------------------------
+# COMBO STACK
+#
+# 주 전투 타겟에게 실제 평타 판정이 들어갔을 때만 호출.
+# fieldofview 조건까지 통과해야 +1.
+# 최대 5스택.
+# ------------------------------------------------------------
+
+Viking_ComboGain:
+  Conditions:
+    - variableInRange{var=caster.combo;value=<5}
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - variableadd{var=caster.combo;amount=1} @self
+    - message{m="&d[COMBO] &fstack=&e<caster.var.combo>"} @PlayersInRadius{r=48}
+
+    # combo가 5에 처음 도달한 순간 한 번만 회복.
+    # 이후 ComboGain 자체가 combo<5 조건에서 막히므로 중복 회복되지 않는다.
+    - heal{amount=30} @self ?variableEquals{var=caster.combo;value=5}
+    - sound{s=entity.player.levelup;v=0.75;p=0.75} @self ?variableEquals{var=caster.combo;value=5}
+    - effect:particles{p=heart;amount=8;hS=0.45;vS=0.75;speed=0.02} @self ?variableEquals{var=caster.combo;value=5}
+    - message{m="&a[COMBO 5] &fHP +30"} @PlayersInRadius{r=48} ?variableEquals{var=caster.combo;value=5}
+
+    # combo 5스택 달성마다 rage +1 (최대 5).
+    - skill{s=Viking_RageGain} @self ?variableEquals{var=caster.combo;value=5}
+
+
+# ------------------------------------------------------------
+# RAGE
+#
+# combo 5스택에 도달할 때마다 rage +1.
+# 최대 5스택.
+#
+# rage 1 = 이동속도 +20% / 데미지 +20%
+# rage 2 = 이동속도 +40% / 데미지 +40%
+# rage 3 = 이동속도 +60% / 데미지 +60%
+# rage 4 = 이동속도 +80% / 데미지 +80%
+# rage 5 = 이동속도 +100% / 데미지 +100%
+#
+# 이동속도는 Minecraft SPEED 효과의 20% 단위를 사용.
+# 커스텀 분노 파티클은 별도 timer가 지속 표시한다.
+# ------------------------------------------------------------
+
+Viking_RageGain:
+  Conditions:
+    - variableInRange{var=caster.rage;value=<5}
+  Skills:
+    - variableadd{var=caster.rage;amount=1} @self
+
+    # Speed I~V = +20%씩.
+    # Mythic potion level은 amplifier 기준이라 0=Speed I.
+    - potion{type=SPEED;duration=999999;level=0;particles=false} @self ?variableEquals{var=caster.rage;value=1}
+    - potion{type=SPEED;duration=999999;level=1;particles=false} @self ?variableEquals{var=caster.rage;value=2}
+    - potion{type=SPEED;duration=999999;level=2;particles=false} @self ?variableEquals{var=caster.rage;value=3}
+    - potion{type=SPEED;duration=999999;level=3;particles=false} @self ?variableEquals{var=caster.rage;value=4}
+    - potion{type=SPEED;duration=999999;level=4;particles=false} @self ?variableEquals{var=caster.rage;value=5}
+
+    - effect:particles{p=angry_villager;amount=10;hS=0.55;vS=1.0;speed=0.02} @self
+    - effect:particles{p=flame;amount=20;hS=0.65;vS=1.1;speed=0.035} @self
+    - sound{s=entity.ravager.roar;v=0.65;p=0.82} @self
+    - message{m="&4[RAGE] &fstack=&c<caster.var.rage> &7| 이동/공격 +20% per stack"} @PlayersInRadius{r=48}
+
+
+# 현재 rage 스택을 계속 시각화.
+# 0.5초마다 현재 스택 수만큼 angry_villager 파티클을 표시.
+Viking_RageParticles:
+  Skills:
+    - effect:particles{p=angry_villager;amount=1;hS=0.38;vS=0.75;speed=0.01} @self ?variableEquals{var=caster.rage;value=1}
+    - effect:particles{p=angry_villager;amount=2;hS=0.42;vS=0.82;speed=0.01} @self ?variableEquals{var=caster.rage;value=2}
+    - effect:particles{p=angry_villager;amount=3;hS=0.46;vS=0.90;speed=0.01} @self ?variableEquals{var=caster.rage;value=3}
+    - effect:particles{p=angry_villager;amount=4;hS=0.50;vS=0.98;speed=0.01} @self ?variableEquals{var=caster.rage;value=4}
+    - effect:particles{p=angry_villager;amount=5;hS=0.55;vS=1.05;speed=0.01} @self ?variableEquals{var=caster.rage;value=5}
+
+    - effect:particles{p=flame;amount=3;hS=0.40;vS=0.75;speed=0.02} @self ?variableInRange{var=caster.rage;value=>=1}
+    - effect:particles{p=smoke;amount=2;hS=0.35;vS=0.70;speed=0.015} @self ?variableInRange{var=caster.rage;value=>=3}
+
+
+# ------------------------------------------------------------
+# ATTACK COMBO
+#
+# combo=3에서 다음 근접공격으로 사용.
+# 기존 attack1 -> attack2 애니메이션을 연속 연결.
+# 추가 데미지 배율은 없고 기존 타격 판정을 그대로 사용.
+#
+# 시작 순간 combo=0으로 소비.
+# ------------------------------------------------------------
+
+Viking_AttackCombo:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableEquals{var=caster.no_hand;value=0} true
+    - variableInRange{var=caster.combo;value=>=5}
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to4}
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - setvariable{var=caster.combo;value=0;type=INTEGER} @self
+    - message{m="&c[COMBO ATTACK] &fAttack1 -> Attack2 &7| combo=0"} @PlayersInRadius{r=48}
+
+    - potion{type=SLOWNESS;duration=50;level=255;particles=false} @self
+    - look{headOnly=false;force=true;immediately=true;repeat=42;repeatInterval=1} @target
+
+    # 1) Attack1
+    - meg:state{mid=viking_miniboss;s=attack1;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    - delay 17
+    - skill{s=Viking_Attack1_Hit} @PlayersInRadius{r=4}
+    - sound{s=entity.player.attack.sweep;v=1.05;p=0.72} @self
+    - sound{s=item.axe.scrape;v=0.55;p=0.72} @self
+
+    # Attack1이 완전히 끝나기 전에 Attack2로 빠르게 연결.
+    - delay 4
+    - meg:state{mid=viking_miniboss;s=attack2;priority=4;override=true;loop=ONCE;force=true;li=0;lo=1} @self
+
+    # 2) Attack2 1타
+    - delay 12
+    - skill{s=Viking_Attack2_Hit1} @PlayersInRadius{r=3.5}
+    - sound{s=entity.player.attack.sweep;v=0.95;p=0.82} @self
+
+    # Attack2 2타
+    - delay 6
+    - skill{s=Viking_Attack2_Hit2} @PlayersInRadius{r=3.5}
+    - sound{s=entity.player.attack.strong;v=1.10;p=0.65} @self
+
+    - delay 7
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# 5. AXE THROW
+#
+# 중거리 패턴: 타겟 거리 5 ~ 18블럭
+#
+# Flow
+# count=0
+# -> throw 애니메이션
+# -> 0.625초(13t)에 발사
+# -> 발사 순간 플레이어 위치(@TargetLocation)를 목적지로 확정
+# -> 이후 플레이어 추종 없음
+# -> 비행 후반부에 Gravity만 증가
+# -> 플레이어 명중 시 데미지만 주고 계속 비행
+# -> 블록 충돌 또는 자연 수명 종료
+# -> onEnd에서 Viking_Miniboss_Axe_Landed 생성
+# -> 회수 완료까지 count=1 유지
+#
+# 새 변수 없음.
+# ============================================================
+
+Viking_AxeThrow:
+  # 강력한 원거리 패턴이므로 재사용 대기시간 30초.
+  Cooldown: 30
+
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableEquals{var=caster.no_hand;value=0} true
+    - variableInRange{var=caster.runner;value=<5}
+
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=5to18}
+
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - setvariable{var=caster.combo;value=0;type=INTEGER} @self
+    - message{m="&6[PATTERN] &fAxeThrow &7| count=1 &7| target=&c<target.name>"} @PlayersInRadius{r=48}
+
+    - potion{type=SLOWNESS;duration=25;level=255;particles=false} @self
+    - look{headOnly=false;force=true;immediately=true;repeat=13;repeatInterval=1} @target
+    - meg:state{mid=viking_miniboss;s=throw;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # throw release ~= 0.625s
+    - delay 13
+
+    # 도끼가 손을 떠나는 정확한 시점.
+    - setvariable{var=caster.no_hand;value=1;type=INTEGER} @self
+    - meg:changepart{mid=viking_miniboss;pid=right_hand;nmid=viking_miniboss_parts;npid=right_empty} @self
+    - meg:defaultstate{mid=viking_miniboss;type=walk;state=walk;li=2;lo=2} @self
+    - message{m="&6[AXE OUT] &fno_hand=1 / 오른손 도끼 숨김"} @PlayersInRadius{r=48}
+
+    - sound{s=entity.snowball.throw;v=1.0;p=0.55} @self
+    - sound{s=item.trident.throw;v=0.65;p=0.65} @self
+
+    # 후반 낙하용 Aura.
+    # 처음에는 낮은 Gravity로 목표 위치까지 뻗고,
+    # 8틱 후부터 Gravity만 높여 도끼가 자연스럽게 아래로 떨어지게 한다.
+    - aura{auraName=viking_axe_fall;duration=52;delay=8} @self
+
+    # 플레이어 엔티티 자체가 아니라
+    # "발사 순간의 플레이어 위치"를 목적지로 사용.
+    - missile{
+        bulletType=ME;
+        bulletModel=viking_miniboss_axe;
+        bulletstate=idle;
+        onTick=Viking_AxeMissileTick;
+        onHit=Viking_AxeHit;
+        onHitBlock=Viking_AxeBlockHit;
+        onEnd=Viking_AxeEnd;
+        v=18;
+        in=2.2;
+        vO=0.34;
+        g=0.18;
+        ac=1;
+        i=1;
+        hR=0.70;
+        vR=0.85;
+        md=60;
+        mr=32;
+        syo=1.55;
+        sfo=1.05;
+        tyo=1.0;
+        stopAtBlock=true;
+        stopAtEntity=false;
+        hitPlayers=true;
+        hitNonPlayers=false
+      } @TargetLocation
+
+
+# Missile callback.
+# 추종 보정은 전혀 하지 않고 후반 Gravity만 증가.
+Viking_AxeMissileTick:
+  Skills:
+    - effect:particles{p=crit;amount=1;hS=0.04;vS=0.04} @origin
+
+    # 8틱 이후부터 아래로 더 강하게 떨어짐.
+    - modifyProjectile{trait=GRAVITY;action=SET;value=0.48} ?hasaura{n=viking_axe_fall}
+
+
+# 플레이어 명중.
+# 데미지만 주고 미사일은 계속 진행한다.
+Viking_AxeHit:
+  Skills:
+    # 30초 쿨타임을 가진 대신 매우 강한 원거리 단발 피해.
+    # rage 1스택당 +20%.
+    - damage{a=45} ?variableEquals{var=caster.rage;value=0}
+    - damage{a=54} ?variableEquals{var=caster.rage;value=1}
+    - damage{a=63} ?variableEquals{var=caster.rage;value=2}
+    - damage{a=72} ?variableEquals{var=caster.rage;value=3}
+    - damage{a=81} ?variableEquals{var=caster.rage;value=4}
+    - damage{a=90} ?variableInRange{var=caster.rage;value=>=5}
+    - sound{s=item.trident.hit;v=1.0;p=0.72} @origin
+    - effect:particles{p=crit;amount=10;hS=0.35;vS=0.35} @origin
+    - message{m="&e[AXE HIT] &fPLAYER HIT &7| missile 계속 진행 / count=<caster.var.count>"} @PlayersInRadius{r=48}
+
+
+# 바닥 / 벽 충돌.
+# 충돌 이펙트만 처리하고, Landed Axe 생성/회수 전환은 onEnd가 단독 담당한다.
+Viking_AxeBlockHit:
+  Skills:
+    - sound{s=block.anvil.land;v=0.85;p=1.45} @origin
+    - effect:particles{p=block_crack;material=STONE;amount=10;hS=0.30;vS=0.22;speed=0.03} @origin
+
+
+# 미사일 종료.
+# BlockHit 종료든 자연 수명 종료든 반드시 Landed Axe를 만들고 회수 상태로 전환한다.
+# 그래서 투척 후 no_hand=1 상태로 영구 고정되는 경우를 방지한다.
+Viking_AxeEnd:
+  Conditions:
+    - variableEquals{var=caster.no_hand;value=1} true
+  Skills:
+    - auraremove{aura=viking_axe_fall} @self
+
+    # 미사일 최종 위치에 Landed Axe 생성.
+    - summon{type=Viking_Miniboss_Axe_Landed;amount=1} @origin
+
+    # 플레이어 추격 Goal을 빼고 goto 회수 이동만 남긴다.
+    - runaigoalselector{goal=clear}
+    - runaigoalselector{goal=float}
+
+    - meg:defaultstate{mid=viking_miniboss;type=walk;state=walk;li=2;lo=2} @self
+
+    # count는 1 유지. no_hand도 1 유지.
+    - message{m="&6[AXE END] &fLanded Axe 생성 / Recovery 시작 &7| count=<caster.var.count> / no_hand=<caster.var.no_hand>"} @PlayersInRadius{r=48}
+
+
+# ------------------------------------------------------------
+# AXE RECOVERY
+#
+# no_hand=1이 회수 패턴의 최우선 상태 스위치.
+#
+# 다른 패턴:
+#   no_hand=0 조건이 있으므로 실행 불가.
+#
+# 회수:
+#   BlockHit에서 AI Goal을 clear + float로 교체
+#   @MIR로 떨어진 도끼를 직접 선택
+#   내부에서는 @target을 쓰지 않고 inherited target을 그대로 사용
+#   goto pathfinding으로 이동
+#   플레이어 추격 Goal이 없으므로 goto와 충돌하지 않음
+#   이동 애니메이션은 BlockHit에서 지정한 walk defaultstate 사용
+#
+# 2.6블럭 이내:
+#   count=4
+#   grab
+#
+# grab 1.2초:
+#   Landed Axe remove
+#   오른손 도끼 복구
+#   no_hand=0
+#
+# grab 2.0초:
+#   walk_oneaxe 복구
+#   count=0
+# ------------------------------------------------------------
+
+Viking_AxeRecover:
+  Conditions:
+    - variableEquals{var=caster.no_hand;value=1} true
+    - variableEquals{var=caster.count;value=1} true
+  Skills:
+    # 중요:
+    # 바깥 mob 파일의 @MIR이 선택한 Landed Axe가 이 스킬의 inherited target.
+    # 여기서 @target을 쓰면 '몹의 현재 전투 타겟(플레이어)'로 덮어써버린다.
+    # 따라서 targeter를 생략하여 MIR의 도끼 타겟을 그대로 상속한다.
+    - goto{speed=1.55;sh=1.8;sv=1.0}
+    - look{headOnly=false;force=true;immediately=false}
+
+    # AxeGrab도 targeter를 생략하여 같은 Landed Axe를 그대로 전달.
+    - skill{s=Viking_AxeGrab}
+
+
+Viking_AxeGrab:
+  Conditions:
+    - variableEquals{var=caster.no_hand;value=1} true
+    - variableEquals{var=caster.count;value=1} true
+  TargetConditions:
+    - distance{d=0to2.6}
+  Skills:
+    # 회수 timer가 다시 Grab을 시작하지 못하게 잠금.
+    - setvariable{var=caster.count;value=4;type=INTEGER} @self
+
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - potion{type=SLOWNESS;duration=40;level=255;particles=false} @self
+    # inherited target = 떨어진 도끼
+    - look{headOnly=false;force=true;immediately=true;repeat=24;repeatInterval=1}
+
+    - meg:state{mid=viking_miniboss;s=grab;priority=5;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - sound{s=item.armor.equip_iron;v=0.45;p=0.70} @self
+    - message{m="&6[PATTERN] &fAxe Grab &7| count=4"} @PlayersInRadius{r=48}
+
+    # grab 접촉 시점 ~= 1.2s
+    - delay 24
+
+    # inherited target인 Landed Axe를 제거.
+    - remove
+    - meg:changepart{mid=viking_miniboss;pid=right_hand;nmid=viking_miniboss;npid=right_hand} @self
+    - setvariable{var=caster.no_hand;value=0;type=INTEGER} @self
+    - sound{s=item.armor.equip_iron;v=0.85;p=0.55} @self
+    - message{m="&a[AXE RECOVERED] &fno_hand=0 / 도끼 복구"} @PlayersInRadius{r=48}
+
+    # grab 전체 2.0s 종료.
+    - delay 16
+
+    # ========================================================
+    # NORMAL COMBAT AI RESTORE
+    #
+    # mob 파일의 원래 AIGoalSelectors와 동일한 순서로 복구.
+    # ========================================================
+    - runaigoalselector{goal=clear}
+    - runaigoalselector{goal=float}
+    - runaigoalselector{goal=meleeattack}
+    - runaigoalselector{goal=movetowardstarget}
+    - runaigoalselector{goal=randomstroll}
+    - runaigoalselector{goal=lookatplayers}
+    - runaigoalselector{goal=randomlookaround}
+
+    - meg:defaultstate{mid=viking_miniboss;type=walk;state=walk_oneaxe;li=2;lo=2} @self
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+    - message{m="&8[VIKING COUNT] &7AI GOALS 복구 / count=&a0 &8| &7AxeThrow 종료"} @PlayersInRadius{r=48}
+
+
+# ============================================================
+# 6. JUMP ATTACK
+#
+# runner>=5 + count=0이면 현재 Threat 타겟에게 실행.
+#
+# count
+# 1 = jump 준비
+# 2 = 공중 / 착지 감지 활성
+# 3 = land 후딜
+#
+# 점프 이동 수치는 기존 느린 미사일 방식 그대로:
+# missile v=22 / g=1.4 / in=4 / vO=80 / pull=7
+# ============================================================
+
+Viking_JumpAttack:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+    - variableEquals{var=caster.no_hand;value=0} true
+    - variableInRange{var=caster.runner;value=>=5}
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+  Skills:
+    # 실제 패턴이 시작되는 여기서 runner를 소비한다.
+    # 근접 combo도 함께 초기화.
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - setvariable{var=caster.runner;value=0;type=INTEGER} @self
+    - setvariable{var=caster.combo;value=0;type=INTEGER} @self
+    - message{m="&d[PATTERN] &fJumpAttack &7| target=&c<target.name> &7| runner=0"} @PlayersInRadius{r=48}
+
+    - potion{type=SLOWNESS;duration=70;level=8;particles=false} @self
+    - look{headOnly=false;force=true;immediately=false;repeat=35;repeatInterval=1} @TargetLocation
+    - meg:state{mid=viking_miniboss;s=jump;priority=5;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+
+    # jump 도약 프레임
+    - delay 10
+    - effect:particlering{particle=cloud;radius=0.65;points=20;amount=1;hS=0.10;vS=0.08;speed=0.01} @self
+    - sound{s=entity.ravager.step;v=0.9;p=0.70} @self
+    - lunge{velocity=1.5;velocityY=0.30} @self
+    - spin{auraName=viking_jump_spin;d=30;v=0} @self
+
+    # 같은 tick의 onGround 오판 방지.
+    - delay 1
+    - setvariable{var=caster.count;value=2;type=INTEGER} @self
+
+    # 기존 느린 미사일 가이드 수치.
+    - missile{
+        onTick=Viking_JumpMissileTick;
+        v=22;
+        i=1;
+        hR=1;
+        vR=1;
+        g=1.4;
+        syo=1;
+        sB=true;
+        HitNonPlayers=false;
+        hp=true;
+        in=4;
+        fromorigin=true;
+        tyo=1.5;
+        vO=80
+      } @TargetLocation
+
+    - potion{type=JUMP;duration=30;lvl=30;p=true} @self
+    - Aura{auraName=viking_jump_stage1;duration=7;delay=0} @self
+    - Aura{auraName=viking_jump_stage2;duration=20;delay=7} @self
+
+    # jump 애니메이션이 끝나도 공중이면 inair LOOP.
+    - delay 9
+    - meg:state{mid=viking_miniboss;s=jump;remove=true;priority=5} @self ?variableEquals{var=caster.count;value=2}
+    - meg:state{mid=viking_miniboss;s=inair;priority=5;override=true;loop=LOOP;force=true;li=0;lo=0} @self ?variableEquals{var=caster.count;value=2}
+
+    # 안전장치: 계속 착지하지 못하면 점프 상태 해제.
+    - delay 50
+    - message{m="&c[JUMP FAILSAFE] &f점프 강제 해제"} @PlayersInRadius{r=48} ?variableEquals{var=caster.count;value=2}
+    - auraremove{aura=viking_jump_stage1} @self ?variableEquals{var=caster.count;value=2}
+    - auraremove{aura=viking_jump_stage2} @self ?variableEquals{var=caster.count;value=2}
+    - auraremove{aura=viking_jump_spin} @self ?variableEquals{var=caster.count;value=2}
+    - meg:state{mid=viking_miniboss;s=inair;remove=true;priority=5} @self ?variableEquals{var=caster.count;value=2}
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self ?variableEquals{var=caster.count;value=2}
+
+
+# 미사일이 매틱 직접 호출해야 해서 별도 유지.
+Viking_JumpMissileTick:
+  Conditions:
+    - variableEquals{var=caster.count;value=2} true
+  Skills:
+    - pull{velocity=7;to=true} @self
+
+    - modifyProjectile{trait=VELOCITY;action=MULTIPLY;value=0.88} ?hasaura{n=viking_jump_stage1}
+    - modifyProjectile{trait=GRAVITY;action=MULTIPLY;value=1.14} ?hasaura{n=viking_jump_stage1}
+
+    - modifyProjectile{trait=VELOCITY;action=MULTIPLY;value=1.05} ?hasaura{n=viking_jump_stage2}
+    - modifyProjectile{trait=GRAVITY;action=MULTIPLY;value=1.05} ?hasaura{n=viking_jump_stage2}
+    - modifyProjectile{trait=INERTIA;action=MULTIPLY;value=1.25} ?hasaura{n=viking_jump_stage2}
+
+
+# 실제 onGround 감지를 위해 별도 유지.
+Viking_JumpLandCheck:
+  Conditions:
+    - variableEquals{var=caster.count;value=2} true
+    - onground true
+  Skills:
+    # 먼저 count=3으로 바꿔 다음 tick 중복 착지 차단.
+    - setvariable{var=caster.count;value=3;type=INTEGER} @self
+    - message{m="&d[PATTERN] &fJump LAND &7| count=3"} @PlayersInRadius{r=48}
+
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - potion{type=SLOWNESS;duration=32;level=8;particles=false} @self
+
+    - auraremove{aura=viking_jump_stage1} @self
+    - auraremove{aura=viking_jump_stage2} @self
+    - auraremove{aura=viking_jump_spin} @self
+
+    - meg:state{mid=viking_miniboss;s=inair;remove=true;priority=5} @self
+    - meg:state{mid=viking_miniboss;s=jump;remove=true;priority=5} @self
+    - meg:state{mid=viking_miniboss;s=land;priority=5;override=true;loop=ONCE;force=true;li=0;lo=1} @self
+
+    # land 충격 0.25s
+    - delay 5
+
+    # rage 1스택당 +20%.
+    - damage{a=28} @PlayersInRadius{r=4.8} ?variableEquals{var=caster.rage;value=0}
+    - damage{a=33.6} @PlayersInRadius{r=4.8} ?variableEquals{var=caster.rage;value=1}
+    - damage{a=39.2} @PlayersInRadius{r=4.8} ?variableEquals{var=caster.rage;value=2}
+    - damage{a=44.8} @PlayersInRadius{r=4.8} ?variableEquals{var=caster.rage;value=3}
+    - damage{a=50.4} @PlayersInRadius{r=4.8} ?variableEquals{var=caster.rage;value=4}
+    - damage{a=56} @PlayersInRadius{r=4.8} ?variableInRange{var=caster.rage;value=>=5}
+
+    - throw{velocity=0.82;velocityY=0.42} @PlayersInRadius{r=4.8}
+
+    - effect:particlering{particle=cloud;radius=1.2;points=28;amount=1;hS=0.16;vS=0.10;speed=0.025} @self
+    - effect:particlering{particle=cloud;radius=2.5;points=42;amount=1;hS=0.20;vS=0.10;speed=0.035} @self
+    - effect:particles{p=block_crack;material=STONE;amount=28;hS=1.8;vS=0.25;speed=0.06} @self
+    - sound{s=entity.generic.explode;v=0.75;p=0.62} @self
+    - sound{s=entity.ravager.step;v=1.25;p=0.55} @self
+
+    # land 나머지 후딜
+    - delay 25
+    - setvariable{var=caster.count;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# 7. COMMON
+# ============================================================
+
+Viking_CancelFallDamage:
+  Conditions:
+    - damagecause{cause=FALL} true
+  Skills:
+    - cancelevent
+
+
+Viking_CancelVanillaAttack:
+  Skills:
+    - cancelevent
+
+
+Viking_HurtSound:
+  Cooldown: 0.35
+  Conditions:
+    - isCancelled false
+  Skills:
+    - sound{s=entity.pillager.hurt;v=0.75;p=0.72} @self
+
+
+Viking_Death:
+  Skills:
+    - setvariable{var=caster.count;value=1;type=INTEGER} @self
+    - meg:state{mid=viking_miniboss;s=death;priority=10;override=true;loop=ONCE;force=true;li=0;lo=0} @self
+    - sound{s=entity.pillager.death;v=0.95;p=0.62} @self

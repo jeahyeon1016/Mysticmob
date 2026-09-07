@@ -1,0 +1,104 @@
+# ============================================================
+# MOUNTED ORC
+# Minecraft 26.1.2
+# MythicMobs Premium 5.13.0
+# ModelEngine Premium 4.1.0
+# v1.14
+#
+# v1.9 기반 변경
+# - 실제 공격 사거리 2블럭으로 조정
+# - 공격의 강제 넉백 제거 옵션 해제(일반 넉백 복구)
+# - 전체 커스텀 사운드 볼륨 v1.10 대비 50% 감소
+# - projectile 전용 sub-hitbox b_projectile_hitbox 추가
+# - BindHitbox로 실제 ZOMBIE proxy 엔티티를 결속
+# - proxy가 받은 피해량을 MountedOrc 부모에게 전달
+# - h=true / Collidable:true
+# ============================================================
+
+MountedOrc:
+  Type: ZOMBIE
+  Display: '말탄 오크'
+  Health: 260
+  Damage: 0
+
+  Modules:
+    ThreatTable: true
+
+  Options:
+    MovementSpeed: 0.2
+    KnockbackResistance: 1
+    FollowRange: 32
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    Collidable: true
+    Silent: true
+
+  AIGoalSelectors:
+    - 0 clear
+    - 1 float
+    - 2 meleeattack
+    - 3 movetowardstarget
+    - 4 randomstroll
+    - 5 lookatplayers
+    - 6 randomlookaround
+
+  AITargetSelectors:
+    - 0 clear
+    - 1 players
+
+  Skills:
+    # ModelEngine
+    - meg:model{mid=orc_minion;d=false;i=true;h=true;lpitch=true;usm=true;save=false} @self ~onSpawn
+    - bindhitbox{mid=orc_minion;p=b_projectile_hitbox;t=MountedOrc_ProjectileHitbox;delay=2} @self ~onSpawn
+    - meg:defaultstate{mid=orc_minion;type=walk;state=walk;li=2;lo=2} @self ~onSpawn
+
+    # 변수 초기화
+    - setvariable{var=caster.pattern_busy;value=0;t=integer} @self ~onSpawn
+
+    # 기본 공격
+    - skill{s=MountedOrc_Attack} @target ~onTimer:2 ?incombat
+
+    # 타겟과 2블럭보다 멀면 run, 2블럭 이내면 walk
+    - skill{s=MountedOrc_RunStart} @target ~onTimer:5 ?incombat
+    - skill{s=MountedOrc_RunStop} @target ~onTimer:5 ?incombat
+
+    # 피격 사운드
+    - skill{s=MountedOrc_HurtSound} @self ~onDamaged
+
+    # 전투 해제
+    - skill{s=MountedOrc_RunReset} @self ~onDropCombat
+    - setvariable{var=caster.pattern_busy;value=0;t=integer} @self ~onDropCombat
+
+    # 사망
+    - skill{s=MountedOrc_Death} @self ~onDeath
+
+
+# ============================================================
+# PROJECTILE PHYSICAL HITBOX PROXY
+# ============================================================
+
+MountedOrc_ProjectileHitbox:
+  Type: ZOMBIE
+  Display: ''
+  Health: 2048
+  Damage: 0
+
+  Options:
+    NoAI: true
+    Silent: true
+    Invisible: true
+    Collidable: true
+    KnockbackResistance: 1
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+
+  AIGoalSelectors:
+    - clear
+
+  AITargetSelectors:
+    - clear
+
+  Skills:
+    - skill{s=MountedOrc_ProjectileHitboxForward;sync=true} @self ~onDamaged

@@ -1,0 +1,153 @@
+'기절 상태': 
+  name: '기절 상태'
+  type: '상태이상'
+  'max-level': 1
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'false'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '0'
+    'cost-scale': '0'
+    'cooldown-base': '1'
+    'cooldown-scale': '0'
+    'mana-base': '0'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+    'vitality-base': '0.0'
+    'vitality-scale': '0.0'
+    'spirit-base': '0.0'
+    'spirit-scale': '0.0'
+    'intelligence-base': '0.0'
+    'intelligence-scale': '0.0'
+    'dexterity-base': '0.0'
+    'dexterity-scale': '0.0'
+    'strength-base': '0.0'
+    'strength-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&d{name} &7({level}/{max})'
+  - '&2Type: &6{type}'
+  - ''
+  - '{req:level}Level: {attr:level}'
+  - '{req:cost}Cost: {attr:cost}'
+  - ''
+  - '&2Mana: {attr:mana}'
+  - '&2Cooldown: {attr:cooldown}'
+  desc: []
+  components: 
+    'Initialize-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        Passive: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            'seconds-base': '1'
+            'seconds-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Status: 
+              type: 'condition'
+              data: 
+                'icon-key': ''
+                type: 'Active'
+                status: 'Stun'
+              preview: 
+                enabled: 'false'
+              children: 
+                'Particle Animation': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    steps: '8'
+                    frequency: '0.05'
+                    angle: '360'
+                    start: '-90'
+                    'duration-base': '1'
+                    'duration-scale': '0'
+                    'h-translation-base': '0'
+                    'h-translation-scale': '0'
+                    'v-translation-base': '0'
+                    'v-translation-scale': '0'
+                    'h-cycles': '1'
+                    'v-cycles': '1'
+                    particle: 'Cloud'
+                    arrangement: 'Sphere'
+                    'radius-base': '0.1'
+                    'radius-scale': '0'
+                    'particles-base': '1'
+                    'particles-scale': '0'
+                    'visible-radius': '25'
+                    dx: '0'
+                    dy: '0'
+                    dz: '0'
+                    amount: '1'
+                    speed: '0'
+                    forward: '0.5'
+                    upward: '2'
+                    right: '0'
+                    '-with-rotation': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}
+                'Particle Animation-b': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    steps: '8'
+                    frequency: '0.05'
+                    angle: '360'
+                    start: '90'
+                    'duration-base': '1'
+                    'duration-scale': '0'
+                    'h-translation-base': '0'
+                    'h-translation-scale': '0'
+                    'v-translation-base': '0'
+                    'v-translation-scale': '0'
+                    'h-cycles': '1'
+                    'v-cycles': '1'
+                    particle: 'Cloud'
+                    arrangement: 'Sphere'
+                    'radius-base': '0.1'
+                    'radius-scale': '0'
+                    'particles-base': '1'
+                    'particles-scale': '0'
+                    'visible-radius': '25'
+                    dx: '0'
+                    dy: '0'
+                    dz: '0'
+                    amount: '1'
+                    speed: '0'
+                    forward: '0.5'
+                    upward: '2'
+                    right: '0'
+                    '-with-rotation': 'false'
+                  preview: 
+                    enabled: 'false'
+                  children: {}

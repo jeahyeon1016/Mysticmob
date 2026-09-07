@@ -1,0 +1,51 @@
+# ============================================================
+# 슬라임 여제 / Slime Queen
+# 필드 보스
+# MythicMobs + BetterModel
+# Final v1.16
+#
+# 중요:
+# - slimegirlprincess.bbmodel 하나만 사용
+# - 기존 spawn 모델의 8.48초 등장 모션을 "spawn" 애니메이션으로 병합
+# - SpawnActor -> Active 엔티티 교체 완전 제거
+# - 같은 MythicMob / 같은 BetterModel display가 spawn -> idle -> 전투까지 유지
+# ============================================================
+
+SlimeQueen_FieldBoss:
+  Type: HUSK
+  Display: '&d&l슬라임 여제'
+  Health: 800
+  Damage: 0
+  Options:
+    Silent: true
+    MovementSpeed: 0.22
+    FollowRange: 40
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    KnockbackResistance: 0.65
+  AIGoalSelectors:
+  - clear
+  - float
+  - meleeattack
+  - movetowardstarget
+  - randomstroll
+  AITargetSelectors:
+  - clear
+  - players
+  - attacker
+  Skills:
+  - model{mid=slimegirlprincess} @self ~onSpawn
+  - skill{s=SlimeQueen_Init} @self ~onSpawn
+  - skill{s=SlimeQueen_WalkStart} @self ~onTimer:2
+  - skill{s=SlimeQueen_IdleStart} @self ~onTimer:2
+  - skill{s=SlimeQueen_Select_R0_3} @target ~onTimer:5
+  - skill{s=SlimeQueen_Select_R3_5} @target ~onTimer:5
+  - skill{s=SlimeQueen_Select_R5_7} @target ~onTimer:5
+  - skill{s=SlimeQueen_Select_R7_8} @target ~onTimer:5
+  - skill{s=SlimeQueen_Select_R8_9} @target ~onTimer:5
+  - skill{s=SlimeQueen_Select_R9_9p5} @target ~onTimer:5
+  - skill{s=SlimeQueen_Select_R9p5_10} @target ~onTimer:5
+  - skill{s=SlimeQueen_Select_R10_11p2} @target ~onTimer:5
+  - skill{s=SlimeQueen_SpawnInvulnerable;sync=true} @trigger ~onDamaged
+  - skill{s=SlimeQueen_ShieldBlock;sync=true} @trigger ~onDamaged
+  - skill{s=SlimeQueen_Death} @self ~onDeath

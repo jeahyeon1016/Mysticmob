@@ -1,0 +1,30 @@
+# MythicMobs 5.13.0 / ModelEngine 4.1.0
+EntWarrior:
+  Type: ZOMBIE
+  Display: '&2엔트 워리어'
+  Health: 100
+  Damage: 0
+  Modules:
+    ThreatTable: true
+  Options:
+    MovementSpeed: 0.14
+    KnockbackResistance: 0.90
+    FollowRange: 20
+    Silent: true
+    PreventOtherDrops: true
+    PreventItemPickup: true
+    PreventSunburn: true
+    PreventRandomEquipment: true
+  AIGoalSelectors:
+    - 0 clear
+    - 1 float
+    - 2 meleeattack
+    - 3 movetowardstarget
+  AITargetSelectors:
+    - 0 clear
+    - 1 players
+  Skills:
+    - skill{s=EW_Init} @self ~onSpawn
+    - skill{s=EW_HurtSound} @self ~onDamaged
+    - skill{s=EW_AttackRouter} @target ~onTimer:2
+    - skill{s=EW_Death} @self ~onDeath

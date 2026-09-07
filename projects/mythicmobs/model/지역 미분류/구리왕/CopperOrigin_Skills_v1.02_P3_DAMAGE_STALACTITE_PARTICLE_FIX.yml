@@ -1,0 +1,2192 @@
+# ============================================================
+# CopperOrigin Skills v1.02 - P3 DAMAGE + STALACTITE PROXY + PARTICLE FEEDBACK FIX
+# - P1 모델만 attach, P2/P3는 remapmodel로 실제 텍스처/파츠 변경
+# - 모델 remove/apply 없음 -> 페이즈 전환 깜빡임 제거
+# - 모델 정면은 -Z이므로 실제 등 뒤(+Z)는 stone_front_bone임
+# - P2/P3 등판 유지
+# - P2: top/right/left/bottom/front 표시, back만 숨김
+# - P3: top/right/left/bottom/front 표시, back만 숨김
+# ============================================================
+# v0.97
+# - P1->P2 / P2->P3 전환 중 AI/이동/기존 패턴 후속 실행 완전 차단
+# - 전환 시작 시 공격 state 제거 후 combat_idle 고정
+# - P2/P3 전환 종료 시 타겟 즉시 재획득 + anim_move 리셋으로 보행 복구
+# - P2/P3 모델 뒤쪽 torso core 투명 UV는 bbmodel에서 별도 수정
+#
+# v0.96
+# - P3 일반 패턴 라우터/쿨다운/딜레이 약 1.4배 가속
+# - P3 전용 fast 애니메이션 사용 (walk/basic/slam/piledrive/roar)
+# - P3 공기파/포효 낙석 투사체 속도 약 1.4배
+# - 구리의 근원 패시브: outer skill은 @self로 실행해 caster=보스 / trigger=공격자 보존
+# - TriggerConditions는 공식 entitytype PLAYER + 공격자별 30틱 태그 쿨다운 사용
+# ============================================================
+# ============================================================
+# v0.90 P3 FIX
+# - P3 진입 시 healthpercent 중복 검사 제거
+# - p3_damage_lock(30% 봉인 도달) + p3_gate(종유석 파괴)로 확정 전환
+# - phase=2 / p3_gate=1 stuck 상태 방지
+# ============================================================
+# ============================================================
+# 구리의 근원 / Copper Origin
+# MythicMobs + BetterModel v0.90 P3 TRANSITION FIX
+#
+#
+# v0.89 추가:
+# - P1/P2/P3 모델 실제 교체 연결
+# - P1=copper_origin_p1 / P2=copper_origin_p2 / P3=copper_origin_p3
+# - 공통 idle/walk를 현재 phase의 모델로 자동 라우팅
+# - 각 페이즈 공격 animation state도 해당 phase 모델 ID로 분리
+#
+# v0.88 기반:
+# - P1 -> P2 전환 컷신 3.5초
+# - P2 -> P3 전환 컷신 4.5초
+# - 전환 중 AI/행동/피해 잠금
+# - 돌 외피 균열 -> 파괴 -> 구리 노출 -> 페이즈 돌입 사운드 단계 연출
+# - 향후 P2/P3 텍스처 모델 교체 지점을 주석으로 표시
+# 구현 범위:
+# P1
+# 0. 묵직한 기본공격
+# 1. 내려치기 - 반경 5 진동영역
+# 2. 내리꽂기 - 3초간 바닥에 박힌 느낌
+# 3. 암석 투척 - 피격 시 넉백
+#
+# 맵 기믹
+# - CopperOrigin_StalactiteHit 을 보스에게 호출하면 5초 그로기
+# - 실제 "활로 종유석 격추 -> 낙하 -> 보스 충돌" 연결은 맵 제작 단계에서 연결
+# ============================================================
+
+
+# ============================================================
+# 0. 초기화 / 공통
+# ============================================================
+
+CopperOrigin_Init:
+  Skills:
+    - setvariable{var=caster.phase;value=1;type=INTEGER} @self
+    - setvariable{var=caster.groggy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setvariable{var=caster.dormant;value=1;type=INTEGER} @self
+    - setvariable{var=caster.p2_gate;value=0;type=INTEGER} @self
+    - setvariable{var=caster.p3_gate;value=0;type=INTEGER} @self
+    - setvariable{var=caster.p2_damage_lock;value=0;type=INTEGER} @self
+    - setvariable{var=caster.p3_damage_lock;value=0;type=INTEGER} @self
+    - setvariable{var=caster.p2_lock_notice;value=0;type=INTEGER} @self
+    - setvariable{var=caster.p3_lock_notice;value=0;type=INTEGER} @self
+    - setvariable{var=caster.p3_roar1_done;value=0;type=INTEGER} @self
+    - setvariable{var=caster.p3_roar2_done;value=0;type=INTEGER} @self
+    - setvariable{var=caster.roaring;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - setvariable{var=caster.transitioning;value=0;type=INTEGER} @self
+
+    # 이전 테스트에서 플레이어에게 남아 있던 구리화 태그 초기화
+    - removetag{t=copper_1} @PlayersInRadius{r=35}
+    - removetag{t=copper_2} @PlayersInRadius{r=35}
+    - removetag{t=copper_3} @PlayersInRadius{r=35}
+    - removetag{t=copper_4} @PlayersInRadius{r=35}
+    - removetag{t=copper_5} @PlayersInRadius{r=35}
+
+    - skill{s=CopperOrigin_BM_SpawnSequence} @self
+    - effect:particles{particle=ash;amount=18;hS=1.0;vS=1.2;y=1.1;speed=0.01} @self
+    - skill{s=CopperOrigin_InitialStalactiteRefresh} @self
+
+
+# ============================================================
+# BetterModel - uploaded animation set
+#
+# active model_identifier: copper_origin_p1 (P2/P3는 remap source)
+# Animation:
+# - sleep_sit_idle      : loop, 잠든 상태
+# - wake_up_from_hit    : once, 첫 피격 기상
+# - combat_idle         : loop, 전투 대기
+# - walk                : 이동
+# - lost_target_idle    : 타겟 상실 대기
+# - basic_attack        : 기본 공격
+# ============================================================
+
+# ============================================================
+# v0.95 REMAPMODEL NO-FLICKER PHASES
+# P1 모델을 한 번만 부착하고 P2/P3는 remapmodel로 파츠/텍스처만 교체.
+# 돌 외피 6개 bone은 partvis로 단계적으로 벗기고, 본체 텍스처/파츠는 remapmodel로 변경.
+# 세 모델은 동일 bone 구조를 유지하며 별도 정상 텍스처를 사용. 모델 엔티티는 제거하지 않음.
+# ============================================================
+CopperOrigin_PhaseVisualInit:
+  Skills:
+    # 모델 부착 직후 원본 돌 외피 6조각을 전부 표시 = P1
+    - delay 1
+    - partvis{m=copper_origin_p1;p=stone_front_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_left_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_right_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_top_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_bottom_bone;v=true} @self
+
+CopperOrigin_PhaseVisualEnsureP1:
+  Conditions:
+    - variableEquals{var=caster.phase;value=1} true
+  Skills:
+    - partvis{m=copper_origin_p1;p=stone_front_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_left_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_right_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_top_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_bottom_bone;v=true} @self
+
+CopperOrigin_PhaseVisualEnsureP2:
+  Conditions:
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.transitioning;value=0} true
+  Skills:
+    # P2: 위/오른쪽/왼쪽/아래/등판은 모두 유지, 정면측 1장만 숨김
+    - partvis{m=copper_origin_p1;p=stone_front_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_right_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_top_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=false} @self
+    - partvis{m=copper_origin_p1;p=stone_left_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_bottom_bone;v=true} @self
+
+CopperOrigin_PhaseVisualEnsureP3:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.transitioning;value=0} true
+  Skills:
+    # P3: 위/오른쪽/왼쪽/아래/등판은 모두 유지, 정면측 1장만 숨김
+    - partvis{m=copper_origin_p1;p=stone_front_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=false} @self
+    - partvis{m=copper_origin_p1;p=stone_left_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_right_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_top_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_bottom_bone;v=true} @self
+
+CopperOrigin_BM_SpawnSequence:
+  Skills:
+    # 스폰 직후에는 계속 잠든 자세 유지.
+    # 첫 피격 전까지 자동 기상하지 않음.
+    - state{mid=copper_origin_p1;s=sleep_sit_idle} @self
+
+
+# 첫 피격 시 한 번만 기상
+CopperOrigin_BM_WakeOnHit:
+  Conditions:
+    - variableEquals{var=caster.dormant;value=1} true
+  Skills:
+    - setvariable{var=caster.dormant;value=2;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - state{mid=copper_origin_p1;s=wake_up_from_hit} @self
+    - sound{s=entity.iron_golem.repair;v=0.85;p=0.55} @self
+
+    # 업로드 모델의 wake_up_from_hit 길이 기준 약 4.4초
+    - delay 88
+
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - state{mid=copper_origin_p1;s=combat_idle} @self
+    - setvariable{var=caster.dormant;value=0;type=INTEGER} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - potionclear{type=SLOWNESS} @self
+
+
+CopperOrigin_BM_DormantHold:
+  Conditions:
+    - variableInRange{var=caster.dormant;value=>0} true
+  Skills:
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - potion{type=SLOWNESS;duration=8;level=10} @self
+
+
+# 페이즈 전환 중에는 매 틱(몹 파일 ~onTimer:1) 위치/AI를 강제로 고정.
+# 이전 공격의 후딜이 AI를 켜려고 해도 transitioning=1 동안 즉시 다시 잠근다.
+CopperOrigin_TransitionHold:
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=1} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+
+CopperOrigin_BM_WalkStart:
+  Conditions:
+    - variableEquals{var=caster.dormant;value=0} true
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.roaring;value=1} false
+    - variableEquals{var=caster.anim_move;value=0} true
+    - moving true
+  Skills:
+    - setvariable{var=caster.anim_move;value=1;type=INTEGER} @self
+    - skill{s=CopperOrigin_BM_PlayWalk_P1} @self
+    - skill{s=CopperOrigin_BM_PlayWalk_P2} @self
+    - skill{s=CopperOrigin_BM_PlayWalk_P3} @self
+
+CopperOrigin_BM_IdleStart:
+  Conditions:
+    - variableEquals{var=caster.dormant;value=0} true
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.roaring;value=1} false
+    - variableEquals{var=caster.anim_move;value=1} true
+    - moving false
+  Skills:
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - skill{s=CopperOrigin_BM_PlayIdle_P1} @self
+    - skill{s=CopperOrigin_BM_PlayIdle_P2} @self
+    - skill{s=CopperOrigin_BM_PlayIdle_P3} @self
+
+# 공격/기상 후 정지 상태에서 현재 페이즈 모델의 combat_idle이 아직 시작되지 않은 경우의 안전장치.
+CopperOrigin_BM_IdleEnsure:
+  Conditions:
+    - variableEquals{var=caster.dormant;value=0} true
+    - variableEquals{var=caster.busy;value=1} false
+    - variableEquals{var=caster.roaring;value=1} false
+    - variableEquals{var=caster.anim_move;value=0} true
+    - moving false
+  Skills:
+    - skill{s=CopperOrigin_BM_PlayIdle_P1} @self
+    - skill{s=CopperOrigin_BM_PlayIdle_P2} @self
+    - skill{s=CopperOrigin_BM_PlayIdle_P3} @self
+
+# 현재 phase의 BetterModel에만 state를 보낸다.
+CopperOrigin_BM_PlayWalk_P1:
+  Conditions:
+    - variableEquals{var=caster.phase;value=1} true
+  Skills:
+    - state{mid=copper_origin_p1;s=walk} @self
+
+CopperOrigin_BM_PlayWalk_P2:
+  Conditions:
+    - variableEquals{var=caster.phase;value=2} true
+  Skills:
+    - state{mid=copper_origin_p1;s=walk} @self
+
+CopperOrigin_BM_PlayWalk_P3:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+  Skills:
+    - state{mid=copper_origin_p1;s=walk_p3_fast} @self
+
+CopperOrigin_BM_PlayIdle_P1:
+  Conditions:
+    - variableEquals{var=caster.phase;value=1} true
+  Skills:
+    - state{mid=copper_origin_p1;s=combat_idle} @self
+
+CopperOrigin_BM_PlayIdle_P2:
+  Conditions:
+    - variableEquals{var=caster.phase;value=2} true
+  Skills:
+    - state{mid=copper_origin_p1;s=combat_idle} @self
+
+CopperOrigin_BM_PlayIdle_P3:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+  Skills:
+    - state{mid=copper_origin_p1;s=combat_idle} @self
+
+
+# ------------------------------------------------------------
+# 종유석 최초 리필
+# BetterModel 부착/스폰 애니메이션 시작 뒤 5틱 후 실행
+# ------------------------------------------------------------
+CopperOrigin_InitialStalactiteRefresh:
+  Skills:
+    - delay 5
+    - skill{s=CopperStalactite_v28_Refresh} @self
+
+
+CopperOrigin_CancelFallDamage:
+  Conditions:
+    - damagecause{cause=FALL} true
+  Skills:
+    - cancelevent
+
+
+
+# ============================================================
+# 페이즈 전환
+#
+# 테스트 기준:
+# P1 -> P2 : 체력 65% 이하
+# (최종 수치는 추후 조정)
+# ============================================================
+
+CopperOrigin_PhaseCheck:
+  Conditions:
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.p2_gate;value=1} true
+    - healthpercent{p=<=65%} true
+  Skills:
+    # ========================================================
+    # v0.94 P1 -> P2 : 100틱 = 5.0초
+    # 모델 교체 없음. 돌 외피 bone 3개가 실제로 순서대로 사라짐.
+    # ========================================================
+    - setvariable{var=caster.phase;value=2;type=INTEGER} @self
+    - setvariable{var=caster.transitioning;value=1;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    # 이미 실행 중이던 P1 공격 애니메이션을 즉시 제거하고 전환 자세로 고정
+    - state{mid=copper_origin_p1;s=basic_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=slam_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=overhead_drive_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=rock_throw_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=combat_idle;f=true} @self
+    - equip{item=AIR HAND} @self
+    - onDamaged{auraName=CopperOriginTransitionLock;duration=120;multiplier=0} @self
+    - potionclear{type=SLOWNESS} @self
+    - potionclear{type=WEAKNESS} @self
+
+    - removetag{t=copper_1} @PlayersInRadius{r=35}
+    - removetag{t=copper_2} @PlayersInRadius{r=35}
+    - removetag{t=copper_3} @PlayersInRadius{r=35}
+    - removetag{t=copper_4} @PlayersInRadius{r=35}
+    - removetag{t=copper_5} @PlayersInRadius{r=35}
+
+    # 0.0s - 균열 시작
+    - sound{s=block.deepslate.break;v=1.25;p=0.42} @self
+    - sound{s=entity.iron_golem.damage;v=1.00;p=0.52} @self
+    - effect:particles{particle=block;material=DEEPSLATE;amount=26;hS=1.15;vS=1.20;y=1.35;speed=0.09} @self
+    - delay 20
+
+    # 1.0s - 윗 외피 균열 연출 (벽 자체는 유지)
+    - sound{s=block.stone.break;v=1.35;p=0.76} @self
+    - effect:particles{particle=block;material=STONE;amount=34;hS=1.25;vS=1.35;y=2.00;speed=0.14} @self
+    - partvis{m=copper_origin_p1;p=stone_top_bone;v=true} @self
+    - delay 20
+
+    # 2.0s - 오른쪽 외피 균열 연출 (벽 자체는 유지)
+    - sound{s=block.deepslate.break;v=1.55;p=0.58} @self
+    - effect:particles{particle=block;material=STONE;amount=46;hS=1.55;vS=1.45;y=1.45;speed=0.17} @self
+    - effect:particles{particle=cloud;amount=12;hS=0.95;vS=0.80;y=1.25;speed=0.024} @self
+    - partvis{m=copper_origin_p1;p=stone_right_bone;v=true} @self
+    - delay 20
+
+    # 3.0s - 실제 정면(-Z)의 큰 외피가 무너지며 구리 본체 노출
+    - sound{s=entity.generic.explode;v=0.80;p=0.82} @self
+    - sound{s=block.stone.break;v=1.65;p=0.55} @self
+    - effect:particles{particle=block;material=STONE;amount=70;hS=1.90;vS=1.80;y=1.40;speed=0.21} @self
+    - effect:particles{particle=dust;color=#D9772A;size=1.18;amount=30;hS=1.15;vS=1.25;y=1.45;speed=0.022} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=false} @self
+    - delay 20
+
+    # 4.0s - 남은 외피는 유지 + P2 텍스처/파츠를 현재 모델에 무깜빡임 remap
+    - sound{s=entity.iron_golem.repair;v=1.30;p=0.74} @self
+    - sound{s=block.copper.place;v=1.10;p=0.88} @self
+    - effect:particlering{particle=dust;color=#C96E2B;size=1.05;radius=3.8;points=32;amount=1;y=0.75;speed=0.006} @self
+    - remapmodel{m=copper_origin_p1;n=copper_origin_p2} @self
+    # remap 직후 P2 외피 상태 재고정
+    - partvis{m=copper_origin_p1;p=stone_front_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_right_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_top_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=false} @self
+    - partvis{m=copper_origin_p1;p=stone_left_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_bottom_bone;v=true} @self
+    - state{mid=copper_origin_p1;s=combat_idle} @self
+    - delay 20
+
+    # 5.0s - 전투 재개
+    - setvariable{var=caster.p2_damage_lock;value=0;type=INTEGER} @self
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+    - auraremove{aura=CopperOriginTransitionLock} @self
+    - setvariable{var=caster.transitioning;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - potionclear{type=SLOWNESS} @self
+    - setAI{ai=true} @self
+    - settarget @NearestPlayer{r=32}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - state{mid=copper_origin_p1;s=combat_idle;f=true} @self
+
+
+CopperOrigin_Phase3Check:
+  Conditions:
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.p3_gate;value=1} true
+    - variableEquals{var=caster.transitioning;value=0} true
+  Skills:
+    # ========================================================
+    # v0.94 P2 -> P3 : 120틱 = 6.0초
+    # P2에 남아 있던 뒤/왼쪽/아랫 외피를 순서대로 완전 제거.
+    # 모델 remove/apply가 없으므로 깜빡임 없음.
+    # ========================================================
+    - setvariable{var=caster.p3_damage_lock;value=0;type=INTEGER} @self
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+    - setvariable{var=caster.phase;value=3;type=INTEGER} @self
+    - setvariable{var=caster.transitioning;value=1;type=INTEGER} @self
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    # 이미 실행 중이던 P2 공격 애니메이션을 즉시 제거하고 전환 자세로 고정
+    - state{mid=copper_origin_p1;s=basic_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=slam_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=overhead_drive_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=rock_throw_attack;r=true;i=true} @self
+    - state{mid=copper_origin_p1;s=combat_idle;f=true} @self
+    - equip{item=AIR HAND} @self
+    - onDamaged{auraName=CopperOriginTransitionLock;duration=140;multiplier=0} @self
+    - setvariable{var=caster.p3_lock_notice;value=0;type=INTEGER} @self
+
+    # 0.0s - 마지막 외피 전체 균열
+    - sound{s=block.anvil.land;v=0.72;p=0.48} @self
+    - sound{s=entity.iron_golem.damage;v=1.25;p=0.40} @self
+    - effect:particles{particle=block;material=STONE;amount=34;hS=1.35;vS=1.40;y=1.35;speed=0.11} @self
+    - delay 20
+
+    # 1.0s - 왼쪽 외피 균열 연출 (벽 자체는 유지)
+    - sound{s=block.stone.break;v=1.45;p=0.70} @self
+    - effect:particles{particle=block;material=STONE;amount=38;hS=1.35;vS=1.45;y=1.35;speed=0.15} @self
+    - partvis{m=copper_origin_p1;p=stone_left_bone;v=true} @self
+    - delay 20
+
+    # 2.0s - 뒤쪽 외피 대량 탈락
+    - sound{s=block.deepslate.break;v=1.65;p=0.52} @self
+    - sound{s=block.stone.break;v=1.45;p=0.62} @self
+    - effect:particles{particle=block;material=STONE;amount=64;hS=1.85;vS=1.80;y=1.40;speed=0.20} @self
+    - effect:particles{particle=cloud;amount=18;hS=1.20;vS=0.95;y=1.20;speed=0.028} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=false} @self
+    - delay 20
+
+    # 3.0s - 아래 외피 균열 연출 (벽 자체는 유지)
+    - sound{s=entity.generic.explode;v=0.90;p=0.68} @self
+    - sound{s=block.stone.break;v=1.70;p=0.50} @self
+    - effect:particles{particle=block;material=STONE;amount=78;hS=1.95;vS=1.70;y=0.95;speed=0.22} @self
+    - partvis{m=copper_origin_p1;p=stone_bottom_bone;v=true} @self
+    - delay 20
+
+    # 4.0s - 완전 구리화 강조 + P3 텍스처/파츠 무깜빡임 remap
+    - sound{s=block.copper.break;v=1.70;p=0.58} @self
+    - effect:particles{particle=dust;color=#FF8A2B;size=1.38;amount=52;hS=1.45;vS=1.55;y=1.45;speed=0.032} @self
+    - effect:particles{particle=dust;color=#63E6BE;size=0.92;amount=18;hS=1.00;vS=1.20;y=1.35;speed=0.020} @self
+    - effect:particlering{particle=dust;color=#E9792A;size=1.18;radius=4.2;points=36;amount=1;y=0.80;speed=0.008} @self
+    - remapmodel{m=copper_origin_p1;n=copper_origin_p3} @self
+    # P3 외피 상태 재고정: 위/오른쪽/왼쪽/아래/등판 유지
+    - partvis{m=copper_origin_p1;p=stone_front_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_back_bone;v=false} @self
+    - partvis{m=copper_origin_p1;p=stone_left_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_right_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_top_bone;v=true} @self
+    - partvis{m=copper_origin_p1;p=stone_bottom_bone;v=true} @self
+    - state{mid=copper_origin_p1;s=combat_idle} @self
+    - delay 20
+
+    # 5.0s - 태초의 구리 에너지 안정화
+    - sound{s=entity.iron_golem.repair;v=1.60;p=0.48} @self
+    - sound{s=block.copper.place;v=1.35;p=0.72} @self
+    - effect:particlering{particle=dust;color=#FF7A1F;size=1.26;radius=4.8;points=40;amount=1;y=0.85;speed=0.009} @self
+    - delay 20
+
+    # 6.0s - 전투 재개
+    # P2와 동일하게 별도 메타스킬로 넘기지 않고 여기서 직접 잠금 해제.
+    # transitioning을 먼저 0으로 내려 TransitionHold가 더 이상 AI를 다시 끄지 못하게 한다.
+    - setvariable{var=caster.p3_damage_lock;value=0;type=INTEGER} @self
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+    - auraremove{aura=CopperOriginTransitionLock} @self
+    - setvariable{var=caster.transitioning;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - potionclear{type=SLOWNESS} @self
+    - potionclear{type=WEAKNESS} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setAI{ai=true} @self
+    - settarget @NearestPlayer{r=32}
+    - state{mid=copper_origin_p1;s=combat_idle;f=true} @self
+
+    # 2틱 뒤 한 번 더 AI/타겟을 강제 복구.
+    # 전환 마지막 틱과 ~onTimer:1 TransitionHold가 겹쳐도 P3가 멈춘 채 남지 않게 한다.
+    - delay 2
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - setvariable{var=caster.anim_move;value=0;type=INTEGER} @self
+    - setAI{ai=true} @self
+    - settarget @NearestPlayer{r=32}
+
+
+# ------------------------------------------------------------
+# 체력 봉인
+#
+# 65% / 30% 도달 후 종유석을 맞기 전까지:
+# - 모든 판정은 현재 체력 비율(healthpercent) 기준
+# - 최대 체력이 얼마든 같은 퍼센트에서 기믹 발동
+# - 임계치 도달 뒤 damage_lock 활성화
+# - 이후 공격 이벤트는 cancel -> 타격 시도는 보이나 HP는 더 내려가지 않음
+# ------------------------------------------------------------
+
+CopperOrigin_P2ThresholdLock:
+  Conditions:
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.p2_gate;value=0} true
+    - healthpercent{p=<=65%} true
+  Skills:
+    - setvariable{var=caster.p2_damage_lock;value=1;type=INTEGER} @self
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+    - onDamaged{auraName=CopperOriginPhaseDamageLock;duration=12000;multiplier=0} @self
+    - skill{s=CopperOrigin_P2LockNotice} @self
+
+CopperOrigin_P2LockNotice:
+  Conditions:
+    - variableEquals{var=caster.p2_lock_notice;value=0} true
+  Skills:
+    - setvariable{var=caster.p2_lock_notice;value=1;type=INTEGER} @self
+    - sound{s=block.anvil.land;v=0.7;p=0.55} @self
+    - effect:particles{particle=dust;color=#AAAAAA;size=0.95;amount=24;hS=0.85;vS=1.10;y=1.3;speed=0.012} @self
+    - effect:particlering{particle=dust;color=#D0D0D0;size=1.05;radius=3.0;points=42;amount=1;y=1.0;speed=0.003} @self
+
+CopperOrigin_P3ThresholdLock:
+  Conditions:
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.p3_gate;value=0} true
+    - healthpercent{p=<=30%} true
+  Skills:
+    - setvariable{var=caster.p3_damage_lock;value=1;type=INTEGER} @self
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+    - onDamaged{auraName=CopperOriginPhaseDamageLock;duration=12000;multiplier=0} @self
+    - skill{s=CopperOrigin_P3LockNotice} @self
+
+CopperOrigin_P3LockNotice:
+  Conditions:
+    - variableEquals{var=caster.p3_lock_notice;value=0} true
+  Skills:
+    - setvariable{var=caster.p3_lock_notice;value=1;type=INTEGER} @self
+    - sound{s=block.anvil.land;v=0.7;p=0.48} @self
+    - effect:particles{particle=dust;color=#C66A2B;size=1.00;amount=28;hS=0.90;vS=1.15;y=1.3;speed=0.014} @self
+    - effect:particlering{particle=dust;color=#E58A3A;size=1.10;radius=3.1;points=44;amount=1;y=1.0;speed=0.003} @self
+
+
+
+# ============================================================
+# v1.02 DAMAGE LOCK SAFETY / PARTICLE FEEDBACK
+# ============================================================
+
+# 포효가 끝난 상태에서는 포효 무적이 절대 남지 않게 강제 제거.
+CopperOrigin_P3_RoarInvulnSafety:
+  Conditions:
+    - variableEquals{var=caster.roaring;value=0} true
+  Skills:
+    - auraremove{aura=CopperOriginRoarInvulnerable} @self
+
+# 실제 3페(phase=3)에서는 이전 30% 봉인 오라가 남아 있으면 안 됨.
+CopperOrigin_P3_DamageLockSafety:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.p3_damage_lock;value=0} true
+  Skills:
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+
+# 체력 봉인 중에는 채팅 대신 보스 주위에 지속적인 '석화 방벽' 링을 표시.
+CopperOrigin_DamageLockVisual:
+  Skills:
+    - skill{s=CopperOrigin_P2DamageLockVisual} @self
+    - skill{s=CopperOrigin_P3DamageLockVisual} @self
+
+CopperOrigin_P2DamageLockVisual:
+  Conditions:
+    - variableEquals{var=caster.p2_damage_lock;value=1} true
+  Skills:
+    - effect:particlering{particle=dust;color=#A9A9A9;size=1.05;radius=2.6;points=34;amount=1;y=1.10;speed=0.002} @self
+    - effect:particles{particle=block;material=STONE;amount=12;hS=1.20;vS=1.35;y=1.20;speed=0.025} @self
+
+CopperOrigin_P3DamageLockVisual:
+  Conditions:
+    - variableEquals{var=caster.p3_damage_lock;value=1} true
+  Skills:
+    - effect:particlering{particle=dust;color=#D9772A;size=1.12;radius=2.8;points=38;amount=1;y=1.10;speed=0.002} @self
+    - effect:particlering{particle=dust;color=#B8B8B8;size=0.82;radius=2.25;points=30;amount=1;y=1.55;speed=0.002} @self
+    - effect:particles{particle=block;material=STONE;amount=14;hS=1.25;vS=1.45;y=1.25;speed=0.028} @self
+
+# ============================================================
+# 구리화 0~5 스택 - v0.6 TAG 방식
+#
+# 기존 target.copper_stack 변수가 플레이어에게 정상 유지되지 않아
+# 매번 1/5로 다시 잡히는 현상이 있었음.
+#
+# v0.6부터는 플레이어 scoreboard tag로 스택 관리:
+# copper_1 ~ copper_5
+#
+# 장점:
+# - 서버에서 직접 /tag <player> list 로 확인 가능
+# - nested skill target context 영향을 덜 받음
+# - 산화수 정화 구현도 단순해짐
+# ============================================================
+
+CopperOrigin_CopperAdd1:
+  Skills:
+    # 높은 스택부터 먼저 검사해야 한 번의 호출에 정확히 +1만 됨
+    - skill{s=CopperOrigin_Copper_4to5} @target
+    - skill{s=CopperOrigin_Copper_3to4} @target
+    - skill{s=CopperOrigin_Copper_2to3} @target
+    - skill{s=CopperOrigin_Copper_1to2} @target
+    - skill{s=CopperOrigin_Copper_0to1} @target
+
+CopperOrigin_Copper_4to5:
+  TargetConditions:
+    - hastag{t=copper_4} true
+  Skills:
+    - removetag{t=copper_4} @target
+    - addtag{t=copper_5} @target
+    - effect:particles{particle=dust;color=#A94E12;size=1.15;amount=18;hS=0.48;vS=0.95;y=0.95;speed=0.018} @target
+
+CopperOrigin_Copper_3to4:
+  TargetConditions:
+    - hastag{t=copper_3} true
+  Skills:
+    - removetag{t=copper_3} @target
+    - addtag{t=copper_4} @target
+    - effect:particles{particle=dust;color=#BD5D18;size=1.08;amount=14;hS=0.44;vS=0.88;y=0.95;speed=0.016} @target
+
+CopperOrigin_Copper_2to3:
+  TargetConditions:
+    - hastag{t=copper_2} true
+  Skills:
+    - removetag{t=copper_2} @target
+    - addtag{t=copper_3} @target
+    - effect:particles{particle=dust;color=#CF6E20;size=1.00;amount=11;hS=0.40;vS=0.80;y=0.95;speed=0.014} @target
+
+CopperOrigin_Copper_1to2:
+  TargetConditions:
+    - hastag{t=copper_1} true
+  Skills:
+    - removetag{t=copper_1} @target
+    - addtag{t=copper_2} @target
+    - effect:particles{particle=dust;color=#D77A27;size=0.92;amount=8;hS=0.36;vS=0.72;y=0.95;speed=0.012} @target
+
+CopperOrigin_Copper_0to1:
+  TargetConditions:
+    - hastag{t=copper_1} false
+    - hastag{t=copper_2} false
+    - hastag{t=copper_3} false
+    - hastag{t=copper_4} false
+    - hastag{t=copper_5} false
+  Skills:
+    - addtag{t=copper_1} @target
+    - effect:particles{particle=dust;color=#DF8A35;size=0.84;amount=5;hS=0.32;vS=0.64;y=0.95;speed=0.010} @target
+
+# 2스택
+CopperOrigin_CopperAdd2:
+  Skills:
+    - skill{s=CopperOrigin_CopperAdd1} @target
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1} @target
+
+# 3스택
+CopperOrigin_CopperAdd3:
+  Skills:
+    - skill{s=CopperOrigin_CopperAdd1} @target
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1} @target
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1} @target
+
+
+# 4스택
+CopperOrigin_CopperAdd4:
+  Skills:
+    - skill{s=CopperOrigin_CopperAdd1} @target
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1} @target
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1} @target
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1} @target
+
+
+# 지속 시각 / 디버프 / 액션바
+CopperOrigin_CopperizationTick:
+  Skills:
+    - skill{s=CopperOrigin_CopperTier1} @target
+    - skill{s=CopperOrigin_CopperTier2} @target
+    - skill{s=CopperOrigin_CopperTier3} @target
+    - skill{s=CopperOrigin_CopperTier4} @target
+    - skill{s=CopperOrigin_CopperTier5} @target
+
+CopperOrigin_CopperTier1:
+  TargetConditions:
+    - hastag{t=copper_1} true
+  Skills:
+    - potion{type=SLOWNESS;duration=16;level=0} @target
+    - effect:particles{particle=dust;color=#C8732B;size=0.8;amount=2;hS=0.28;vS=0.55;y=0.9;speed=0.002} @target
+    - effect:particles{particle=dust;color=#DF8A35;size=0.84;amount=5;hS=0.32;vS=0.64;y=0.95;speed=0.010} @target
+
+CopperOrigin_CopperTier2:
+  TargetConditions:
+    - hastag{t=copper_2} true
+  Skills:
+    - potion{type=SLOWNESS;duration=16;level=0} @target
+    - effect:particles{particle=dust;color=#D9822B;size=0.9;amount=4;hS=0.34;vS=0.65;y=0.9;speed=0.002} @target
+    - effect:particles{particle=dust;color=#D77A27;size=0.92;amount=8;hS=0.36;vS=0.72;y=0.95;speed=0.012} @target
+
+CopperOrigin_CopperTier3:
+  TargetConditions:
+    - hastag{t=copper_3} true
+  Skills:
+    - potion{type=SLOWNESS;duration=16;level=1} @target
+    - potion{type=WEAKNESS;duration=16;level=0} @target
+    - effect:particles{particle=dust;color=#D67B27;size=1.0;amount=7;hS=0.42;vS=0.78;y=0.9;speed=0.003} @target
+    - effect:particles{particle=dust;color=#CF6E20;size=1.00;amount=11;hS=0.40;vS=0.80;y=0.95;speed=0.014} @target
+
+CopperOrigin_CopperTier4:
+  TargetConditions:
+    - hastag{t=copper_4} true
+  Skills:
+    - potion{type=SLOWNESS;duration=16;level=2} @target
+    - potion{type=WEAKNESS;duration=16;level=1} @target
+    - effect:particles{particle=dust;color=#C96C1E;size=1.05;amount=10;hS=0.48;vS=0.88;y=0.9;speed=0.003} @target
+    - effect:particles{particle=dust;color=#BD5D18;size=1.08;amount=14;hS=0.44;vS=0.88;y=0.95;speed=0.016} @target
+
+CopperOrigin_CopperTier5:
+  TargetConditions:
+    - hastag{t=copper_5} true
+  Skills:
+    - potion{type=SLOWNESS;duration=16;level=5} @target
+    - potion{type=WEAKNESS;duration=16;level=2} @target
+    - effect:particles{particle=dust;color=#B85F18;size=1.15;amount=16;hS=0.55;vS=1.0;y=0.9;speed=0.004} @target
+    - effect:particles{particle=dust;color=#A94E12;size=1.15;amount=18;hS=0.48;vS=0.95;y=0.95;speed=0.018} @target
+
+
+# ============================================================
+# 구리화 감소 / 고정형 산화수 분출 - v0.12
+#
+# v0.11에서도 정화가 안 된 원인 후보:
+# marker -> PlayersInRadius -> nested skill -> TargetConditions
+# 타겟 컨텍스트가 다시 꼬일 여지가 있었음.
+#
+# v0.12는 구리화 감소만큼은 Mythic 타겟 전달을 아예 쓰지 않고
+# 마커 위치 기준 vanilla /tag 명령으로 직접 처리.
+#
+# 동시에 분출 시각은 0.1초마다 계속 뿜도록 분리.
+# ============================================================
+
+CopperOrigin_OxidationWaterPool:
+  Skills:
+    - summon{type=CopperOriginOxidationMarker;amount=1} @RandomLocationsNearOrigin{a=3;r=10;minr=3;s=4}
+
+
+# 생성 순간 1회 강한 폭발 + 약 6.4초 뒤 제거
+CopperOrigin_OxidationMarker_Start:
+  Skills:
+    - sound{s=block.bubble_column.upwards_inside;v=1.25;p=1.0} @self
+    - effect:particles{particle=splash;amount=65;hS=0.42;vS=0.55;y=0.10;speed=0.18} @self
+    - effect:particles{particle=dust;color=#35FFE1;size=1.10;amount=35;hS=0.30;vS=0.55;y=0.35;speed=0.07} @self
+    - effect:particles{particle=bubble;amount=26;hS=0.28;vS=0.65;y=0.30;speed=0.10} @self
+    - delay 200
+    - remove @self
+
+
+# 0.1초마다 표시되는 수직 분출.
+# 여러 높이에 좁은 파티클 층을 쌓아 "바닥 -> 위" 기둥처럼 보이게 함.
+CopperOrigin_OxidationMarker_Visual:
+  Skills:
+    - effect:particles{particle=splash;amount=16;hS=0.55;vS=0.20;y=0.08;speed=0.11} @self
+    - effect:particles{particle=dust;color=#41FFE0;size=0.95;amount=10;hS=0.46;vS=0.18;y=0.30;speed=0.04} @self
+
+    - effect:particles{particle=splash;amount=10;hS=0.46;vS=0.22;y=0.85;speed=0.10} @self
+    - effect:particles{particle=dust;color=#63F5E2;size=0.82;amount=8;hS=0.40;vS=0.20;y=1.10;speed=0.035} @self
+
+    - effect:particles{particle=bubble;amount=8;hS=0.36;vS=0.25;y=1.55;speed=0.08} @self
+    - effect:particles{particle=dust;color=#9AFFF0;size=0.72;amount=6;hS=0.32;vS=0.22;y=1.85;speed=0.03} @self
+
+    - effect:particles{particle=bubble;amount=5;hS=0.28;vS=0.22;y=2.35;speed=0.07} @self
+    - effect:particles{particle=dust;color=#D6FFF8;size=0.62;amount=4;hS=0.24;vS=0.18;y=2.65;speed=0.02} @self
+
+    # 분출구 중심점
+    - effect:particles{particle=dust;color=#FFFFFF;size=1.20;amount=4;hS=0.18;vS=0.04;y=0.22;speed=0.001} @self
+
+
+# 0.8초마다 구리화 -1.
+# 중요: 낮은 단계부터 처리.
+# 예) copper_5는 이 틱에서 마지막 5->4만 실행되고,
+# 이미 4->3 명령은 앞에서 지나갔으므로 정확히 1스택만 감소.
+CopperOrigin_OxidationMarker_Cleanse:
+  Skills:
+    # 1 -> 0
+    - command{c='execute at <caster.uuid> as @a[distance=..1.7,tag=copper_1] run title @s actionbar {"text":"산화 완료! 구리화가 해제되었습니다.","color":"aqua"}'} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_1] run effect clear @s minecraft:slowness"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_1] run effect clear @s minecraft:weakness"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_1] run tag @s remove copper_1"} @self
+
+    # 2 -> 1
+    - command{c='execute at <caster.uuid> as @a[distance=..1.7,tag=copper_2] run title @s actionbar {"text":"산화 중... 구리화 1/5","color":"aqua"}'} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_2] run tag @s add copper_1"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_2] run tag @s remove copper_2"} @self
+
+    # 3 -> 2
+    - command{c='execute at <caster.uuid> as @a[distance=..1.7,tag=copper_3] run title @s actionbar {"text":"산화 중... 구리화 2/5","color":"aqua"}'} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_3] run tag @s add copper_2"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_3] run tag @s remove copper_3"} @self
+
+    # 4 -> 3
+    - command{c='execute at <caster.uuid> as @a[distance=..1.7,tag=copper_4] run title @s actionbar {"text":"산화 중... 구리화 3/5","color":"aqua"}'} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_4] run tag @s add copper_3"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_4] run tag @s remove copper_4"} @self
+
+    # 5 -> 4
+    - command{c='execute at <caster.uuid> as @a[distance=..1.7,tag=copper_5] run title @s actionbar {"text":"산화 중... 구리화 4/5","color":"aqua"}'} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_5] run tag @s add copper_4"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1.7,tag=copper_5] run tag @s remove copper_5"} @self
+
+# ============================================================
+# P2 공격 라우터
+# ============================================================
+
+CopperOrigin_P2Router:
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=28} true
+  Skills:
+    - randomskill{skills=CopperOrigin_P2_Slam,CopperOrigin_P2_Piledrive,CopperOrigin_P2_BasicAttack,CopperOrigin_P2_CopperRockThrow} @target
+
+
+# ============================================================
+# 1. P1 공격 라우터
+#
+# busy=1 / groggy=1 동안 새 공격 시작 금지
+# 각각의 공격은 자체 Cooldown 보유
+# ============================================================
+
+CopperOrigin_P1Router:
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=28} true
+  Skills:
+    # 근접 스킬 둘 + 기본공격 + 원거리 암석투척을 섞어 시도.
+    # 거리/쿨 조건이 맞지 않는 스킬은 자연스럽게 실패.
+    - randomskill{skills=CopperOrigin_P1_Slam,CopperOrigin_P1_Piledrive,CopperOrigin_P1_BasicAttack,CopperOrigin_P1_RockThrow} @target
+
+
+
+
+# ============================================================
+# v0.75 공통 스킬 범위 표시
+# - 빨강/주황 계열: 피해 범위
+# - 청록 계열: 습윤/정화 계열
+# ============================================================
+
+# 기본공격: 전방 약 3블럭 타격영역을 작은 원 2개로 표시
+CopperOrigin_P1_BasicAttack:
+  Cooldown: 3.5
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=4.2} true
+  Skills:
+    - state{mid=copper_origin_p1;s=basic_attack} @self
+    # 실제 판정: 보스가 바라보는 전방 80도 / 3.0블럭 안의 플레이어만 적중
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    # 주먹을 들어올리는 텔레그래프
+    - sound{s=entity.iron_golem.step;v=1.25;p=0.65} @self
+    - effect:particles{particle=dust;color=#FFD166;size=1.0;amount=12;hS=0.55;vS=0.35;y=1.2;speed=0.005} @self
+    - effect:particles{particle=crit;amount=6;hS=0.35;vS=0.25;y=1.5;speed=0.02} @self
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - effect:particles{particle=dust;color=#FFB703;size=1.15;amount=16;hS=0.65;vS=0.40;y=1.2;speed=0.005} @self
+    - delay 15
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+
+    - damage{a=10} @LivingInCone{a=80;r=3.0;rot=0;target=players}
+    - throw{velocity=0.55;velocityY=0.10} @LivingInCone{a=80;r=3.0;rot=0;target=players}
+    - sound{s=entity.iron_golem.attack;v=1.35;p=0.70} @self
+
+    - delay 10
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+
+
+# ============================================================
+# P1-1. 내려치기
+#
+# 트리거: 3블럭 이내
+# 쿨: 30초
+# 전방을 내려친 뒤 약 2.2초 동안 진동 영역 표현
+# 최종 판정 반경: 5
+# ============================================================
+
+CopperOrigin_SlamImpactFX:
+  Skills:
+    # 플레이어 피격 여부와 무관하게 지면 자체가 강하게 얻어맞는 연출
+    - sound{s=block.anvil.land;v=0.95;p=0.48} @self
+    - sound{s=block.deepslate.break;v=1.30;p=0.58} @self
+    - sound{s=entity.generic.explode;v=1.05;p=0.48} @self
+    - effect:particles{particle=block;material=DEEPSLATE;amount=42;hS=2.40;vS=0.38;y=0.08;speed=0.15} @self
+    - effect:particles{particle=block;material=STONE;amount=34;hS=1.85;vS=0.32;y=0.10;speed=0.12} @self
+    - effect:particles{particle=cloud;amount=34;hS=2.20;vS=0.22;y=0.08;speed=0.055} @self
+    - effect:particlering{particle=cloud;radius=5;points=54;amount=2;y=0.10;speed=0.055} @self
+
+
+CopperOrigin_P1_Slam:
+  Cooldown: 30
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=3} true
+  Skills:
+    - state{mid=copper_origin_p1;s=slam_attack} @self
+    # slam_attack 실제 길이 3.35s(67t), ROOT 최저점 2.84s≈57t
+    # 피해/폭발 판정을 정확히 t=57에 맞춤
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    # 큰 공격 예고: 실제 피해 반경 5를 미리 보여줌
+    - sound{s=block.stone.break;v=1.2;p=0.55} @self
+    - effect:particlering{particle=dust;color=#FFB000;size=1.05;radius=5;points=44;amount=1;y=0.10;speed=0.001} @self
+    - delay 8
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - effect:particlering{particle=dust;color=#FF7A00;size=1.15;radius=5;points=44;amount=1;y=0.10;speed=0.001} @self
+    - effect:particlering{particle=cloud;radius=2.6;points=24;amount=1;y=0.12;speed=0.01} @self
+    - delay 8
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - effect:particlering{particle=dust;color=#FF3B30;size=1.20;radius=5;points=44;amount=1;y=0.10;speed=0.001} @self
+    - effect:particlering{particle=cloud;radius=4.0;points=32;amount=1;y=0.12;speed=0.01} @self
+    - delay 41
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+
+    # 충격 발생 - 플레이어가 빗나가도 지면 충격 연출은 항상 발생
+    - skill{s=CopperOrigin_SlamImpactFX} @self
+    - damage{a=14} @PlayersInRadius{r=5}
+    - skill{s=CopperStalactite_v28_Refresh} @self
+
+    # 진동이 남아있는 느낌
+    - delay 4
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - effect:particlering{particle=cloud;radius=4.3;points=28;amount=1;y=0.08;speed=0.012} @self
+    - delay 3
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - effect:particlering{particle=cloud;radius=3.6;points=24;amount=1;y=0.08;speed=0.008} @self
+
+    - delay 3
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+
+
+# ============================================================
+# P1-2. 내리꽂기
+#
+# 트리거: 3블럭 이내
+# 쿨: 25초
+#
+# 현재 프로토타입에서는 실제 블록 속에 플레이어를 끼우지 않고
+# 아래쪽 속도 + 강한 둔화 + 멀미로 "바닥에 박힘"을 재현.
+# 실제 매몰 지형 연출은 맵과 함께 제작하는 편이 안전.
+# ============================================================
+
+CopperOrigin_P1_Piledrive:
+  Cooldown: 25
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=3} true
+  Skills:
+    # overhead_drive_attack = 4.20s / 84 ticks
+    # 실제 손이 바닥에 완전히 꽂히는 프레임 ~= 3.30s / 66 ticks
+    - state{mid=copper_origin_p1;s=overhead_drive_attack} @self
+    # 내리꽂기 판정: 전방 45도 / 약 2.2블럭, 고정 타겟 추적 아님
+    # 딜 타이밍: t=66 = 3.30s (이전 76t보다 0.50s 빠름)
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    # 긴 차징 텔레그래프
+    - sound{s=entity.iron_golem.repair;v=1.0;p=0.55} @self
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - delay 14
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - delay 4
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - sound{s=block.anvil.place;v=0.55;p=0.75} @self
+    - delay 8
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+
+    # t=66 (3.20s): 손이 바닥/대상 위치에 꽂히는 순간과 피해 동기화
+    - damage{a=12} @EntitiesInCone{angle=45;range=2.2;rotation=0}
+    - velocity{mode=ADD;x=0;y=-1.35;z=0} @EntitiesInCone{angle=45;range=2.2;rotation=0}
+    - potion{type=SLOWNESS;duration=60;level=10} @EntitiesInCone{angle=45;range=2.2;rotation=0}
+    - potion{type=NAUSEA;duration=60;level=1} @EntitiesInCone{angle=45;range=2.2;rotation=0}
+    - sound{s=block.deepslate.break;v=1.35;p=0.60} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - sound{s=entity.generic.explode;v=0.80;p=0.62} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - effect:particles{particle=cloud;amount=18;hS=0.65;vS=0.16;y=0.05;speed=0.025} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - effect:particles{particle=block;material=STONE;amount=22;hS=0.8;vS=0.22;y=0.08;speed=0.10} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+
+    # 애니메이션 종료까지 남은 8틱(0.4초) 동안 공격 잠금
+    - delay 18
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+CopperOrigin_P1_RockThrow:
+  Cooldown: 8
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=4} false
+    - targetwithin{d=28} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    # AI가 꺼져 있어도 투석 대상 쪽으로 몸 전체를 회전
+    - look{headOnly=false;force=true;immediately=true} @target
+    # AI/이동 상태가 완전히 멈춘 다음 공격 state를 재생해 default/walk 덮어쓰기 방지
+    - delay 1
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - state{mid=copper_origin_p1;s=rock_throw_attack} @self
+
+    # 손에 돌을 들고 있는 것처럼 보이도록 실제 STONE을 장비.
+    # MythicMobs 공식 equip mechanic 사용.
+    - equip{item=STONE HAND} @self
+
+    - sound{s=block.stone.break;v=1.25;p=0.70} @self
+    - effect:particles{particle=block;material=STONE;amount=18;hS=0.75;vS=0.22;y=0.15;speed=0.08} @self
+    - effect:particles{particle=dust;color=#B08968;size=1.0;amount=10;hS=0.55;vS=0.40;y=1.4;speed=0.01} @self
+
+    # 준비/장전 모션
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - look{headOnly=false;force=true;immediately=false} @target
+    - effect:particles{particle=dust;color=#DDB892;size=1.1;amount=14;hS=0.45;vS=0.35;y=1.6;speed=0.01} @self
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - look{headOnly=false;force=true;immediately=false} @target
+    - delay 17
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    # 릴리즈 직전 현재 대상 위치를 다시 바라봄
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # t=58 (2.90s): 실제 팔이 앞으로 뻗는 릴리즈 순간에 투사체 생성
+    - equip{item=AIR HAND} @self
+    - projectile{onTick=CopperOrigin_RockTick;onHit=CopperOrigin_RockHit;v=14;i=1;hR=1.65;vR=1.65;mr=34} @target
+
+    # rock_throw_attack 종료 72t까지 후딜 유지
+    - delay 14
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+
+
+CopperOrigin_RockTick:
+  Skills:
+    # 흩어지는 파편보다 중앙에 뭉친 '한 덩어리 암석'이 보이도록 밀도 강화
+    - effect:particles{particle=BLOCK;material=STONE;amount=64;hS=0.58;vS=0.58;speed=0.018} @origin
+    - effect:particles{particle=BLOCK;material=COBBLESTONE;amount=42;hS=0.44;vS=0.44;speed=0.020} @origin
+    - effect:particles{particle=dust;color=#6F6863;size=1.75;amount=26;hS=0.34;vS=0.34;speed=0.004} @origin
+
+
+CopperOrigin_RockHit:
+  Skills:
+    - damage{a=11}
+    - throw{velocity=1.65;velocityY=0.35}
+    - sound{s=block.stone.break;v=1.15;p=0.75}
+    - effect:particles{particle=cloud;amount=12;hS=0.5;vS=0.35;speed=0.03}
+
+
+
+
+# ============================================================
+# P2 공격
+# ============================================================
+
+# 0. 강화 기본공격
+CopperOrigin_P2_BasicAttack:
+  Cooldown: 3.0
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=4.5} true
+  Skills:
+    - state{mid=copper_origin_p1;s=basic_attack} @self
+    # 실제 판정: 보스가 바라보는 전방 80도 / 3.0블럭 안의 플레이어만 적중
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - effect:particles{particle=dust;color=#D9772A;size=1.05;amount=12;hS=0.55;vS=0.45;y=1.3;speed=0.004} @self
+    - delay 35
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - damage{a=13} @LivingInCone{a=80;r=3.0;rot=0;target=players}
+    - throw{velocity=0.70;velocityY=0.12} @LivingInCone{a=80;r=3.0;rot=0;target=players}
+    - sound{s=entity.iron_golem.attack;v=1.35;p=0.65} @self
+    - delay 8
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+
+
+# 1. 내려치기 + 진동 피해를 한 번이라도 맞으면 구리화 +1
+CopperOrigin_P2_Slam:
+  Cooldown: 30
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=3} true
+  Skills:
+    - state{mid=copper_origin_p1;s=slam_attack} @self
+    # slam_attack 실제 길이 3.35s(67t), ROOT 최저점 2.84s≈57t
+    # 피해/폭발 판정을 정확히 t=57에 맞춤
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    - effect:particlering{particle=dust;color=#E09A3E;size=1.05;radius=5;points=44;amount=1;y=0.10;speed=0.001} @self
+    - delay 8
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - effect:particlering{particle=dust;color=#D9772A;size=1.15;radius=5;points=44;amount=1;y=0.10;speed=0.001} @self
+    - delay 8
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - effect:particlering{particle=dust;color=#C8641B;size=1.20;radius=5;points=44;amount=1;y=0.10;speed=0.001} @self
+    - delay 41
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+
+    - skill{s=CopperOrigin_SlamImpactFX} @self
+    - skill{s=CopperOrigin_P2_SlamHit} @PlayersInRadius{r=5}
+    - skill{s=CopperStalactite_v28_Refresh} @self
+    - effect:particlering{particle=dust;color=#C8732B;size=1.0;radius=5;points=42;amount=1;y=0.12;speed=0.004} @self
+
+    # 강한 충격으로 지하 산화수가 분출
+    - skill{s=CopperOrigin_OxidationWaterPool} @self
+
+    - delay 10
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+
+
+# 2. 내리꽂기 + 실명 + 구리화 3
+CopperOrigin_P2_Piledrive:
+  Cooldown: 25
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=3} true
+  Skills:
+    # overhead_drive_attack = 4.20s / 84 ticks
+    # impact ~= 3.30s / 66 ticks
+    - state{mid=copper_origin_p1;s=overhead_drive_attack} @self
+    # 내리꽂기 판정: 전방 45도 / 약 2.2블럭, 고정 타겟 추적 아님
+    # 딜 타이밍: t=66 = 3.30s (이전 76t보다 0.50s 빠름)
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - delay 14
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - delay 4
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - sound{s=block.anvil.place;v=0.60;p=0.70} @self
+    - delay 8
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+
+    # t=66: 내리꽂기 임팩트
+    - skill{s=CopperOrigin_P2_PiledriveHit} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - velocity{mode=ADD;x=0;y=-1.45;z=0} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - potion{type=SLOWNESS;duration=60;level=10} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - potion{type=BLINDNESS;duration=60;level=0} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - sound{s=block.deepslate.break;v=1.45;p=0.56} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - effect:particles{particle=dust;color=#D9772A;size=1.05;amount=18;hS=0.55;vS=0.85;y=1.0;speed=0.008} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - effect:particles{particle=block;material=STONE;amount=24;hS=0.85;vS=0.22;y=0.08;speed=0.11} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+
+    # 내리꽂기 충격과 같은 프레임에 산화수 분출
+    - skill{s=CopperOrigin_OxidationWaterPool} @self
+
+    # 76 + 8 = 총 84틱 = 애니메이션 4.20초와 일치
+    - delay 18
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+CopperOrigin_P2_CopperRockThrow:
+  Cooldown: 8
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=4} false
+    - targetwithin{d=28} true
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - look{headOnly=false;force=true;immediately=true} @target
+    # AI/이동 상태가 완전히 멈춘 다음 공격 state를 재생해 default/walk 덮어쓰기 방지
+    - delay 1
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - state{mid=copper_origin_p1;s=rock_throw_attack} @self
+
+    # P2도 같은 투척 모션을 사용하되 손에는 돌을 표시.
+    - equip{item=STONE HAND} @self
+    - effect:particles{particle=block;material=STONE;amount=14;hS=0.70;vS=0.22;y=0.15;speed=0.07} @self
+    - effect:particles{particle=dust;color=#D9772A;size=1.0;amount=14;hS=0.55;vS=0.45;y=1.35;speed=0.008} @self
+
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - look{headOnly=false;force=true;immediately=false} @target
+    - delay 20
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - look{headOnly=false;force=true;immediately=false} @target
+    - delay 17
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - look{headOnly=false;force=true;immediately=true} @target
+
+    # t=58 (2.90s): 릴리즈
+    - equip{item=AIR HAND} @self
+    - projectile{onTick=CopperOrigin_CopperRockTick;onHit=CopperOrigin_CopperRockHit;v=15;i=1;hR=1.75;vR=1.75;mr=34} @target
+
+    - delay 14
+    - cancelSkill ?variableEquals{var=caster.transitioning;value=1}
+    - setAI{ai=true} @self ?variableEquals{var=caster.transitioning;value=0}
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self ?variableEquals{var=caster.transitioning;value=0}
+
+
+CopperOrigin_CopperRockTick:
+  Skills:
+    # P2도 중앙 코어를 조밀하게 만들어 '돌덩이' 형태가 유지되도록 함
+    - effect:particles{particle=BLOCK;material=STONE;amount=58;hS=0.60;vS=0.60;speed=0.018} @origin
+    - effect:particles{particle=BLOCK;material=CUT_COPPER;amount=46;hS=0.46;vS=0.46;speed=0.020} @origin
+    - effect:particles{particle=dust;color=#A85D2A;size=1.80;amount=28;hS=0.35;vS=0.35;speed=0.004} @origin
+
+
+CopperOrigin_CopperRockHit:
+  Skills:
+    - damage{a=13}
+    - throw{velocity=1.70;velocityY=0.35}
+    - skill{s=CopperOrigin_CopperAdd2}
+    - sound{s=block.stone.break;v=1.2;p=0.70}
+    - effect:particles{particle=dust;color=#D9772A;size=1.0;amount=12;hS=0.48;vS=0.35;speed=0.02}
+
+
+
+# ============================================================
+# P3 - 완전 전성기의 모습
+#
+# 멀티 기준:
+# - 구리화는 플레이어별 태그로 개별 관리
+# - 구리의 근원 패시브는 공격자별 1.5초 내부쿨
+# - 그로기 중에는 패시브/낙석/공격 전부 멈춤
+# ============================================================
+
+CopperOrigin_P3Router:
+  Conditions:
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=30} true
+  Skills:
+    - randomskill{skills=CopperOrigin_P3_Slam,CopperOrigin_P3_Piledrive,CopperOrigin_P3_BasicAttack} @target
+
+
+# ------------------------------------------------------------
+# P3 패시브: 구리의 근원
+#
+# 보스를 때린 플레이어에게 구리화 +1
+# 단, Fabled의 연타형 스킬 때문에 플레이어별 30틱(1.5초) 내부쿨.
+# 그로기 중에는 절대 발동하지 않음.
+# ------------------------------------------------------------
+
+CopperOrigin_P3_SourcePassive:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.transitioning;value=0} true
+    - variableEquals{var=caster.groggy;value=1} false
+  # 공식 MythicMobs TriggerConditions: 이 metaskill을 일으킨 실제 공격자를 검사.
+  # Mob 파일에서 이 스킬을 @self로 실행해야 caster는 보스, trigger는 공격자로 유지됨.
+  TriggerConditions:
+    - entitytype{t=PLAYER} true
+    - hastag{t=copper_origin_source_cd} false
+  Skills:
+    - addtag{t=copper_origin_source_cd} @trigger
+    - skill{s=CopperOrigin_CopperAdd1} @trigger
+    - effect:particles{particle=dust;color=#E8792D;size=0.85;amount=9;hS=0.34;vS=0.55;y=0.9;speed=0.003} @trigger
+    - sound{s=block.copper.hit;v=0.65;p=1.15} @trigger
+    - delay 30
+    - removetag{t=copper_origin_source_cd} @trigger
+
+
+# ------------------------------------------------------------
+# P3 기본공격
+# ------------------------------------------------------------
+
+CopperOrigin_P3_BasicAttack:
+  Cooldown: 2.0
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=4.8} true
+  Skills:
+    - state{mid=copper_origin_p1;s=basic_attack_p3_fast} @self
+    # P3 x1.4 fast animation. 실제 판정: 전방 80도 / 3.0블럭
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - effect:particles{particle=dust;color=#F08A34;size=1.15;amount=18;hS=0.65;vS=0.50;y=1.35;speed=0.005} @self
+    - delay 25
+    - damage{a=16} @LivingInCone{a=80;r=3.0;rot=0;target=players}
+    - throw{velocity=0.85;velocityY=0.15} @LivingInCone{a=80;r=3.0;rot=0;target=players}
+    - sound{s=entity.iron_golem.attack;v=1.4;p=0.58} @self
+    - delay 14
+    - skill{s=CopperOrigin_P3_EndAction} @self
+
+
+# ------------------------------------------------------------
+# P3 내려치기
+# 기존 진동 + 전방 구리 공기파
+# 공기파 적중: 구리화 +1
+# ------------------------------------------------------------
+
+CopperOrigin_P3_Slam:
+  Cooldown: 17.0
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=5} true
+  Skills:
+    - state{mid=copper_origin_p1;s=slam_attack_p3_fast} @self
+    # P3 fast slam: 약 2.39s(48t), impact 약 t=41
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - effect:particlering{particle=dust;color=#F39A3F;size=1.05;radius=5;points=46;amount=1;y=0.08;speed=0.001} @self
+    - delay 6
+    - effect:particlering{particle=dust;color=#E8732D;size=1.15;radius=5;points=46;amount=1;y=0.08;speed=0.001} @self
+    - delay 6
+    - effect:particlering{particle=dust;color=#C75B1A;size=1.20;radius=5;points=46;amount=1;y=0.08;speed=0.001} @self
+    - delay 29
+
+    - skill{s=CopperOrigin_SlamImpactFX} @self
+    - skill{s=CopperOrigin_P3_SlamHit} @PlayersInRadius{r=5}
+    - skill{s=CopperStalactite_v28_Refresh} @self
+
+    # 전방 공기파:
+    # 몹이 현재 바라보는 방향을 기준으로 직선 발사.
+    # sE=false: 플레이어를 한 명 맞아도 투사체가 사라지지 않고 계속 관통.
+    # sB=false: 지면/블록에 즉시 소멸하지 않음.
+    - projectile{onStart=CopperOrigin_P3_WaveStart;onTick=CopperOrigin_P3_WaveTick;onHit=CopperOrigin_P3_WaveHit;v=14;i=1;hR=1.30;vR=1.00;mr=28;syo=1.10;sfo=1.8;sB=false;sE=false;hs=true;hfs=0.65} @Forward{f=28;lockpitch=true}
+
+    # 강한 충격은 기존 산화수 기믹도 발생
+    - skill{s=CopperOrigin_OxidationWaterPool} @self
+
+    - delay 7
+    - skill{s=CopperOrigin_P3_EndAction} @self
+
+
+# ------------------------------------------------------------
+# P3 내리꽂기
+# 기존 구속 + 4방향 공기파
+# 각 공기파 적중: 구리화 +1
+# ------------------------------------------------------------
+
+CopperOrigin_P3_Piledrive:
+  Cooldown: 15.7
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.busy;value=1} false
+    - targetwithin{d=4} true
+  Skills:
+    # P3 fast overhead_drive: 3.00s / 60 ticks
+    # impact ~= 2.35s / 47 ticks
+    - state{mid=copper_origin_p1;s=overhead_drive_attack_p3_fast} @self
+    # 내리꽂기 판정: 전방 45도 / 약 2.2블럭, 고정 타겟 추적 아님
+    # 딜 타이밍: fast animation t≈47 = 약 2.35s
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+
+    - delay 14
+    - delay 14
+    - delay 10
+    - delay 4
+    - sound{s=block.anvil.place;v=0.65;p=0.66} @self
+    - delay 5
+
+    # t≈47: 실제 손이 꽂히는 순간
+    - skill{s=CopperOrigin_P3_PiledriveHit} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - velocity{mode=ADD;x=0;y=-1.50;z=0} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - potion{type=SLOWNESS;duration=50;level=8} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - potion{type=BLINDNESS;duration=45;level=0} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - sound{s=block.deepslate.break;v=1.55;p=0.52} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    - effect:particles{particle=block;material=STONE;amount=28;hS=0.9;vS=0.24;y=0.08;speed=0.12} @LivingInCone{a=45;r=2.2;rot=0;target=players}
+    # 충격 방향을 기준축으로 고정한 직후 4방향 공기파 발생
+    - look{headOnly=false;force=true;immediately=true} @target
+    - delay 1
+
+    - projectile{onStart=CopperOrigin_P3_WaveStart;onTick=CopperOrigin_P3_WaveTick;onHit=CopperOrigin_P3_WaveHit;v=14;i=1;hR=1.30;vR=1.00;mr=24;syo=1.05;sfo=1.8;sB=false;sE=false;hs=true;hfs=0.65} @Forward{f=24;rot=0;lockpitch=true}
+    - projectile{onStart=CopperOrigin_P3_WaveStart;onTick=CopperOrigin_P3_WaveTick;onHit=CopperOrigin_P3_WaveHit;v=14;i=1;hR=1.30;vR=1.00;mr=24;syo=1.05;sfo=1.8;sB=false;sE=false;hs=true;hfs=0.65} @Forward{f=24;rot=90;lockpitch=true}
+    - projectile{onStart=CopperOrigin_P3_WaveStart;onTick=CopperOrigin_P3_WaveTick;onHit=CopperOrigin_P3_WaveHit;v=14;i=1;hR=1.30;vR=1.00;mr=24;syo=1.05;sfo=1.8;sB=false;sE=false;hs=true;hfs=0.65} @Forward{f=24;rot=180;lockpitch=true}
+    - projectile{onStart=CopperOrigin_P3_WaveStart;onTick=CopperOrigin_P3_WaveTick;onHit=CopperOrigin_P3_WaveHit;v=14;i=1;hR=1.30;vR=1.00;mr=24;syo=1.05;sfo=1.8;sB=false;sE=false;hs=true;hfs=0.65} @Forward{f=24;rot=270;lockpitch=true}
+
+    - skill{s=CopperOrigin_OxidationWaterPool} @self
+
+    # fast animation 총 약 60틱에 맞춰 recovery 단축.
+    - delay 12
+    - skill{s=CopperOrigin_P3_EndAction} @self
+CopperOrigin_P3_WaveStart:
+  Skills:
+    - sound{s=entity.breeze.wind_burst;v=1.15;p=0.62} @origin
+    - effect:particles{particle=dust;color=#FFF1D6;size=1.15;amount=14;hS=0.35;vS=0.25;speed=0.008} @origin
+
+CopperOrigin_P3_WaveTick:
+  Skills:
+    # "공기파"가 한 덩어리로 움직이는 게 보이도록 응축도를 높임.
+    # 넓게 퍼뜨리지 않고 약 1블럭 폭의 밝은 구리 코어 + 바람 테두리.
+    - effect:particles{particle=dust;color=#FF7A1F;size=1.20;amount=20;hS=0.34;vS=0.34;speed=0.006} @origin
+    - effect:particles{particle=dust;color=#FFE0B5;size=0.78;amount=10;hS=0.26;vS=0.26;speed=0.004} @origin
+    - effect:particles{particle=cloud;amount=7;hS=0.42;vS=0.25;speed=0.025} @origin
+    - effect:particles{particle=gust;amount=2;hS=0.28;vS=0.22;speed=0.02} @origin
+
+
+CopperOrigin_P3_WaveHit:
+  Skills:
+    - damage{a=10} @target
+    - skill{s=CopperOrigin_CopperAdd1} @target
+    - throw{velocity=0.65;velocityY=0.10}
+    - effect:particles{particle=dust;color=#F0A35C;size=1.0;amount=10;hS=0.38;vS=0.34;speed=0.015}
+
+
+# ------------------------------------------------------------
+# P3 구리 포효
+#
+# - 구리 암석 투척 삭제
+# - 천장 낙석 패턴으로 대체
+# - 일반 낙석: 피해 + 구리화 +1
+# - 습윤석: 구리화 -1
+#
+# ★ groggy 안전장치:
+# 시작 조건뿐 아니라 웨이브마다 groggy=0 확인.
+# 도중 종유석으로 그로기 걸리면 남은 웨이브는 즉시 무효화.
+# ------------------------------------------------------------
+
+# ------------------------------------------------------------
+# P3 구리 포효 = 궁극기
+#
+# P3에서 체력 조건으로 정확히 2회:
+# - 22 이하 : 1회
+# - 10 이하 : 1회
+#
+# 랜덤 라우터에서는 제거.
+# ------------------------------------------------------------
+
+
+
+CopperOrigin_P3_Roar1Check:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.p3_roar1_done;value=0} true
+    - variableEquals{var=caster.busy;value=1} false
+    - healthpercent{p=<=22%} true
+  Skills:
+    - setvariable{var=caster.p3_roar1_done;value=1;type=INTEGER} @self
+    - skill{s=CopperOrigin_P3_Roar} @self
+
+CopperOrigin_P3_Roar2Check:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.p3_roar2_done;value=0} true
+    - variableEquals{var=caster.busy;value=1} false
+    - healthpercent{p=<=10%} true
+  Skills:
+    - setvariable{var=caster.p3_roar2_done;value=1;type=INTEGER} @self
+    - skill{s=CopperOrigin_P3_Roar} @self
+
+
+CopperOrigin_P3_Roar:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.groggy;value=1} false
+  Skills:
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - setvariable{var=caster.roaring;value=1;type=INTEGER} @self
+    - setvariable{var=caster.roar_repel;value=1;type=INTEGER} @self
+
+    # 포효 무적은 포효 실길이(약 147t)에 맞춰 150t만 유지.
+    # RoarEnd 제거 + 별도 safety timer까지 3중으로 잔류를 방지한다.
+    - auraremove{aura=CopperOriginRoarInvulnerable} @self
+    - onDamaged{auraName=CopperOriginRoarInvulnerable;duration=150;cancelEvent=true} @self
+
+    # 이동/AI 상태를 먼저 멈춘 뒤 포효 애니메이션 재생
+    - delay 1
+    - state{mid=copper_origin_p1;s=roar_attack_p3_fast} @self
+    - potion{type=SLOWNESS;duration=360;level=10} @self
+
+
+    # 시작부터 근접 플레이어 밀쳐내기
+    - skill{s=CopperOrigin_P3_RoarRepel} @self
+
+    # 포효 사운드
+    - sound{s=entity.ender_dragon.growl;v=1.35;p=0.45} @self
+    - sound{s=entity.ravager.roar;v=1.25;p=0.58} @self
+    - sound{s=entity.generic.explode;v=0.75;p=0.38} @self
+    - potion{type=NAUSEA;duration=22;level=0} @PlayersInRadius{r=16}
+
+    # roar_attack의 힘 모으기 구간과 연동
+    - effect:particlering{particle=cloud;radius=2.0;points=38;amount=1;y=1.0;speed=0.055} @self
+    - effect:particles{particle=gust;amount=18;hS=1.4;vS=0.75;y=1.25;speed=0.070} @self
+    - delay 4
+    - effect:particlering{particle=cloud;radius=3.5;points=48;amount=1;y=1.0;speed=0.065} @self
+    - effect:particles{particle=gust;amount=22;hS=2.0;vS=0.85;y=1.25;speed=0.080} @self
+    - delay 4
+    - effect:particlering{particle=cloud;radius=5.0;points=60;amount=1;y=1.0;speed=0.075} @self
+    - effect:particles{particle=gust;amount=26;hS=2.7;vS=0.95;y=1.25;speed=0.095} @self
+    - skill{s=CopperOrigin_P3_RoarAirflow} @self
+    - sound{s=block.anvil.land;v=0.5;p=0.50} @self
+    - delay 8
+
+    # P3 x1.4: 약 0.8초 후 접근 차단 해제. fast roar는 약 7.21초로 패턴과 동기화.
+    - setvariable{var=caster.roar_repel;value=0;type=INTEGER} @self
+
+    # 불규칙 낙석 리듬
+    - skill{s=CopperOrigin_P3_RoarRandomSmall} @self
+    - skill{s=CopperOrigin_P3_RoarAirflow} @self
+    - delay 13
+
+    - skill{s=CopperOrigin_P3_RoarRandomTiny} @self
+    - delay 4
+    - skill{s=CopperOrigin_P3_RoarRandomTiny} @self
+    - delay 4
+    - skill{s=CopperOrigin_P3_RoarTargeted} @self
+    - delay 5
+
+    - skill{s=CopperOrigin_P3_RoarRandomMedium} @self
+    - skill{s=CopperOrigin_P3_RoarAirflow} @self
+    - delay 16
+
+    - skill{s=CopperOrigin_P3_RoarTargeted} @self
+    - delay 4
+    - skill{s=CopperOrigin_P3_RoarRandomSmall} @self
+    - skill{s=CopperOrigin_P3_RoarAirflow} @self
+    - delay 12
+
+    - skill{s=CopperOrigin_P3_RoarRandomTiny} @self
+    - delay 5
+    - skill{s=CopperOrigin_P3_RoarRandomMedium} @self
+    - skill{s=CopperOrigin_P3_RoarAirflow} @self
+    - delay 6
+
+    - delay 13
+    - skill{s=CopperOrigin_P3_RoarTargeted} @self
+    - skill{s=CopperOrigin_P3_RoarAirflow} @self
+    - delay 4
+    - skill{s=CopperOrigin_P3_RoarRandomTiny} @self
+    - delay 4
+    - skill{s=CopperOrigin_P3_RoarRandomTiny} @self
+    - delay 4
+    - skill{s=CopperOrigin_P3_RoarRandomMedium} @self
+    - skill{s=CopperOrigin_P3_RoarAirflow} @self
+
+    - delay 36
+    - skill{s=CopperOrigin_P3_RoarEnd} @self
+
+
+CopperOrigin_P3_RoarAirflow:
+  Conditions:
+    - variableEquals{var=caster.roaring;value=1} true
+  Skills:
+    # 몸 주변에서 공기가 바깥으로 밀려나는 반복 파동
+    - effect:particlering{particle=cloud;radius=2.8;points=30;amount=1;y=1.15;speed=0.065} @self
+    - effect:particlering{particle=cloud;radius=5.2;points=42;amount=1;y=1.05;speed=0.080} @self
+    - effect:particles{particle=gust;amount=24;hS=3.8;vS=0.85;y=1.35;speed=0.115} @self
+    - effect:particles{particle=cloud;amount=18;hS=4.4;vS=0.45;y=0.80;speed=0.090} @self
+
+
+CopperOrigin_P3_RoarHold:
+  Conditions:
+    - variableEquals{var=caster.roaring;value=1} true
+  Skills:
+    # 포효 패턴이 끝나기 전에는 애니메이션 상태와 무관하게 절대 이동하지 않음.
+    # Mob 파일에서 ~onTimer:2로 계속 호출되므로 다른 스킬이 AI를 건드려도 즉시 다시 잠금.
+    - setvariable{var=caster.busy;value=1;type=INTEGER} @self
+    - setAI{ai=false} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - potion{type=SLOWNESS;duration=8;level=10} @self
+
+
+CopperOrigin_P3_RoarRepel:
+  Conditions:
+    - variableEquals{var=caster.roar_repel;value=1} true
+  Skills:
+    - throw{velocity=1.35;velocityY=0.18} @PlayersInRadius{r=7}
+    - effect:particlering{particle=cloud;radius=6.5;points=34;amount=1;y=0.35;speed=0.035} @self
+
+
+CopperOrigin_P3_RoarEnd:
+  Skills:
+    - setvariable{var=caster.roaring;value=0;type=INTEGER} @self
+    - setvariable{var=caster.roar_repel;value=0;type=INTEGER} @self
+    - auraremove{aura=CopperOriginRoarInvulnerable} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - potionclear{type=SLOWNESS} @self
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - sound{s=block.anvil.land;v=0.35;p=0.72} @self
+    - effect:particles{particle=cloud;amount=20;hS=2.4;vS=0.25;y=0.25;speed=0.025} @self
+
+
+CopperOrigin_P3_RoarRandomTiny:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.roaring;value=1} true
+  Skills:
+    - skill{s=CopperOrigin_P3_RoarRepel} @self
+    - summon{type=CopperOriginRoarMarker;amount=1} @RandomLocationsNearOrigin{a=2;r=14;minr=3;s=1.5}
+
+
+CopperOrigin_P3_RoarRandomSmall:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.roaring;value=1} true
+  Skills:
+    - skill{s=CopperOrigin_P3_RoarRepel} @self
+    - summon{type=CopperOriginRoarMarker;amount=1} @RandomLocationsNearOrigin{a=4;r=14;minr=3;s=1.5}
+
+
+CopperOrigin_P3_RoarRandomMedium:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.roaring;value=1} true
+  Skills:
+    - skill{s=CopperOrigin_P3_RoarRepel} @self
+    - sound{s=block.pointed_dripstone.land;v=0.60;p=0.72} @self
+    - summon{type=CopperOriginRoarMarker;amount=1} @RandomLocationsNearOrigin{a=6;r=15;minr=3;s=1.5}
+
+
+CopperOrigin_P3_RoarTargeted:
+  Conditions:
+    - variableEquals{var=caster.phase;value=3} true
+    - variableEquals{var=caster.roaring;value=1} true
+  Skills:
+    # 플레이어 현재 위치 직접 겨냥
+    - effect:particlering{particle=dust;color=#FFF0C4;size=0.95;radius=1.0;points=24;amount=1;y=0.25;speed=0.001} @PlayersInRadius{r=30}
+    - summon{type=CopperOriginRoarMarker;amount=1} @PlayersInRadius{r=30}
+
+    # 동시에 주변 랜덤 낙석도 섞어 회피 공간을 압박
+    - summon{type=CopperOriginRoarMarker;amount=1} @RandomLocationsNearOrigin{a=2;r=12;minr=2;s=1.3}
+
+
+CopperOrigin_P3_RoarMarkerStart:
+  Skills:
+    # 약 25% 습윤석
+    - randomskill{skills=CopperOrigin_P3_Roar_Normal,CopperOrigin_P3_Roar_Normal,CopperOrigin_P3_Roar_Normal,CopperOrigin_P3_Roar_Wet} @self
+
+
+# 실제 보이는 낙석은 MythicMobs native summonfallingblock.
+# 마커는 바닥 판정/타이밍만 담당.
+CopperOrigin_P3_Roar_Normal:
+  Skills:
+    # 착탄 위치 경고
+    - effect:particlering{particle=dust;color=#FF7A24;size=0.90;radius=0.95;points=24;amount=1;y=0.22;speed=0.001} @self
+
+    # MythicMobs 정식 METEOR + BLOCK bullet.
+    # marker(@self) 위 hfs=14에서 RAW_COPPER_BLOCK 투사체가 실제로 낙하.
+    # sE=false: 중간에 플레이어를 스쳐도 사라지지 않음.
+    # sB=true: 바닥 블럭에 닿으면 종료 -> onEnd에서 착탄 판정.
+    - projectile{
+        type=METEOR;
+        bulletType=BLOCK;
+        material=RAW_COPPER_BLOCK;
+        bulletspin=0.25;
+        hfs=26;
+        v=1.75;
+        i=1;
+        hR=0.70;
+        vR=0.90;
+        mr=24;
+        md=100;
+        sE=false;
+        sB=true;
+        onStart=CopperOrigin_P3_Roar_NormalStart;
+        onHit=CopperOrigin_P3_Roar_NormalDirectHit;
+        onEnd=CopperOrigin_P3_Roar_NormalImpact
+      } @self
+
+    # projectile 종료 후 marker 정리 여유
+    - delay 300
+    - remove @self
+
+CopperOrigin_P3_Roar_NormalStart:
+  Skills:
+    # 상공에서 나타나는 순간만 짧은 반짝임. trail 없음.
+    - effect:particles{particle=dust;color=#FFB073;size=0.85;amount=8;hS=0.12;vS=0.12;speed=0.001} @origin
+    - sound{s=block.pointed_dripstone.drip_lava_into_cauldron;v=0.50;p=0.72} @origin
+
+
+# [v0.47] 미사용: onTick 콜백 제거로 클라이언트/서버 부하 감소
+CopperOrigin_P3_Roar_NormalTick:
+  Skills:
+    # RAW_COPPER_BLOCK 주변: 무거운 구리 파편 + 약한 주황 불티.
+    - effect:particles{particle=block;material=RAW_COPPER_BLOCK;amount=5;hS=0.18;vS=0.18;speed=0.025} @origin
+    - effect:particles{particle=dust;color=#C96A2B;size=0.62;amount=3;hS=0.16;vS=0.16;speed=0.006} @origin
+    # 낙하 중 휘이익 소리. 매 tick 너무 겹치지 않게 낮은 볼륨.
+    - sound{s=entity.breeze.wind_burst;v=0.22;p=1.65} @origin
+
+
+CopperOrigin_P3_Roar_NormalDirectHit:
+  Skills:
+    # IMPORTANT:
+    # projectile onHit은 맞은 엔티티를 자동으로 이 metaskill의 target으로 넘김.
+    # 여기서 @target 같은 명시 targeter를 쓰면 원래 projectile target(marker)로
+    # 덮어써질 수 있으므로 직격 스킬에서는 targeter를 쓰지 않는다.
+    - damage{a=18}
+    - skill{s=CopperOrigin_CopperAdd4_OnHit}
+    - throw{velocity=0.45;velocityY=-0.45}
+    - effect:particles{particle=dust;color=#FF7A1F;size=1.15;amount=22;hS=0.48;vS=0.65;speed=0.025}
+    - sound{s=block.pointed_dripstone.land;v=1.25;p=0.62}
+    - sound{s=entity.generic.explode;v=0.65;p=0.75}
+    - effect:particles{particle=block;material=RAW_COPPER_BLOCK;amount=26;hS=0.50;vS=0.50;speed=0.11}
+    - effect:particles{particle=dust;color=#D66A25;size=0.95;amount=14;hS=0.40;vS=0.45;speed=0.015}
+
+
+# projectile onHit 전용 구리화 +4
+# 모든 skill/mechanic이 inherited hit target을 그대로 사용한다.
+CopperOrigin_CopperAdd4_OnHit:
+  Skills:
+    - skill{s=CopperOrigin_CopperAdd1_OnHit}
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1_OnHit}
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1_OnHit}
+    - delay 2
+    - skill{s=CopperOrigin_CopperAdd1_OnHit}
+
+CopperOrigin_CopperAdd1_OnHit:
+  Skills:
+    - skill{s=CopperOrigin_Copper_4to5_OnHit}
+    - skill{s=CopperOrigin_Copper_3to4_OnHit}
+    - skill{s=CopperOrigin_Copper_2to3_OnHit}
+    - skill{s=CopperOrigin_Copper_1to2_OnHit}
+    - skill{s=CopperOrigin_Copper_0to1_OnHit}
+
+CopperOrigin_Copper_4to5_OnHit:
+  TargetConditions:
+    - hastag{t=copper_4} true
+  Skills:
+    - removetag{t=copper_4}
+    - addtag{t=copper_5}
+
+CopperOrigin_Copper_3to4_OnHit:
+  TargetConditions:
+    - hastag{t=copper_3} true
+  Skills:
+    - removetag{t=copper_3}
+    - addtag{t=copper_4}
+
+CopperOrigin_Copper_2to3_OnHit:
+  TargetConditions:
+    - hastag{t=copper_2} true
+  Skills:
+    - removetag{t=copper_2}
+    - addtag{t=copper_3}
+
+CopperOrigin_Copper_1to2_OnHit:
+  TargetConditions:
+    - hastag{t=copper_1} true
+  Skills:
+    - removetag{t=copper_1}
+    - addtag{t=copper_2}
+
+CopperOrigin_Copper_0to1_OnHit:
+  TargetConditions:
+    - hastag{t=copper_1} false
+    - hastag{t=copper_2} false
+    - hastag{t=copper_3} false
+    - hastag{t=copper_4} false
+    - hastag{t=copper_5} false
+  Skills:
+    - addtag{t=copper_1}
+
+
+CopperOrigin_P3_Roar_NormalImpact:
+  Skills:
+    # 바닥 착탄은 연출만.
+    # 피해/구리화는 떨어지는 블럭 본체에 직접 맞았을 때만 발생.
+    - sound{s=block.pointed_dripstone.land;v=1.25;p=0.60} @origin
+    - sound{s=block.stone.break;v=0.9;p=0.65} @origin
+    - effect:particles{particle=block;material=RAW_COPPER_BLOCK;amount=30;hS=0.75;vS=0.35;speed=0.12} @origin
+
+
+
+CopperOrigin_P3_Roar_Wet:
+  Skills:
+    # 습윤석 착탄 위치 경고
+    - effect:particlering{particle=dust;color=#57F0D3;size=0.90;radius=0.95;points=24;amount=1;y=0.22;speed=0.001} @self
+
+    # 습윤석도 동일한 METEOR 구조.
+    - projectile{
+        type=METEOR;
+        bulletType=BLOCK;
+        material=OXIDIZED_COPPER;
+        bulletspin=0.25;
+        hfs=26;
+        v=1.75;
+        i=1;
+        hR=0.70;
+        vR=0.90;
+        mr=24;
+        md=100;
+        sE=false;
+        sB=true;
+        onStart=CopperOrigin_P3_Roar_WetStart;
+        onHit=CopperOrigin_P3_Roar_WetDirectHit;
+        onEnd=CopperOrigin_P3_Roar_WetImpact
+      } @self
+
+    - delay 300
+    - remove @self
+
+CopperOrigin_P3_Roar_WetStart:
+  Skills:
+    - effect:particles{particle=dust;color=#8FFFF0;size=0.85;amount=8;hS=0.12;vS=0.12;speed=0.001} @origin
+    - sound{s=block.pointed_dripstone.drip_water_into_cauldron;v=0.55;p=1.20} @origin
+
+
+# [v0.47] 미사용: onTick 콜백 제거로 클라이언트/서버 부하 감소
+CopperOrigin_P3_Roar_WetTick:
+  Skills:
+    # OXIDIZED_COPPER 주변: 산화 구리빛 + 아주 소량의 물방울.
+    - effect:particles{particle=dust;color=#63E6BE;size=0.64;amount=4;hS=0.17;vS=0.17;speed=0.005} @origin
+    - effect:particles{particle=splash;amount=3;hS=0.15;vS=0.15;speed=0.025} @origin
+    - effect:particles{particle=bubble;amount=2;hS=0.12;vS=0.12;speed=0.020} @origin
+    # 습윤석도 휘이익 계열, 일반 낙석보다 조금 높은 음.
+    - sound{s=entity.breeze.wind_burst;v=0.20;p=1.85} @origin
+
+
+CopperOrigin_P3_Roar_WetDirectHit:
+  Skills:
+    # projectile onHit의 실제 피격 대상을 그대로 사용.
+    # 습윤석 직격은 구리화 -3.
+    - damage{a=6}
+    - skill{s=CopperOrigin_WetStoneCleanse3_OnHit}
+    - throw{velocity=0.20;velocityY=-0.20}
+    - effect:particles{particle=dust;color=#77FFE6;size=1.05;amount=20;hS=0.42;vS=0.55;speed=0.025}
+    - sound{s=block.pointed_dripstone.land;v=0.75;p=1.20}
+    - effect:particles{particle=splash;amount=18;hS=0.34;vS=0.34;speed=0.08}
+    - effect:particles{particle=dust;color=#7FFFD4;size=0.85;amount=12;hS=0.28;vS=0.28;speed=0.02}
+
+# projectile onHit 전용 습윤석 구리화 -3
+# 현재 스택에서 최대 3단계 감소.
+CopperOrigin_WetStoneCleanse3_OnHit:
+  Skills:
+    - skill{s=CopperOrigin_WetStoneCleanse1_OnHit}
+    - delay 1
+    - skill{s=CopperOrigin_WetStoneCleanse1_OnHit}
+    - delay 1
+    - skill{s=CopperOrigin_WetStoneCleanse1_OnHit}
+
+CopperOrigin_WetStoneCleanse1_OnHit:
+  Skills:
+    # 감소는 반드시 낮은 스택부터 검사.
+    # 그래야 한 번의 호출에서 새로 만들어진 낮은 스택이
+    # 같은 호출 안에서 다시 감소하지 않고 정확히 -1만 적용됨.
+    - skill{s=CopperOrigin_Wet_1to0_OnHit}
+    - skill{s=CopperOrigin_Wet_2to1_OnHit}
+    - skill{s=CopperOrigin_Wet_3to2_OnHit}
+    - skill{s=CopperOrigin_Wet_4to3_OnHit}
+    - skill{s=CopperOrigin_Wet_5to4_OnHit}
+
+CopperOrigin_Wet_5to4_OnHit:
+  TargetConditions:
+    - hastag{t=copper_5} true
+  Skills:
+    - removetag{t=copper_5}
+    - addtag{t=copper_4}
+
+CopperOrigin_Wet_4to3_OnHit:
+  TargetConditions:
+    - hastag{t=copper_4} true
+  Skills:
+    - removetag{t=copper_4}
+    - addtag{t=copper_3}
+
+CopperOrigin_Wet_3to2_OnHit:
+  TargetConditions:
+    - hastag{t=copper_3} true
+  Skills:
+    - removetag{t=copper_3}
+    - addtag{t=copper_2}
+
+CopperOrigin_Wet_2to1_OnHit:
+  TargetConditions:
+    - hastag{t=copper_2} true
+  Skills:
+    - removetag{t=copper_2}
+    - addtag{t=copper_1}
+
+CopperOrigin_Wet_1to0_OnHit:
+  TargetConditions:
+    - hastag{t=copper_1} true
+  Skills:
+    - removetag{t=copper_1}
+    - potionclear{type=SLOWNESS}
+    - potionclear{type=WEAKNESS}
+
+
+CopperOrigin_P3_Roar_WetImpact:
+  Skills:
+    - skill{s=CopperOrigin_WetStoneCleanseAtOrigin} @origin
+    - sound{s=block.pointed_dripstone.land;v=0.8;p=1.20} @origin
+    - sound{s=block.amethyst_block.chime;v=1.0;p=1.4} @origin
+    - effect:particles{particle=splash;amount=28;hS=0.70;vS=0.40;speed=0.10} @origin
+    - effect:particles{particle=dust;color=#7FFFD4;size=0.9;amount=16;hS=0.55;vS=0.45;speed=0.03} @origin
+
+
+
+# BLOCK_DISPLAY 낙하 이동.
+# DisplayOptions.TeleportDuration=50 이므로 실제 텔레포트가 화면에서는
+# 약 2.5초 동안 부드럽게 아래로 보간된다.
+
+
+
+# ------------------------------------------------------------
+# 포효 낙석 시각 전용 ArmorStand 수동 낙하
+#
+# 블럭 본체만 이동. trail 파티클 없음.
+# 26 -> 24 -> 22 -> ... -> 2
+# 4틱 간격 × 12회 = 약 2.4~2.8초 체감.
+# ------------------------------------------------------------
+
+
+CopperOrigin_WetStoneCleanseAtOrigin:
+  Skills:
+    # projectile 착탄 origin 기준 구리화 정확히 -1.
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_1] run tag @s remove copper_1"}
+
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_2] run tag @s add copper_1"}
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_2] run tag @s remove copper_2"}
+
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_3] run tag @s add copper_2"}
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_3] run tag @s remove copper_3"}
+
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_4] run tag @s add copper_3"}
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_4] run tag @s remove copper_4"}
+
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_5] run tag @s add copper_4"}
+    - command{c="execute positioned <skill.var.origin.x> <skill.var.origin.y> <skill.var.origin.z> as @a[distance=..1.45,tag=copper_5] run tag @s remove copper_5"}
+
+
+
+CopperOrigin_WetStoneCleanseTarget:
+  Skills:
+    - skill{s=CopperOrigin_WetStoneCleanseTarget_1} @target
+    - skill{s=CopperOrigin_WetStoneCleanseTarget_2} @target
+    - skill{s=CopperOrigin_WetStoneCleanseTarget_3} @target
+    - skill{s=CopperOrigin_WetStoneCleanseTarget_4} @target
+    - skill{s=CopperOrigin_WetStoneCleanseTarget_5} @target
+
+CopperOrigin_WetStoneCleanseTarget_1:
+  TargetConditions:
+    - hastag{t=copper_1} true
+  Skills:
+    - removetag{t=copper_1} @target
+    - potionclear{type=SLOWNESS} @target
+    - potionclear{type=WEAKNESS} @target
+
+CopperOrigin_WetStoneCleanseTarget_2:
+  TargetConditions:
+    - hastag{t=copper_2} true
+  Skills:
+    - removetag{t=copper_2} @target
+    - addtag{t=copper_1} @target
+
+CopperOrigin_WetStoneCleanseTarget_3:
+  TargetConditions:
+    - hastag{t=copper_3} true
+  Skills:
+    - removetag{t=copper_3} @target
+    - addtag{t=copper_2} @target
+
+CopperOrigin_WetStoneCleanseTarget_4:
+  TargetConditions:
+    - hastag{t=copper_4} true
+  Skills:
+    - removetag{t=copper_4} @target
+    - addtag{t=copper_3} @target
+
+CopperOrigin_WetStoneCleanseTarget_5:
+  TargetConditions:
+    - hastag{t=copper_5} true
+  Skills:
+    - removetag{t=copper_5} @target
+    - addtag{t=copper_4} @target
+
+
+# 습윤석은 반경 1블럭 플레이어의 구리화 정확히 -1
+# 산화수와 동일한 command 방식 사용.
+CopperOrigin_WetStoneCleanse:
+  Skills:
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_1] run tag @s remove copper_1"} @self
+
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_2] run tag @s add copper_1"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_2] run tag @s remove copper_2"} @self
+
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_3] run tag @s add copper_2"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_3] run tag @s remove copper_3"} @self
+
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_4] run tag @s add copper_3"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_4] run tag @s remove copper_4"} @self
+
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_5] run tag @s add copper_4"} @self
+    - command{c="execute at <caster.uuid> as @a[distance=..1,tag=copper_5] run tag @s remove copper_5"} @self
+
+
+# 행동 종료.
+# 패턴 중간에 종유석 그로기가 걸리면 busy는 groggy recover가 해제하므로
+# 여기서는 그로기가 아닐 때만 해제.
+CopperOrigin_P3_EndAction:
+  Conditions:
+  Skills:
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+
+
+# ============================================================
+# 실제 점적석 낙하 감지 브리지
+#
+# 기존 v0.1~0.2의 CopperOrigin_StalactiteHit은
+# "맵 기믹이 이 스킬을 직접 호출한다"는 전제의 수동 훅이었음.
+# 그래서 바닐라 점적석을 그냥 떨어뜨려 맞혀도 자동 발동하지 않았음.
+#
+# v0.3부터는 보스가 FALLING_STALACTITE 피해를 받으면
+# 자동으로 CopperOrigin_StalactiteHit을 호출.
+# 혹시 서버/Paper에서 FALLING_BLOCK으로 들어오는 경우도 보조 처리.
+# ============================================================
+
+CopperOrigin_DripstoneDamageCheck:
+  Skills:
+    - skill{s=CopperOrigin_DripstoneCause_Stalactite} @self
+    - skill{s=CopperOrigin_DripstoneCause_FallingBlock} @self
+
+CopperOrigin_DripstoneCause_Stalactite:
+  Conditions:
+    - damagecause{cause=FALLING_STALACTITE} true
+  Skills:
+    - skill{s=CopperOrigin_StalactiteHit} @self
+
+CopperOrigin_DripstoneCause_FallingBlock:
+  Conditions:
+    - damagecause{cause=FALLING_BLOCK} true
+  Skills:
+    - skill{s=CopperOrigin_StalactiteHit} @self
+# ============================================================
+# 종유석 외피 파괴 기믹
+#
+# 종유석은 일반 기절을 만들지 않으며,
+# HP 봉인 상태에서 다음 페이즈 외피를 깨는 용도로만 사용.
+# ============================================================
+
+
+CopperOrigin_OxidationWater_OnP2:
+  Conditions:
+    - variableEquals{var=caster.phase;value=2} true
+  Skills:
+    - skill{s=CopperOrigin_OxidationWaterPool} @self
+
+
+
+
+CopperOrigin_UnlockP2ByStalactite:
+  Conditions:
+    - variableEquals{var=caster.phase;value=1} true
+    - variableEquals{var=caster.p2_gate;value=0} true
+    - healthpercent{p=<=65%} true
+  Skills:
+    - setvariable{var=caster.p2_gate;value=1;type=INTEGER} @self
+    - setvariable{var=caster.p2_damage_lock;value=0;type=INTEGER} @self
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+    - effect:particles{particle=block;material=STONE;amount=55;hS=1.50;vS=1.35;y=1.25;speed=0.16} @self
+    - effect:particlering{particle=dust;color=#F3C969;size=1.12;radius=3.4;points=44;amount=1;y=0.85;speed=0.006} @self
+    - skill{s=CopperOrigin_PhaseCheck} @self
+
+CopperOrigin_UnlockP3ByStalactite:
+  Conditions:
+    - variableEquals{var=caster.phase;value=2} true
+    - variableEquals{var=caster.p3_gate;value=0} true
+    # 30% 도달 여부는 HP를 재검사하지 않고 봉인 플래그로 판정.
+    # ThresholdLock이 먼저 p3_damage_lock=1을 만들었을 때만 종유석이 외피를 파괴함.
+    - variableEquals{var=caster.p3_damage_lock;value=1} true
+  Skills:
+    # 게이트를 먼저 열고 봉인을 해제한 뒤 Phase3Check를 즉시 호출.
+    - setvariable{var=caster.p3_gate;value=1;type=INTEGER} @self
+    - setvariable{var=caster.p3_damage_lock;value=0;type=INTEGER} @self
+    - auraremove{aura=CopperOriginPhaseDamageLock} @self
+    - effect:particles{particle=block;material=STONE;amount=70;hS=1.70;vS=1.55;y=1.25;speed=0.19} @self
+    - effect:particlering{particle=dust;color=#FF8A2B;size=1.20;radius=3.8;points=48;amount=1;y=0.90;speed=0.008} @self
+    - skill{s=CopperOrigin_Phase3Check} @self
+
+
+CopperOrigin_StalactiteHit:
+  Skills:
+    # 종유석은 이제 "일반 기절" 용도가 아님.
+    # 오직 체력 봉인 상태에서 돌 외피/석화를 깨는 기믹으로만 사용.
+    - skill{s=CopperOrigin_UnlockP2ByStalactite} @self
+    - skill{s=CopperOrigin_UnlockP3ByStalactite} @self
+
+    # 외피 봉인 상태가 아닌 종유석 직격은 무거운 충돌 연출만.
+    # 별도 groggy / busy / slowness / weakness / 5초 딜타임 없음.
+    - sound{s=block.pointed_dripstone.land;v=1.2;p=0.65} @self
+    - effect:particles{particle=block;material=STONE;amount=22;hS=0.65;vS=0.50;y=1.25;speed=0.10} @self
+
+
+CopperOrigin_GroggyRecover:
+  Conditions:
+    - variableEquals{var=caster.groggy;value=1} true
+  Skills:
+    - setvariable{var=caster.groggy;value=0;type=INTEGER} @self
+    - setAI{ai=true} @self
+    - setvariable{var=caster.busy;value=0;type=INTEGER} @self
+    - potionclear{type=SLOWNESS} @self
+    - potionclear{type=WEAKNESS} @self
+    - sound{s=entity.iron_golem.repair;v=1.15;p=0.80} @self
+
+
+# ============================================================
+# v0.2 예정
+#
+# - P2 전환
+# - 플레이어 변수 copper_stack 0~5
+# - 내려치기/내리꽂기/구리 암석 투척의 구리화 부여
+# - 강공격 또는 종유석으로 지하수층 파괴
+# - 산화수 영역: 0.7~1초마다 copper_stack -1
+# ============================================================
+
+# ============================================================
+# 보스 사망 시 구리화 즉시 초기화
+# ============================================================
+
+# ------------------------------------------------------------
+# 보스 사망 처리
+#
+# BetterModel 쪽 애니메이션 이름은 반드시 'death'.
+# BetterModel이 실제 사망 시 built-in death 애니메이션을 자동 재생하고,
+# 이 MythicMobs 스킬은 전투 상태/플레이어 구리화 정리를 담당.
+# ------------------------------------------------------------
+
+CopperOrigin_Death:
+  Skills:
+    - skill{s=CopperOrigin_DeathCleanup} @self
+
+
+CopperOrigin_DeathCleanup:
+  Skills:
+    - removetag{t=copper_1} @PlayersInRadius{r=50}
+    - removetag{t=copper_2} @PlayersInRadius{r=50}
+    - removetag{t=copper_3} @PlayersInRadius{r=50}
+    - removetag{t=copper_4} @PlayersInRadius{r=50}
+    - removetag{t=copper_5} @PlayersInRadius{r=50}
+    - potionclear{type=SLOWNESS} @PlayersInRadius{r=50}
+    - potionclear{type=WEAKNESS} @PlayersInRadius{r=50}

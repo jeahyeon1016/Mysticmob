@@ -1,0 +1,207 @@
+'에테르 레이': 
+  name: '에테르 레이'
+  type: '공격'
+  'max-level': 20
+  'skill-req-lvl': 0
+  'needs-permission': 'false'
+  'cooldown-message': 'true'
+  incompatible: []
+  attributes: 
+    'level-base': '1'
+    'level-scale': '0'
+    'cost-base': '1'
+    'cost-scale': '0'
+    'cooldown-base': '13'
+    'cooldown-scale': '0'
+    'mana-base': '9'
+    'mana-scale': '0'
+    'points-spent-req-base': '0'
+    'points-spent-req-scale': '0'
+    '민첩-base': '0.0'
+    '민첩-scale': '0.0'
+    '용기-base': '0.0'
+    '용기-scale': '0.0'
+    '의지-base': '0.0'
+    '의지-scale': '0.0'
+    '정신력-base': '0.0'
+    '정신력-scale': '0.0'
+    '지혜-base': '0.0'
+    '지혜-scale': '0.0'
+    '힘-base': '0.0'
+    '힘-scale': '0.0'
+  msg: '&6{player} &2has cast &6{skill}'
+  icon: 'pumpkin'
+  'icon-data': 0
+  'icon-durability': 0
+  'icon-lore': 
+  - '&f追推頭&d{name}&f/&6{type} &7({level}/{max})'
+  - '&f追秋頭'
+  - '&f追秋頭&f전방으로 에테르 마력을 방출해'
+  - '&f追秋頭&f적 다수에게 마법 피해를 입힌다'
+  - '&f追秋頭피격된 적은 경직, 정신 집중이 중단된다'
+  - '&f追秋頭[광선 스킬]'
+  - '&f追秋頭'
+  - '&f追秋頭&f{attr:mana}&f의 MP를 소모하여 '
+  - '&f追秋頭姜{attr:damage.Multiplier}&f의 江마법 피해'
+  - '&f追秋頭'
+  - '&f追抽頭&f쿨타임: {attr:cooldown}&f초'
+  desc: []
+  components: 
+    'Cast-0': 
+      type: 'trigger'
+      data: {}
+      preview: 
+        enabled: 'false'
+      children: 
+        'MythicMob Skill': 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            skill: 'sk_ray'
+          preview: 
+            enabled: 'false'
+          children: {}
+        Channel: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            still: 'true'
+            'time-base': '0.75'
+            'time-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: 
+            Repeat: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                'repetitions-base': '10'
+                'repetitions-scale': '0'
+                period: '0.1'
+                delay: '0'
+                'stop-on-fail': 'false'
+              preview: 
+                enabled: 'false'
+              children: 
+                'Particle Projectile': 
+                  type: 'mechanic'
+                  data: 
+                    'icon-key': ''
+                    counts: 'true'
+                    pierce: 'true'
+                    group: 'Enemy'
+                    steps: '1'
+                    'collision-radius-base': '1.2'
+                    'collision-radius-scale': '0'
+                    'gravity-base': '0'
+                    'gravity-scale': '0'
+                    'drag-base': '0'
+                    'drag-scale': '0'
+                    period: '1'
+                    homing: 'false'
+                    'velocity-base': '5'
+                    'velocity-scale': '0'
+                    'lifespan-base': '1'
+                    'lifespan-scale': '0'
+                    'distance-base': '6'
+                    'distance-scale': '0'
+                    'on-expire': 'false'
+                    spread: 'Horizontal Cone'
+                    'amount-base': '1'
+                    'amount-scale': '0'
+                    'angle-base': '30'
+                    'angle-scale': '0'
+                    'forward-base': '0'
+                    'forward-scale': '0'
+                    'upward-base': '0'
+                    'upward-scale': '0'
+                    'right-base': '0'
+                    'right-scale': '0'
+                    particle: 'Dust color transition'
+                    'dust-color': '#9a75f0'
+                    'final-dust-color': '#41ecb9'
+                    'dust-size': '1'
+                    arrangement: 'Sphere'
+                    'radius-base': '1'
+                    'radius-scale': '0'
+                    'particles-base': '5'
+                    'particles-scale': '0'
+                    'visible-radius': '25'
+                    dx: '0'
+                    dy: '0'
+                    dz: '0'
+                    amount: '1'
+                    speed: '0.1'
+                    'use-effect': 'false'
+                  preview: 
+                    enabled: 'false'
+                    period: '5'
+                    'per-target': 'false'
+                    path: 'false'
+                  children: 
+                    'Damage Lore': 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': 'damage'
+                        counts: 'true'
+                        hand: 'Main'
+                        regex: '强 공격 피해姜: {value}'
+                        'multiplier-base': '0.1'
+                        'multiplier-scale': '0.006'
+                        true: 'false'
+                        classifier: 'ap'
+                        knockback: 'false'
+                        'ignore-divinity': 'false'
+                        cause: 'Entity Attack'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+                    Interrupt: 
+                      type: 'mechanic'
+                      data: 
+                        'icon-key': ''
+                        counts: 'true'
+                      preview: 
+                        enabled: 'false'
+                      children: {}
+            Sound: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                sound: 'Custom'
+                custom: 'lay'
+                'volume-base': '100'
+                'volume-scale': '0'
+                'pitch-base': '1'
+                'pitch-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+            Channel: 
+              type: 'mechanic'
+              data: 
+                'icon-key': ''
+                counts: 'true'
+                still: 'true'
+                'time-base': '1'
+                'time-scale': '0'
+              preview: 
+                enabled: 'false'
+              children: {}
+        Sound: 
+          type: 'mechanic'
+          data: 
+            'icon-key': ''
+            counts: 'true'
+            sound: 'Ambient cave'
+            'volume-base': '100'
+            'volume-scale': '0'
+            'pitch-base': '2'
+            'pitch-scale': '0'
+          preview: 
+            enabled: 'false'
+          children: {}

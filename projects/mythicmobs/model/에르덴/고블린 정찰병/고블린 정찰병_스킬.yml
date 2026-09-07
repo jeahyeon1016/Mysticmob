@@ -1,0 +1,5 @@
+# 고블린 정찰병 — 스킬 준비용 (미구현, 서버 배포 제외)
+# 기획: https://docs.google.com/document/d/19nH7ZbtBfQsa5KSMh-6AkD-h86iHA-omdYnnWKMTsWw/edit?tab=t.yui2gpybkoqu
+# 모델: 미확보 — 임의 배정하지 않음
+# 실행 가능한 정의 없음. 패턴·수치·ID는 개별 구현 시 확정.
+# 기획은 활 원거리. 투척형 GoblinThrower 모델은 자동 배정하지 않음.

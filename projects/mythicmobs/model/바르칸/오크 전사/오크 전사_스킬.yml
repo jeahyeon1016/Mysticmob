@@ -1,0 +1,303 @@
+# ============================================================
+# ORC WARRIOR - SKILLS
+# Development v1.3
+# MythicMobs 5.13.0 + ModelEngine 4
+# ============================================================
+#
+# count
+#   0 = 기본 상태
+#   1 = attack 진행 중
+#   2 = attack2 진행 중
+#
+# PHASE 1 (HP > 40%)
+#   idle / walk
+#   멀어지면 run
+#   attack / attack2 일반 사용
+#
+# PHASE 2 (HP <= 40%)
+#   기본 idle = block_idle
+#   기본 walk = block_walk
+#   run 사용 X
+#   count=0 동안 피해 완전 무효
+#   공격할 때만 count=1/2가 되어 방어가 풀림
+#   공격 종료 후 count=0 -> 다시 방어 상태
+#   attack / attack2 각각 10초 쿨
+#   공통 공격 간격 aura로 연속 두 패턴 즉시 연결 방지
+#
+# 공격1: attack
+#   hit = 17t ~= 0.83s
+#   범위 = 전방 -90 ~ +90
+#
+# 공격2: attack2
+#   hit = 16t ~= 0.81s
+#   범위 = -90 ~ +90
+# ============================================================
+
+
+# ============================================================
+# INIT / PHASE
+# ============================================================
+
+OrcWarrior_Init:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.phase2;type=INTEGER;value=0} @self
+    - auraremove{aura=orc_warrior_running} @self
+    - auraremove{aura=orc_warrior_attack_gap} @self
+    - setspeed{speed=1;type=WALK} @self
+
+
+OrcWarrior_Phase2Check:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=0} true
+    - healthpercent{p=<=40%} true
+  Skills:
+    - setvariable{var=caster.phase2;type=INTEGER;value=1} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - auraremove{aura=orc_warrior_running} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:defaultstate{mid=orc_warrior;type=idle;state=block_idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=orc_warrior;type=walk;state=block_walk;li=2;lo=2} @self
+
+
+# ============================================================
+# PHASE 2 BASE DEFENSE
+#
+# 방어는 더 이상 별도 '패턴'이 아님.
+# phase2=1 + count=0 자체가 방어 상태.
+# 단, 방어 판정은 정면 -90 ~ +90 (총 180도)만 적용.
+# 후방에서 들어오는 피해는 그대로 받음.
+# 공격 중(count=1/2)에는 방어가 풀림.
+# ============================================================
+
+OrcWarrior_BlockDamage:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=1} true
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - cancelevent
+    - sound{s=item.shield.block;v=0.9;p=0.82} @self
+
+
+# ============================================================
+# ATTACK ROUTER
+# ============================================================
+
+OrcWarrior_AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2.7}
+  Skills:
+    - skill{s=OrcWarrior_Phase1AttackRouter} @target
+    - skill{s=OrcWarrior_Phase2AttackRouter} @target
+
+
+OrcWarrior_Phase1AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=0} true
+  Skills:
+    - randomskill{skills=OrcWarrior_Attack1,OrcWarrior_Attack2} @target
+
+
+# 2페에서는 공통 간격이 끝난 경우에만 공격 시도.
+OrcWarrior_Phase2AttackRouter:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=1} true
+    - hasaura{n=orc_warrior_attack_gap} false
+  Skills:
+    - randomskill{skills=OrcWarrior_Phase2Attack1,OrcWarrior_Phase2Attack2} @target
+
+
+# ============================================================
+# PHASE 2 ATTACK WRAPPERS
+# 각각 10초 개별 쿨타임.
+# ============================================================
+
+OrcWarrior_Phase2Attack1:
+  Cooldown: 10
+  Conditions:
+    - variableEquals{var=caster.phase2;value=1} true
+    - variableEquals{var=caster.count;value=0} true
+    - hasaura{n=orc_warrior_attack_gap} false
+  Skills:
+    # 공격 시작부터 90t 동안 공통 간격.
+    # 실제 공격 종료 후 약 2.5초 정도 방패를 들고 버틴 뒤 다음 공격 가능.
+    - aura{auraName=orc_warrior_attack_gap;duration=90} @self
+    - skill{s=OrcWarrior_Attack1} @target
+
+
+OrcWarrior_Phase2Attack2:
+  Cooldown: 10
+  Conditions:
+    - variableEquals{var=caster.phase2;value=1} true
+    - variableEquals{var=caster.count;value=0} true
+    - hasaura{n=orc_warrior_attack_gap} false
+  Skills:
+    - aura{auraName=orc_warrior_attack_gap;duration=90} @self
+    - skill{s=OrcWarrior_Attack2} @target
+
+
+# ============================================================
+# ATTACK 1
+# animation = attack
+# damage = 17t ~= 0.83s
+# angle = front -90 ~ +90
+# Mythic FOV = angle 180 / rotation 0
+# ============================================================
+
+OrcWarrior_Attack1:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2.7}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=1} @self
+    - auraremove{aura=orc_warrior_running} @self
+    - setspeed{speed=1;type=WALK} @self
+
+    - look{headOnly=false;force=true;immediately=true} @target
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - stun{d=37;f=false;stopai=true} @self
+
+    - meg:state{mid=orc_warrior;s=attack;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - sound{s=entity.ravager.attack;v=0.9;p=0.82} @self
+
+    - delay 17
+    - skill{s=OrcWarrior_Attack1_Hit} @PlayersInRadius{r=2.7}
+    - sound{s=entity.player.attack.sweep;v=1.0;p=0.72} @self
+
+    - delay 20
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+
+OrcWarrior_Attack1_Hit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - damage{amount=10}
+
+
+# ============================================================
+# ATTACK 2
+# animation = attack2
+# damage = 16t ~= 0.81s
+# angle = -90 ~ +90
+# ============================================================
+
+OrcWarrior_Attack2:
+  Conditions:
+    - variableEquals{var=caster.count;value=0} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2.7}
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=2} @self
+    - auraremove{aura=orc_warrior_running} @self
+    - setspeed{speed=1;type=WALK} @self
+
+    - look{headOnly=false;force=true;immediately=true} @target
+    - velocity{mode=SET;x=0;y=0;z=0} @self
+    - stun{d=38;f=false;stopai=true} @self
+
+    - meg:state{mid=orc_warrior;s=attack2;priority=4;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - sound{s=entity.ravager.attack;v=0.9;p=0.90} @self
+
+    - delay 16
+    - skill{s=OrcWarrior_Attack2_Hit} @PlayersInRadius{r=2.7}
+    - sound{s=entity.player.attack.strong;v=1.0;p=0.78} @self
+
+    - delay 22
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+
+
+OrcWarrior_Attack2_Hit:
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - fieldofview{angle=180;rotation=0}
+  Skills:
+    - damage{amount=10}
+
+
+# ============================================================
+# RUN - PHASE 1 ONLY
+# 2페이즈에서는 run 대신 block_walk가 기본 추격 모션.
+# ============================================================
+
+OrcWarrior_RunStart:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=0} true
+    - variableEquals{var=caster.count;value=0} true
+    - hasaura{n=orc_warrior_running} false
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=>3}
+  Skills:
+    - aura{auraName=orc_warrior_running;duration=999999} @self
+    - setspeed{speed=1.3;type=WALK} @self
+    - meg:defaultstate{mid=orc_warrior;type=walk;state=run;li=2;lo=2} @self
+
+
+OrcWarrior_RunStop:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=0} true
+    - variableEquals{var=caster.count;value=0} true
+    - hasaura{n=orc_warrior_running} true
+  TargetConditions:
+    - entitytype{t=PLAYER} true
+    - distance{d=0to2.8}
+  Skills:
+    - auraremove{aura=orc_warrior_running} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:defaultstate{mid=orc_warrior;type=walk;state=walk;li=2;lo=2} @self
+
+
+# ============================================================
+# VANILLA ATTACK / RESET / DEATH
+# ============================================================
+
+OrcWarrior_CancelVanillaAttack:
+  Skills:
+    - cancelevent
+
+
+OrcWarrior_CombatDrop:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - auraremove{aura=orc_warrior_running} @self
+    - auraremove{aura=orc_warrior_attack_gap} @self
+    - setspeed{speed=1;type=WALK} @self
+    - skill{s=OrcWarrior_CombatDrop_Phase1} @self
+    - skill{s=OrcWarrior_CombatDrop_Phase2} @self
+
+
+OrcWarrior_CombatDrop_Phase1:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=0} true
+  Skills:
+    - meg:defaultstate{mid=orc_warrior;type=idle;state=idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=orc_warrior;type=walk;state=walk;li=2;lo=2} @self
+
+
+OrcWarrior_CombatDrop_Phase2:
+  Conditions:
+    - variableEquals{var=caster.phase2;value=1} true
+  Skills:
+    - meg:defaultstate{mid=orc_warrior;type=idle;state=block_idle;li=2;lo=2} @self
+    - meg:defaultstate{mid=orc_warrior;type=walk;state=block_walk;li=2;lo=2} @self
+
+
+OrcWarrior_Death:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=99} @self
+    - auraremove{aura=orc_warrior_running} @self
+    - auraremove{aura=orc_warrior_attack_gap} @self
+    - setspeed{speed=1;type=WALK} @self
+    - meg:state{mid=orc_warrior;s=death;priority=10;override=true;loop=ONCE;force=true;li=1;lo=1} @self
+    - sound{s=entity.ravager.death;v=1.0;p=0.82} @self
