@@ -1,4 +1,4 @@
-# Ent Guardian — 최소 전투 패턴
+# 배포본은 model/실바르/엔트 가디언/엔트 가디언_스킬.yml과 동일하게 유지한다.
 EG_Init:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=0} @self
