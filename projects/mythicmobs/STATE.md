@@ -4,7 +4,9 @@
 
 - Git 루트: `D:\ai agent\projects\mythicmobs`
 - 브랜치: `main`
-- GitHub: https://github.com/jeahyeon1016/Mysticmob.git
+- 최신 기준 로컬 경로: `D:\ai agent\projects\mythicmobs`
+- 통합 백업 저장소: https://github.com/jeahyeon1016/ai-agent
+- 기존 원본 저장소(참고): https://github.com/jeahyeon1016/Mysticmob.git
 
 ## 구현 완료
 

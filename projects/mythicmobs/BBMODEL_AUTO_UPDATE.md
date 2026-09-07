@@ -20,7 +20,7 @@
    D:\ai agent\projects\mythicmobs\bukkit\plugins\ModelEngine\resource pack.zip
    ```
 
-4. 최신 ZIP을 GitHub 저장소에 커밋·푸시한다. 저장소는 `jeahyeon1016/Mysticmob`, 브랜치는 `main`으로 한다.
+4. 최신 ZIP과 설정 변경은 로컬 기준으로 확인한다. 공유가 필요할 때만 통합 저장소 `jeahyeon1016/ai-agent`의 `master`에 커밋·푸시한다.
 
    ```text
    D:\ai agent\projects\mythicmobs\bukkit\plugins\ModelEngine\resource pack.zip
@@ -29,7 +29,7 @@
    서버 설정에는 다음 GitHub 다운로드 URL과 로컬 ZIP의 SHA-1을 반영한다.
 
    ```properties
-   resource-pack=https://github.com/jeahyeon1016/Mysticmob/raw/refs/heads/main/bukkit/plugins/ModelEngine/resource%20pack.zip
+   resource-pack=<배포 환경에서 관리하는 실제 resource-pack URL>
    resource-pack-id=<유효한 UUID>
    resource-pack-sha1=<로컬 ZIP의 SHA-1>
    ```
