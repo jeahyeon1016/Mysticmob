@@ -3,10 +3,10 @@
 ## 기본 정보
 
 - Git 루트: `D:\ai agent\projects\mythicmobs`
-- 브랜치: `main`
+- 브랜치: `master`
 - 최신 기준 로컬 경로: `D:\ai agent\projects\mythicmobs`
 - 통합 백업 저장소: https://github.com/jeahyeon1016/ai-agent
-- 기존 원본 저장소(참고): https://github.com/jeahyeon1016/Mysticmob.git
+- 리소스팩 배포 저장소: https://github.com/jeahyeon1016/ai-agent.git
 
 ## 구현 완료
 
@@ -16,6 +16,7 @@
 - [x] 엔트 미니언/워리어 리소스팩 모델·텍스처 확인
 - [x] 엔트 미니언 검증 코드 확인: `validation/ValidateEntMinion.java`
 - [x] 엔트 소서러 Attack2 미사일 연출 반영: `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml`
+- [x] 엔트 가디언 리소스팩·스킬 반영 및 PaperResources 리로드 확인
 
 ## 현재 판단
 
@@ -28,6 +29,7 @@
 | 2026-09-07 | 엔트 미니언·워리어 구현 상태 확인 | 완료 | `model/`, `bukkit/plugins/ModelEngine/`, `bukkit/plugins/MythicMobs/` |
 | 2026-09-07 | 엔트 소서러 `.bbmodel`을 ModelEngine 블루프린트에 적용 | 적용 완료 / 리로드 대기 | `bukkit/plugins/ModelEngine/blueprints/ent_sorcerer.bbmodel` |
 | 2026-09-08 | 엔트 소서러 Attack2 3발 미사일 연출 조정 | 완료 / 서버 리로드 확인 | `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml` |
+| 2026-09-09 | 엔트 가디언 리소스팩을 ai-agent로 통일 | 완료 / PaperResources 로드 확인 | `bukkit/plugins/ModelEngine/resource pack.zip`, `bukkit/plugins/PaperResources/resources.txt` |
 
 ## 다음 업데이트 규칙
 
