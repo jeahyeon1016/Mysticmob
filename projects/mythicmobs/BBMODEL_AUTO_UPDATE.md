@@ -20,7 +20,7 @@
    D:\ai agent\projects\mythicmobs\bukkit\plugins\ModelEngine\resource pack.zip
    ```
 
-4. 최신 ZIP을 통합 백업 저장소 `jeahyeon1016/ai-agent`의 `master` 브랜치에 커밋·푸시한다. 단, PaperResources는 익명 GitHub Raw 다운로드가 가능한 공개 URL만 사용할 수 있으므로, 공개 배포 URL은 `bukkit/plugins/PaperResources/resources.txt`에서 별도로 확인한다. 현재 `ai-agent` Raw URL은 서버에서 404가 발생해 공개 `Mysticmob` URL을 사용 중이다.
+4. 최신 ZIP을 통합 백업 저장소 `jeahyeon1016/ai-agent`와 공개 배포 저장소 `jeahyeon1016/Mysticmob`에 각각 반영한다. PaperResources는 공개 배포 저장소의 Raw URL을 사용한다.
 
    ```text
    D:\ai agent\projects\mythicmobs\bukkit\plugins\ModelEngine\resource pack.zip
