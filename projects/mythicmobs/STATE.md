@@ -20,6 +20,7 @@
 - [x] 엔트 가디언 리소스팩·스킬 반영 및 PaperResources 리로드 확인
 - [x] 엔트 가디언 필드보스 패턴 반영: sweep·arm_inground·smash_ground·체력 구간 뿌리 소환
 - [x] 엔트 가디언 뿌리 소환을 `BONE_BLOCK` 위 5개씩, 체력 구간 4회 총 20개로 제한하고 사망 시 자식 정리
+- [x] 엔트 가디언 뿌리 지속 소환 수정: 사망 전까지 누적 유지, 체력 구간 패턴은 `arm_inground` 사용, 기존 콤보 10 패턴과 `pull_jaws` 제거
 
 ## 현재 판단
 
@@ -34,6 +35,7 @@
 | 2026-09-08 | 엔트 소서러 Attack2 3발 미사일 연출 조정 | 완료 / 서버 리로드 확인 | `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml` |
 | 2026-09-09 | 엔트 가디언 리소스팩을 ai-agent로 통일 | 완료 / PaperResources 로드 확인 | `bukkit/plugins/ModelEngine/resource pack.zip`, `bukkit/plugins/PaperResources/resources.txt` |
 | 2026-09-10 | 엔트 가디언 필드보스 패턴 및 반복 뿌리 모델 반영 | 완료 / `meg reload`, `mm reload` 확인 | `bukkit/plugins/MythicMobs/`, `bukkit/plugins/ModelEngine/` |
+| 2026-09-10 | 엔트 가디언 뿌리 누적 및 패턴 정리 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml` |
 
 ## 다음 업데이트 규칙
 

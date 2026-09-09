@@ -19,7 +19,6 @@ EG_AttackRouter:
     - lineofsight true
   Skills:
     - skill{s=EG_Smash} @target
-    - skill{s=EG_Inground} @target
     - skill{s=EG_Sweep} @target
 
 EG_Sweep:
@@ -54,23 +53,6 @@ EG_LeftSweep:
     - skill{s=EG_ComboHit} @LivingInCone{a=150;r=5;rot=-15;target=players}
     - sound{s=entity.iron_golem.attack;v=1;p=0.6} @self
 
-EG_Inground:
-  Cooldown: 20
-  Conditions:
-    - variableEquals{var=caster.count;value=0} true
-    - variableInRange{var=caster.combo_attack;value=>=10} true
-  Skills:
-    - setvariable{var=caster.count;type=INTEGER;value=1} @self
-    - setspeed{speed=0} @self
-    - meg:state{mid=ent_guardian;s=arm_inground;priority=3;li=0;lo=0} @self
-    - delay 14
-    - sound{s=entity.ender_dragon.growl;v=1;p=0.7} @self
-    - delay 13
-    - summon{type=EntGuardianHandHit;amount=1;radius=0} @ModelPart{mid=ent_guardian;pid=right_fingers}
-    - delay 40
-    - setspeed{speed=1} @self
-    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=1}
-
 EG_Smash:
   Cooldown: 30
   Conditions:
@@ -97,7 +79,7 @@ EG_RootPhase:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
-    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
     - delay 25
     - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=0}
     - delay 25
@@ -108,7 +90,7 @@ EG_RootPhase60:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
-    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
     - delay 25
     - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=5}
     - delay 25
@@ -119,7 +101,7 @@ EG_RootPhase40:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
-    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
     - delay 25
     - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=10}
     - delay 25
@@ -130,7 +112,7 @@ EG_RootPhase20:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
-    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
     - delay 25
     - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=15}
     - delay 25
@@ -165,18 +147,8 @@ EGR_Init:
     - meg:model{mid=ent_branch;d=false;i=true;lpitch=true;usm=true;save=false} @self
     - meg:state{mid=ent_branch;s=skill;priority=3;loop=LOOP;force=true;li=0;lo=0} @self
     - skill{s=EGR_Strike;repeat=11;repeatInterval=33;delay=12} @self
-    - delay 408
-    - remove @self
 
 EGR_Strike:
   Skills:
     - particlesphere{p=redstone;color=#43B05C;size=0.9;amount=20;radius=2} @self
     - damage{a=10} @PlayersInRadius{r=2}
-
-EGH_Hit:
-  Skills:
-    - particlesphere{p=redstone;color=#43B05C;size=0.9;amount=20;radius=2} @self
-    - damage{a=10} @PlayersInRadius{r=2}
-    - potion{type=SLOWNESS;duration=40;level=255;particles=false} @PlayersInRadius{r=2}
-    - delay 1
-    - remove @self

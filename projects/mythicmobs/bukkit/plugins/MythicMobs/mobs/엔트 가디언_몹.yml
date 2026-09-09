@@ -44,15 +44,3 @@ EntGuardianRoot:
     PreventOtherDrops: true
   Skills:
     - skill{s=EGR_Init} @self ~onSpawn
-
-EntGuardianHandHit:
-  Type: ARMOR_STAND
-  Health: 1
-  Options:
-    Invisible: true
-    NoGravity: true
-    Silent: true
-    Invincible: true
-    PreventOtherDrops: true
-  Skills:
-    - skill{s=EGH_Hit} @self ~onSpawn
