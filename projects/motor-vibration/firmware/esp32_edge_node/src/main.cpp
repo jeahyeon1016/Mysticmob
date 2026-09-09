@@ -4888,34 +4888,25 @@ bool fileExistsQuiet(
         return false;
     }
 
-    File entry =
-        directory.openNextFile();
-
-    while (entry)
+    // Scope each directory entry to one open/close lifecycle. Reassigning a
+    // previously closed File can trip LittleFS lfs_file_close assertions.
+    while (true)
     {
-        if (
-            !entry.isDirectory()
-        )
+        File entry = directory.openNextFile();
+        if (!entry) break;
+
+        bool matched = false;
+        if (!entry.isDirectory())
         {
-            const String entryName =
-                baseNameOfPath(
-                    String(entry.name())
-                );
-
-            if (
-                entryName ==
-                expectedName
-            )
-            {
-                entry.close();
-                directory.close();
-                return true;
-            }
+            matched = baseNameOfPath(String(entry.name())) == expectedName;
         }
-
         entry.close();
-        entry =
-            directory.openNextFile();
+
+        if (matched)
+        {
+            directory.close();
+            return true;
+        }
     }
 
     directory.close();

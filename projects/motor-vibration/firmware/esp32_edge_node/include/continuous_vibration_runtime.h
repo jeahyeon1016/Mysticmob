@@ -21,6 +21,9 @@
 bool beginBackendHttp(BackendHttp&, WiFiClientSecure&, const char*);
 namespace ContinuousVibration {
 using namespace VibrationWindow;
+// Keep several completed windows available so capture never immediately
+// blocks behind feature extraction or a temporarily full pending queue.
+constexpr unsigned RawQueueCapacity = 8;
 #if RAW_VIBRATION_ENABLED
 constexpr unsigned PendingCapacity = 8; // PSRAM-backed processing keeps capture from stalling.
 // Keep one raw window per HTTPS request on the N8 internal heap.
@@ -137,6 +140,13 @@ void captureTask(void*) {
         const unsigned entries = adxlRead(0x39) & 0x3f;
         const bool disconnected = adxlRead(REG_DEVID) != 0xE5 || entries > 32;
         if (entries >= 32 || disconnected) {
+            Serial.printf("[FIFO] fault=%s entries=%u windowIndex=%lu count=%u startUs=%llu ageUs=%llu\n",
+                          disconnected ? "sensor_unavailable" : "fifo_overrun",
+                          entries,
+                          static_cast<unsigned long>(capturing.index),
+                          capturing.count,
+                          static_cast<unsigned long long>(capturing.startUs),
+                          static_cast<unsigned long long>(now - lastData));
             reportCaptureHealth(disconnected ? CaptureHealth::State::ChannelFailed :
                                               CaptureHealth::State::TimedOut);
             if (!capturing.count) capturing.startUs = now;
@@ -425,7 +435,7 @@ bool start() {
              static_cast<unsigned long>(esp_random()),static_cast<unsigned long>(esp_random()),
              static_cast<unsigned long>(esp_random()),static_cast<unsigned long>(esp_random()));
     mutex=xSemaphoreCreateMutex();
-    rawQueue=xQueueCreate(1,sizeof(Raw));
+    rawQueue=xQueueCreate(RawQueueCapacity,sizeof(Raw));
     const auto alloc = [](size_t bytes) {
         void* value = heap_caps_malloc(bytes, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
         return value ? value : heap_caps_malloc(bytes, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
