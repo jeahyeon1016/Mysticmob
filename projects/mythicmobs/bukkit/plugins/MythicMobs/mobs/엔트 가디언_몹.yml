@@ -25,6 +25,34 @@ EntGuardian:
     - 1 players
   Skills:
     - skill{s=EG_Init} @self ~onSpawn
-    - skill{s=EG_HurtSound} @self ~onDamaged
+    - skill{s=EG_Damaged;sync=true} @self ~onDamaged
+    - skill{s=EG_RootPhase} @self ~onDamaged =80%
+    - skill{s=EG_RootPhase} @self ~onDamaged =60%
+    - skill{s=EG_RootPhase} @self ~onDamaged =40%
+    - skill{s=EG_RootPhase} @self ~onDamaged =20%
     - skill{s=EG_AttackRouter} @target ~onTimer:2
     - skill{s=EG_Death} @self ~onDeath
+
+EntGuardianRoot:
+  Type: ARMOR_STAND
+  Health: 1
+  Options:
+    Invisible: true
+    NoGravity: true
+    Silent: true
+    Invincible: true
+    PreventOtherDrops: true
+  Skills:
+    - skill{s=EGR_Init} @self ~onSpawn
+
+EntGuardianHandHit:
+  Type: ARMOR_STAND
+  Health: 1
+  Options:
+    Invisible: true
+    NoGravity: true
+    Silent: true
+    Invincible: true
+    PreventOtherDrops: true
+  Skills:
+    - skill{s=EGH_Hit} @self ~onSpawn

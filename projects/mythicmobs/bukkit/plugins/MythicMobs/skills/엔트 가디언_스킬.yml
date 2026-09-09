@@ -1,7 +1,8 @@
-# Ent Guardian — 최소 전투 패턴
+# Ent Guardian field-boss pattern. Damage is provisional at 10.
 EG_Init:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.combo_attack;type=INTEGER;value=0} @self
     - meg:model{mid=ent_guardian;d=false;i=true;lpitch=true;usm=true;save=false} @self
     - meg:defaultstate{mid=ent_guardian;type=idle;state=idle;li=2;lo=2} @self
     - meg:defaultstate{mid=ent_guardian;type=walk;state=walk;li=2;lo=2} @self
@@ -17,9 +18,12 @@ EG_AttackRouter:
     - distance{d=<5} true
     - lineofsight true
   Skills:
-    - randomskill{skills=EG_Sweep 5,EG_Smash 3,EG_Pull 2} @self
+    - skill{s=EG_Smash} @target
+    - skill{s=EG_Inground} @target
+    - skill{s=EG_Sweep} @target
 
 EG_Sweep:
+  Cooldown: 5
   Conditions:
     - variableEquals{var=caster.count;value=0} true
   Skills:
@@ -28,52 +32,88 @@ EG_Sweep:
     - setspeed{speed=0} @self
     - velocity{mode=SET;x=0;y=0;z=0} @self
     - randomskill{skills=EG_RightSweep,EG_LeftSweep} @self
-    - delay 30
+    - delay 50
     - setspeed{speed=1} @self
-    - delay 30
-    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=1}
 
 EG_RightSweep:
   Skills:
     - meg:state{mid=ent_guardian;s=right_sweep;priority=3;li=0;lo=0} @self
-    - delay 14
-    - damage{a=16} @LivingInCone{a=150;r=4.5;rot=0;target=players}
+    - delay 28
+    - particles{p=redstone;color=#43B05C;size=0.9;amount=18;hS=0.35;vS=0.05;speed=0;y=0.3} @LivingInCone{a=150;r=5;rot=15;target=players}
+    - damage{a=10} @LivingInCone{a=150;r=5;rot=15;target=players}
+    - skill{s=EG_ComboHit} @LivingInCone{a=150;r=5;rot=15;target=players}
     - sound{s=entity.iron_golem.attack;v=1;p=0.65} @self
 
 EG_LeftSweep:
   Skills:
     - meg:state{mid=ent_guardian;s=left_sweep;priority=3;li=0;lo=0} @self
-    - delay 14
-    - damage{a=16} @LivingInCone{a=150;r=4.5;rot=0;target=players}
+    - delay 28
+    - particles{p=redstone;color=#43B05C;size=0.9;amount=18;hS=0.35;vS=0.05;speed=0;y=0.3} @LivingInCone{a=150;r=5;rot=-15;target=players}
+    - damage{a=10} @LivingInCone{a=150;r=5;rot=-15;target=players}
+    - skill{s=EG_ComboHit} @LivingInCone{a=150;r=5;rot=-15;target=players}
     - sound{s=entity.iron_golem.attack;v=1;p=0.6} @self
 
-EG_Smash:
+EG_Inground:
+  Cooldown: 20
   Conditions:
     - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.combo_attack;value=>=10} true
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=1} @self
     - setspeed{speed=0} @self
-    - meg:state{mid=ent_guardian;s=smash_ground;priority=3;li=0;lo=0} @self
-    - delay 20
-    - damage{a=22} @PlayersInRadius{r=5}
-    - effect:particles{p=block_crack;m=dirt;amount=40;hS=2;vS=0.2} @self
-    - delay 35
+    - meg:state{mid=ent_guardian;s=arm_inground;priority=3;li=0;lo=0} @self
+    - delay 14
+    - sound{s=entity.ender_dragon.growl;v=1;p=0.7} @self
+    - delay 13
+    - summon{type=EntGuardianHandHit;amount=1;radius=0} @ModelPart{mid=ent_guardian;pid=right_fingers}
+    - delay 40
     - setspeed{speed=1} @self
-    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=1}
 
-EG_Pull:
+EG_Smash:
+  Cooldown: 30
   Conditions:
     - variableEquals{var=caster.count;value=0} true
+    - variableInRange{var=caster.combo_attack;value=>=20} true
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=1} @self
     - setspeed{speed=0} @self
-    - meg:state{mid=ent_guardian;s=pull_jaws;priority=3;li=0;lo=0} @self
-    - delay 18
-    - pull{v=2} @PlayersInRadius{r=7}
-    - damage{a=12} @PlayersInRadius{r=3}
+    - look{headOnly=false;immediately=true} @target
+    - meg:state{mid=ent_guardian;s=smash_ground;priority=3;li=0;lo=0} @self
+    - delay 16
+    - sound{s=entity.warden.tendril_clicks;v=1;p=0.7} @self
+    - delay 29
+    - particles{p=redstone;color=#43B05C;size=1;amount=24;hS=0.4;vS=0.05;speed=0;y=0.3} @LivingInCone{a=120;r=4;rot=0;target=players}
+    - damage{a=10} @LivingInCone{a=120;r=4;rot=0;target=players}
+    - skill{s=EG_ComboHit} @LivingInCone{a=120;r=4;rot=0;target=players}
+    - sound{s=entity.iron_golem.damage;v=1.4;p=0.45} @self
+    - setvariable{var=caster.combo_attack;type=INTEGER;value=0} @self
     - delay 35
     - setspeed{speed=1} @self
-    - setvariable{var=caster.count;type=INTEGER;value=0} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=1}
+
+EG_RootPhase:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=2} @self
+    - setspeed{speed=0} @self
+    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - delay 25
+    - summon{type=EntGuardianRoot;amount=1;radius=0} @Forward{f=4;lockpitch=true}
+    - delay 25
+    - setspeed{speed=1} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
+
+EG_Damaged:
+  Conditions:
+    - damageamount{a=>0} true
+  Skills:
+    - variableadd{var=caster.combo_attack;amount=1} @self
+    - skill{s=EG_HurtSound} @self
+
+EG_ComboHit:
+  Skills:
+    - variableadd{var=caster.combo_attack;amount=5} @self
 
 EG_HurtSound:
   Skills:
@@ -85,3 +125,24 @@ EG_Death:
     - setAI{ai=false} @self
     - sound{s=block.wood.break;v=1.5;p=0.45} @self
     - sound{s=entity.zombie.death;v=0.7;p=0.4} @self
+
+EGR_Init:
+  Skills:
+    - meg:model{mid=ent_branch;d=false;i=true;lpitch=true;usm=true;save=false} @self
+    - meg:state{mid=ent_branch;s=skill;priority=3;loop=LOOP;force=true;li=0;lo=0} @self
+    - skill{s=EGR_Strike;repeat=11;repeatInterval=33;delay=12} @self
+    - delay 408
+    - remove @self
+
+EGR_Strike:
+  Skills:
+    - particlesphere{p=redstone;color=#43B05C;size=0.9;amount=20;radius=2} @self
+    - damage{a=10} @PlayersInRadius{r=2}
+
+EGH_Hit:
+  Skills:
+    - particlesphere{p=redstone;color=#43B05C;size=0.9;amount=20;radius=2} @self
+    - damage{a=10} @PlayersInRadius{r=2}
+    - potion{type=SLOWNESS;duration=40;level=255;particles=false} @PlayersInRadius{r=2}
+    - delay 1
+    - remove @self

@@ -18,6 +18,7 @@
 - [x] 엔트 미니언 검증 코드 확인: `validation/ValidateEntMinion.java`
 - [x] 엔트 소서러 Attack2 미사일 연출 반영: `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml`
 - [x] 엔트 가디언 리소스팩·스킬 반영 및 PaperResources 리로드 확인
+- [x] 엔트 가디언 필드보스 패턴 반영: sweep·arm_inground·smash_ground·체력 구간 뿌리 소환
 
 ## 현재 판단
 
@@ -31,6 +32,7 @@
 | 2026-09-07 | 엔트 소서러 `.bbmodel`을 ModelEngine 블루프린트에 적용 | 적용 완료 / 리로드 대기 | `bukkit/plugins/ModelEngine/blueprints/ent_sorcerer.bbmodel` |
 | 2026-09-08 | 엔트 소서러 Attack2 3발 미사일 연출 조정 | 완료 / 서버 리로드 확인 | `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml` |
 | 2026-09-09 | 엔트 가디언 리소스팩을 ai-agent로 통일 | 완료 / PaperResources 로드 확인 | `bukkit/plugins/ModelEngine/resource pack.zip`, `bukkit/plugins/PaperResources/resources.txt` |
+| 2026-09-10 | 엔트 가디언 필드보스 패턴 및 반복 뿌리 모델 반영 | 완료 / `meg reload`, `mm reload` 확인 | `bukkit/plugins/MythicMobs/`, `bukkit/plugins/ModelEngine/` |
 
 ## 다음 업데이트 규칙
 
