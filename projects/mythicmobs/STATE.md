@@ -6,7 +6,8 @@
 - 브랜치: `master`
 - 최신 기준 로컬 경로: `D:\ai agent\projects\mythicmobs`
 - 통합 백업 저장소: https://github.com/jeahyeon1016/ai-agent
-- 리소스팩 배포 저장소: https://github.com/jeahyeon1016/ai-agent.git
+- 통합 백업 저장소: https://github.com/jeahyeon1016/ai-agent.git
+- 현재 공개 리소스팩 배포 저장소: https://github.com/jeahyeon1016/Mysticmob.git
 
 ## 구현 완료
 

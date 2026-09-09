@@ -20,16 +20,16 @@
    D:\ai agent\projects\mythicmobs\bukkit\plugins\ModelEngine\resource pack.zip
    ```
 
-4. 최신 ZIP을 PaperResources가 읽는 GitHub 저장소에 커밋·푸시한다. 현재는 `jeahyeon1016/ai-agent` 저장소의 `master` 브랜치를 사용하며, 저장소 내부 실제 경로가 `projects/mythicmobs/bukkit/...`이므로 ZIP URL에도 이 경로를 포함한다. 저장소·브랜치·경로는 항상 `bukkit/plugins/PaperResources/resources.txt`의 실제 URL과 일치시킨다.
+4. 최신 ZIP을 통합 백업 저장소 `jeahyeon1016/ai-agent`의 `master` 브랜치에 커밋·푸시한다. 단, PaperResources는 익명 GitHub Raw 다운로드가 가능한 공개 URL만 사용할 수 있으므로, 공개 배포 URL은 `bukkit/plugins/PaperResources/resources.txt`에서 별도로 확인한다. 현재 `ai-agent` Raw URL은 서버에서 404가 발생해 공개 `Mysticmob` URL을 사용 중이다.
 
    ```text
    D:\ai agent\projects\mythicmobs\bukkit\plugins\ModelEngine\resource pack.zip
    ```
 
-   현재 URL 예시:
+   현재 PaperResources URL:
 
    ```text
-   https://github.com/jeahyeon1016/ai-agent/raw/refs/heads/master/projects/mythicmobs/bukkit/plugins/ModelEngine/resource%20pack.zip
+   https://github.com/jeahyeon1016/Mysticmob/raw/refs/heads/master/projects/mythicmobs/bukkit/plugins/ModelEngine/resource%20pack.zip
    ```
 
    URL이 실제 GitHub Raw ZIP을 가리키고 `404`가 아닌지 확인한다. Paper 서버 `server.properties`의 `resource-pack`이 비어 있어도 PaperResources가 URL을 관리할 수 있다. 별도로 `resource-pack-sha1`을 사용하는 배포라면 로컬 ZIP SHA-1과 원격 ZIP SHA-1을 일치시킨다.
