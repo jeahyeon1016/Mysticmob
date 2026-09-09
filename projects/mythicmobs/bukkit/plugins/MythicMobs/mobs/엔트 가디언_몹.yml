@@ -27,9 +27,9 @@ EntGuardian:
     - skill{s=EG_Init} @self ~onSpawn
     - skill{s=EG_Damaged;sync=true} @self ~onDamaged
     - skill{s=EG_RootPhase} @self ~onDamaged =80%
-    - skill{s=EG_RootPhase} @self ~onDamaged =60%
-    - skill{s=EG_RootPhase} @self ~onDamaged =40%
-    - skill{s=EG_RootPhase} @self ~onDamaged =20%
+    - skill{s=EG_RootPhase60} @self ~onDamaged =60%
+    - skill{s=EG_RootPhase40} @self ~onDamaged =40%
+    - skill{s=EG_RootPhase20} @self ~onDamaged =20%
     - skill{s=EG_AttackRouter} @target ~onTimer:2
     - skill{s=EG_Death} @self ~onDeath
 

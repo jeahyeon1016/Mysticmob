@@ -19,6 +19,7 @@
 - [x] 엔트 소서러 Attack2 미사일 연출 반영: `bukkit/plugins/MythicMobs/skills/엔트 소서러_스킬.yml`
 - [x] 엔트 가디언 리소스팩·스킬 반영 및 PaperResources 리로드 확인
 - [x] 엔트 가디언 필드보스 패턴 반영: sweep·arm_inground·smash_ground·체력 구간 뿌리 소환
+- [x] 엔트 가디언 뿌리 소환을 `BONE_BLOCK` 위 5개씩, 체력 구간 4회 총 20개로 제한하고 사망 시 자식 정리
 
 ## 현재 판단
 

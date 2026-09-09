@@ -99,7 +99,40 @@ EG_RootPhase:
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
     - delay 25
-    - summon{type=EntGuardianRoot;amount=1;radius=0} @Forward{f=4;lockpitch=true}
+    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=0}
+    - delay 25
+    - setspeed{speed=1} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
+
+EG_RootPhase60:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=2} @self
+    - setspeed{speed=0} @self
+    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - delay 25
+    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=5}
+    - delay 25
+    - setspeed{speed=1} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
+
+EG_RootPhase40:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=2} @self
+    - setspeed{speed=0} @self
+    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - delay 25
+    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=10}
+    - delay 25
+    - setspeed{speed=1} @self
+    - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
+
+EG_RootPhase20:
+  Skills:
+    - setvariable{var=caster.count;type=INTEGER;value=2} @self
+    - setspeed{speed=0} @self
+    - meg:state{mid=ent_guardian;s=pull_jaws;priority=4;li=0;lo=0} @self
+    - delay 25
+    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=15}
     - delay 25
     - setspeed{speed=1} @self
     - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
@@ -123,6 +156,7 @@ EG_Death:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=9} @self
     - setAI{ai=false} @self
+    - remove @Children
     - sound{s=block.wood.break;v=1.5;p=0.45} @self
     - sound{s=entity.zombie.death;v=0.7;p=0.4} @self
 
