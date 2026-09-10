@@ -70,3 +70,11 @@
 - Direct verification in `D:\github\MotorDiagnosis\firmware\esp32_edge_node`: `pio test -e native` with `C:\msys64\ucrt64\bin` prefixed to PATH = 164/164 passed; `pio run -e esp32-s3-devkitc-1-n8` passed; `git diff --check` passed with existing LF/CRLF warnings.
 - Policy status: 09R source implementation plus spool-priority guard is present but hardware reboot/priority ordering is unverified; 10R metadata is present but no real server fixture; 11R blocked because the current profile proves 16 slots, not 600; 12R adaptive partition is not applied and OTA/backup/restore approval is absent; 13R diagnostics are source/build verified; 14R native/N8 verified; 15R rollout gate says `coordinator may upload = NO`.
 - Upload/log gate: no COM7 upload, reset, format, partition change, or 3-minute log run. Missing real 202/200 ACK fixture, baseline ID/values, LittleFS backup/hash/restore evidence, and hardware serial validation keep rollout blocked.
+
+## 2026-09-11 IoT policy upload and 3-minute log
+
+- Upload authorization was confirmed by the user after local review; only `esp32-s3-devkitc-1-n8` was uploaded to `COM7`. No partition upload, format, or erase command was used. PlatformIO upload completed with ESP32-S3 identification and flash hash verification.
+- Three-minute serial observation completed at 115200 baud. Boot and Wi-Fi/NTP synchronization succeeded; LittleFS restored 2511 queued records and continued capture.
+- Raw transport initially failed with TLS `status=-1`, retained batches, `pending=8`, and queue overflow. `WINDOW Dropped windows` rose to 295 during observation.
+- HTTP `202` ACK paths succeeded for batches 1-3 (`expected=3/4`, `matched=3/4`) and corresponding records were deleted. Later retries for batch 4 returned HTTP `409 WINDOW_SEQUENCE_CONFLICT` (`Expired/out-of-order window`) and remained retained.
+- `baseline_missing` safe mode remained active. Repeated LittleFS open errors reported `raw-spool-v2-*.bin does not exist, no permits for creation` while spool records were stored. Final hardware result: upload succeeded, but runtime communication/data-loss criteria failed; do not declare rollout healthy or close the issue.
