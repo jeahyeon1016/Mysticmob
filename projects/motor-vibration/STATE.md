@@ -95,3 +95,10 @@
 - Final 3-minute observation after the mutex-scope repair: no panic, Guru Meditation, watchdog, or reboot; durable spool records continued to be written. TLS still intermittently returned `-1`, but retries were bounded and 202 ACK was observed in the prior retest.
 - Final gate remains **BLOCKED**: `WINDOW Dropped windows` still reached 222 in the final 3-minute run. The firmware is not rollout-healthy until raw capture persistence is decoupled from LittleFS latency or an equivalent lossless buffer is implemented and verified.
 - Do not declare completion, do not close the upload issue, and do not push MotorDiagnosis changes. The dirty MotorDiagnosis worktree remains intentionally uncommitted.
+
+## 2026-09-11 remaining Drop/TLS repair plan
+
+- Added `09_ESP32_DroppedWindows_TLS-1_원인분석_수정계획_2026-09-11.md`.
+- Confirmed only the direct Drop failure boundary: capture/processing queue overflow increments `processingDrops`; the dominant LittleFS substage is not yet measured.
+- TLS `-1` remains an HTTP-pre-response transport failure with an unknown lower-level cause. Intermittent 202 success rules out treating URL/auth/certificate configuration as a proven permanent fault.
+- Next gate starts with numbered instrumentation (`DROP-01/02`, `TLS-01`) before selecting a storage or TLS behavior change.
