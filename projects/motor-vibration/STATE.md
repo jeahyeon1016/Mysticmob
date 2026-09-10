@@ -111,3 +111,11 @@
 - The latest 3-minute observation failed: raw queue saturated at 8, `capture_queue_full` increased, the first raw spool write took about 11.0 seconds, TLS `-1` recurred, and `IntegerDivideByZero` rebooted the device repeatedly.
 - Current strongest direct evidence is `writeRawSpool()` line 406 (`LittleFS.open(temp, "w")`) entering LittleFS allocation/metadata code while the filesystem had only 4,096 bytes free. This is a hypothesis to verify with a safe capacity-admission guard, not permission to delete or format data.
 - Work is intentionally paused here. The uploaded firmware is **not rollout-healthy** and the dirty `D:\github\MotorDiagnosis` worktree remains uncommitted.
+
+## 2026-09-11 evidence-only repair boundary after checkpoint 10
+
+- Added `11_ESP32_확정원인_디버그우선_에이전트수정범위_2026-09-11.md`.
+- Confirmed three product-code defects from source and logs: the network task's `rawQueueIsEmpty()` guard blocks selection of a new durable spool batch whenever any backlog exists; the boot-reset cursor leaves the first 8.80-second slot scan inside active capture; and `processingTask()` holds the pending mutex across the 11.05-second filesystem write.
+- Confirmed the panic call path ends at `writeRawSpool()` calling `LittleFS.open(temp, "w")` with only 4,096 bytes free, but did not claim near-full storage as the sole divide-by-zero cause. The exact bundled `lfs.c:689`, allocator state, and safe reserve are still unknown.
+- Preserved the existing two-agent structure: Agent 1 owns Drop/LittleFS runtime, Agent 2 owns TLS diagnostics, and the coordinator alone integrates/uploads/monitors.
+- The next run is deliberately bounded at deterministic fixes, fail-closed diagnostics, build/test, one COM7 upload, one 3-minute log, and a stop/report decision. Fixed-ring work, partition/format/erase, queue inflation, TLS behavior changes, and MotorDiagnosis commit/push remain outside scope.
