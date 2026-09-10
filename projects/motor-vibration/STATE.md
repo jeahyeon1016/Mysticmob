@@ -85,3 +85,13 @@
 - Confirmed failure chain: unlimited `baseline_missing` priority selection skipped older indexes, the server later rejected those indexes with `WINDOW_SEQUENCE_CONFLICT`, 500 ms-capped retry kept the rejected batch active, and non-durable RAM queues overflowed.
 - The guide treats initial TLS `-1` as a contributing transient failure pending underlying TLS diagnostics, and treats LittleFS `no permits for creation` as likely existence-probe noise because the following spool write succeeded.
 - Full policy compliance requires an explicit server-order decision: allow unseen out-of-order identities, or accept that firmware-only monotonic sending cannot satisfy priority-before-backlog.
+
+## 2026-09-11 agent-integrated upload retest
+
+- Two agents were used and their reports were received: Dalton handled firmware/native FIX-01/02/04/05/06/07; Darwin handled backend FIX-03 and its tests. Both agents were closed after coordinator review.
+- Coordinator verification passed: native firmware 171/171, backend regression 80/80 with 8 skips, N8 build, and `git diff --check`.
+- COM7 upload was repeated after each runtime repair using firmware only; no partition upload, format, or erase was used. Flash hash verification succeeded.
+- First repaired runtime exposed `WindowFeatures` stack-canary overflow and 16-slot spool exhaustion. The repair increased the task stack to 16 KiB, changed raw spool capacity to 512 slots with free-byte enforcement, and replaced noisy missing-file probes with `stat`.
+- Final 3-minute observation after the mutex-scope repair: no panic, Guru Meditation, watchdog, or reboot; durable spool records continued to be written. TLS still intermittently returned `-1`, but retries were bounded and 202 ACK was observed in the prior retest.
+- Final gate remains **BLOCKED**: `WINDOW Dropped windows` still reached 222 in the final 3-minute run. The firmware is not rollout-healthy until raw capture persistence is decoupled from LittleFS latency or an equivalent lossless buffer is implemented and verified.
+- Do not declare completion, do not close the upload issue, and do not push MotorDiagnosis changes. The dirty MotorDiagnosis worktree remains intentionally uncommitted.
