@@ -1,0 +1,1162 @@
+# capture_start_utc=2026-09-10T16:10:01.470098+00:00
+# duration_seconds=300.000
+# port=COM7 baud=115200
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0x2b (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce3808,len:0x4bc
+load:0x403c9700,len:0xbd8
+load:0x403cc700,len:0x2a0c
+entry 0x403c98d0
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0x8 (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce3808,len:0x4bc
+load:0x403c9700,len:0xbd8
+load:0x403cc700,len:0x2a0c
+entry 0x403c98d0
+
+==============================================================
+ MotorDiagnosis Edge Node
+ Firmware Version : v1.3-signal-analysis.1
+ Fix : I/O-safe ring + session timestamps + strict ACK + TLS
+==============================================================
+[TIME] Boot session ID: 1721
+[FLASH] Mounting LittleFS without automatic format...
+[FLASH] Total : 2752512 bytes
+[FLASH] Used  : 1220608 bytes
+[RECOVERY] Binary ring restored 1968 queued record(s).
+[RECOVERY] Watermark ignored 139 already-consumed valid slot(s).
+[RECOVERY] Consumed watermark: 3190 | next ordinal: 5159.
+[RECOVERY] Active unresolved timestamps: 21.
+[RECOVERY] Legacy v1 unresolved records pending migration: 0.
+[RECOVERY] CRC/schema-invalid slots observed: 0.
+[RECOVERY] Logical capacity: 24999 | physical slots: 25000 | bytes: 1200000.
+[RECOVERY] Oldest-drop count: 0.
+[QUALITY] Not provisioned; automatic quality reporting disabled.
+[PSRAM] found=yes size=8386215 free=8320267
+[PSRAM] buffers rawQueue=8 processingQueue=8 workspace=psram batch=psram rawHold=8(psram) rawBytes=3072(psram) encodedRaw=4097(psram)
+[OK] Vibration Task -> Core 0
+[OK] Continuous Audio Task -> Core 1
+
+[WiFi] Starting non-blocking connection to jmc
+[STACK] VibrationFIFO free=7664 bytes
+[ADXL345] Device ID : 0xE5
+[STACK] WindowFeatures free=3980 bytes
+[WiFi] Startup continues offline.
+[TIME] No UTC yet. Sensor acquisition will continue and unresolved records will be stored locally.
+[SYSTEM] Restored Queue : 1968 / 24999
+[SYSTEM] Pipeline ready.
+[SYNC] snapshot unavailable: reason=no_latest generation=0 current=0 ready=yes quality=0
+[SENSOR] Synchronized acquisition failed.
+[RAW-DEBUG] samples=512 quality=valid X[min=-264 max=-235 mean=-246.7 rms=246.7] Y[min=20 max=46 mean=30.4 rms=30.6] Z[min=-85 max=-27 mean=-50.3 rms=50.8]
+[OK] Wi-Fi connected.
+[WiFi] IP   : 172.20.10.2
+[WiFi] RSSI : -52 dBm
+[TIME] Synchronizing NTP...
+.[TIME] Raw blocked: UTC invalid; trying backend fallback.
+........[  7464][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[TIME] Backend health HTTP error: -1
+[TIME] Raw blocked: UTC invalid; trying backend fallback.
+.[PROCESSING-DIAG] pending_full held count=1 windowIndex=8 raw_queue=0 pending=8
+.[RAW-DEBUG] samples=512 quality=valid X[min=-259 max=-230 mean=-246.5 rms=246.5] Y[min=11 max=46 mean=30.1 rms=30.3] Z[min=-84 max=-17 mean=-50.4 rms=50.9]
+
+[OK] NTP synchronized: 2026-09-10T16:10:10Z
+[TIME] Durable timestamp anchor: session=1721 monotonicMs=8888 epochMs=1789056610506
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9569
+[RAW-DEBUG] samples=512 quality=valid X[min=-259 max=-230 mean=-246.5 rms=246.5] Y[min=11 max=46 mean=30.1 rms=30.3] Z[min=-84 max=-17 mean=-50.4 rms=50.9]
+[PROCESSING-DIAG] pending_full held count=13 windowIndex=8 raw_queue=1 pending=8
+[PROCESSING-DIAG] pending_full held count=22 windowIndex=8 raw_queue=3 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-259 max=-230 mean=-246.5 rms=246.5] Y[min=11 max=46 mean=30.1 rms=30.3] Z[min=-84 max=-17 mean=-50.4 rms=50.9]
+[PROCESSING-DIAG] pending_full held count=29 windowIndex=8 raw_queue=4 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-259 max=-230 mean=-246.5 rms=246.5] Y[min=11 max=46 mean=30.1 rms=30.3] Z[min=-84 max=-17 mean=-50.4 rms=50.9]
+[ 12423][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[TIME] Backend health HTTP error: -1
+[PROCESSING-DIAG] pending_full held count=36 windowIndex=8 raw_queue=6 pending=8
+[PROCESSING-DIAG] pending_full held count=40 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-259 max=-230 mean=-246.5 rms=246.5] Y[min=11 max=46 mean=30.1 rms=30.3] Z[min=-84 max=-17 mean=-50.4 rms=50.9]
+[PROCESSING-DIAG] pending_full held count=44 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=48 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=52 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-259 max=-230 mean=-246.5 rms=246.5] Y[min=11 max=46 mean=30.1 rms=30.3] Z[min=-84 max=-17 mean=-50.4 rms=50.9]
+[PROCESSING-DIAG] pending_full held count=56 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=60 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1969 / 24999 | physical slots=25000 | dropped=0
+
+assert failed: lfs_file_close lfs.c:6080 (lfs_mlist_isopen(lfs->mlist, (struct lfs_mlist*)file))
+
+
+Backtrace: 0x40377bba:0x3fcb4ed0 0x4037ce3d:0x3fcb4ef0 0x40382d8d:0x3fcb4f10 0x42054af7:0x3fcb5040 0x420507bc:0x3fcb5060 0x4202ec29:0x3fcb5080 0x420ab986:0x3fcb50a0 0x42017849:0x3fcb50c0 0x42019f41:0x3fcb50e0 0x42008d00:0x3fcb5100 0x420108a5:0x3fcb5120 0x4201109b:0x3fcb52b0
+
+
+
+
+ELF file SHA256: 25db00af6a92f178
+
+Rebooting...
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x400335f1
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce3808,len:0x4bc
+load:0x403c9700,len:0xbd8
+load:0x403cc700,len:0x2a0c
+entry 0x403c98d0
+
+==============================================================
+ MotorDiagnosis Edge Node
+ Firmware Version : v1.3-signal-analysis.1
+ Fix : I/O-safe ring + session timestamps + strict ACK + TLS
+==============================================================
+[TIME] Boot session ID: 1722
+[FLASH] Mounting LittleFS without automatic format...
+[FLASH] Total : 2752512 bytes
+[FLASH] Used  : 1220608 bytes
+[RECOVERY] Binary ring restored 1969 queued record(s).
+[RECOVERY] Watermark ignored 139 already-consumed valid slot(s).
+[RECOVERY] Consumed watermark: 3190 | next ordinal: 5160.
+[RECOVERY] Active unresolved timestamps: 21.
+[RECOVERY] Legacy v1 unresolved records pending migration: 0.
+[RECOVERY] CRC/schema-invalid slots observed: 0.
+[RECOVERY] Logical capacity: 24999 | physical slots: 25000 | bytes: 1200000.
+[RECOVERY] Oldest-drop count: 0.
+[QUALITY] Not provisioned; automatic quality reporting disabled.
+[PSRAM] found=yes size=8386215 free=8320267
+[PSRAM] buffers rawQueue=8 processingQueue=8 workspace=psram batch=psram rawHold=8(psram) rawBytes=3072(psram) encodedRaw=4097(psram)
+[OK] Vibration Task -> Core 0
+[OK] Continuous Audio Task -> Core 1
+
+[WiFi] Starting non-blocking connection to jmc
+[STACK] VibrationFIFO free=7664 bytes
+[ADXL345] Device ID : 0xE5
+[STACK] WindowFeatures free=3980 bytes
+[WiFi] Startup continues offline.
+[TIME] No UTC yet. Sensor acquisition will continue and unresolved records will be stored locally.
+[SYSTEM] Restored Queue : 1969 / 24999
+[SYSTEM] Pipeline ready.
+[SYNC] snapshot unavailable: reason=no_latest generation=0 current=0 ready=yes quality=0
+[SENSOR] Synchronized acquisition failed.
+[RAW-DEBUG] samples=512 quality=valid X[min=-261 max=-232 mean=-246.6 rms=246.6] Y[min=13 max=48 mean=29.9 rms=30.2] Z[min=-79 max=-21 mean=-49.7 rms=50.2]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9570 (UTC unresolved)
+[OFFLINE-COLD-BOOT] Storing Sequence 9570 locally without UTC; acquisition continues.
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=7 pending_after=7 retry_count=0
+[BUFFER-CANARY] phase=raw_post_before rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=1 windowIndex=8 raw_queue=0 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=5 windowIndex=8 raw_queue=2 pending=8
+[PROCESSING-DIAG] pending_full held count=9 windowIndex=8 raw_queue=4 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=13 windowIndex=8 raw_queue=6 pending=8
+[PROCESSING-DIAG] pending_full held count=17 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=21 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1970 / 24999 | physical slots=25000 | dropped=0
+[OK] Wi-Fi connected.
+[WiFi] IP   : 172.20.10.2
+[WiFi] RSSI : -49 dBm
+[TIME] Synchronizing NTP...
+
+[OK] NTP synchronized: 2026-09-10T16:10:37Z
+[TIME] Durable timestamp anchor: session=1722 monotonicMs=15632 epochMs=1789056637906
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=28 windowIndex=8 raw_queue=8 pending=8
+[STORAGE-DIAG] phase=raw_post_before task=WindowHTTPS stack_hw=9436 internal_free=190100 internal_min_free=178968 internal_heap_ok=true psram_free=8209439 psram_min_free=8168503 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=41 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=54 windowIndex=8 raw_queue=8 pending=8
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9571
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=66 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=74 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=82 windowIndex=8 raw_queue=8 pending=8
+[ 21507][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[BUFFER-CANARY] phase=raw_post_after rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=85 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=89 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=93 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=97 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=101 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=105 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1971 / 24999 | physical slots=25000 | dropped=0
+[PROCESSING-DIAG] pending_full held count=109 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[STORAGE-DIAG] phase=raw_post_after task=WindowHTTPS stack_hw=6300 internal_free=189128 internal_min_free=131324 internal_heap_ok=true psram_free=8209207 psram_min_free=8147823 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5390 status=-1 fail_stage=post pending_before=7 pending_after=8 retry_count=0
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5390 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=23062
+[WINDOW] HTTP -1; batch retained
+[PROCESSING-DIAG] pending_full held count=122 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=26 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=1
+[BUFFER-CANARY] phase=raw_post_before rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[STORAGE-DIAG] phase=raw_post_before task=WindowHTTPS stack_hw=6300 internal_free=189132 internal_min_free=131324 internal_heap_ok=true psram_free=8209207 psram_min_free=8147823 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=134 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9572
+[PROCESSING-DIAG] pending_full held count=147 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=157 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=165 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=173 windowIndex=8 raw_queue=8 pending=8
+[ 36771][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[BUFFER-CANARY] phase=raw_post_after rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=178 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=182 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=186 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=190 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=194 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=198 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1972 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=206 windowIndex=8 raw_queue=8 pending=8
+[STORAGE-DIAG] phase=raw_post_after task=WindowHTTPS stack_hw=6300 internal_free=188988 internal_min_free=130532 internal_heap_ok=true psram_free=8209207 psram_min_free=8147823 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=4978 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=1
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=4978 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=14212
+[WINDOW] HTTP -1; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=48 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=2
+[BUFFER-CANARY] phase=raw_post_before rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=219 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[STORAGE-DIAG] phase=raw_post_before task=WindowHTTPS stack_hw=6300 internal_free=188988 internal_min_free=130532 internal_heap_ok=true psram_free=8209207 psram_min_free=8147823 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[PROCESSING-DIAG] pending_full held count=232 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9573
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=244 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=252 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=259 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[ 51311][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[BUFFER-CANARY] phase=raw_post_after rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=266 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=270 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=273 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=277 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=281 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=285 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=289 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1973 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[STORAGE-DIAG] phase=raw_post_after task=WindowHTTPS stack_hw=6300 internal_free=188988 internal_min_free=130532 internal_heap_ok=true psram_free=8209207 psram_min_free=8147823 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=4685 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=2
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=4685 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=14247
+[WINDOW] HTTP -1; batch retained
+[PROCESSING-DIAG] pending_full held count=299 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=70 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=3
+[BUFFER-CANARY] phase=raw_post_before rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=312 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[STORAGE-DIAG] phase=raw_post_before task=WindowHTTPS stack_hw=6300 internal_free=189020 internal_min_free=130532 internal_heap_ok=true psram_free=8209207 psram_min_free=8147823 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=325 windowIndex=8 raw_queue=8 pending=8
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9574
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=336 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=343 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=350 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=358 windowIndex=8 raw_queue=8 pending=8
+[ 66629][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[BUFFER-CANARY] phase=raw_post_after rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=362 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=366 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=370 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=373 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=377 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=381 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1974 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=389 windowIndex=8 raw_queue=8 pending=8
+[STORAGE-DIAG] phase=raw_post_after task=WindowHTTPS stack_hw=6300 internal_free=188988 internal_min_free=130532 internal_heap_ok=true psram_free=8209207 psram_min_free=8147823 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5258 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=3
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5258 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=14385
+[WINDOW] HTTP -1; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=92 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=4
+[PROCESSING-DIAG] pending_full held count=402 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=415 windowIndex=8 raw_queue=8 pending=8
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9575
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=427 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=435 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=443 windowIndex=8 raw_queue=8 pending=8
+[ 80261][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=4677 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=4
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=4677 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=4717
+[WINDOW] HTTP -1; batch retained
+[WINDOW] Dropped windows=100 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=5
+[PROCESSING-DIAG] pending_full held count=448 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=461 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=474 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=3542 status=202 fail_stage=ack pending_before=8 pending_after=8 retry_count=5
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=3542 body_read_ms=3 status=202 response_bytes=762 fail_stage=none total_ms=3592
+[WINDOW] HTTP 202; batch retained
+[PROCESSING-DIAG] pending_full held count=479 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=107 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=6
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=641 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=6
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=641 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=695
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=483 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=108 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=7
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=757 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=7
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=757 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=805
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=487 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=110 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=792 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=8
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=792 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=833
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=491 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=112 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=9
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=494 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=1132 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=9
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=1132 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=1171
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=115 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=10
+[PROCESSING-DIAG] pending_full held count=498 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1975 / 24999 | physical slots=25000 | dropped=0
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=727 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=10
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=727 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=756
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=506 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=117 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=11
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=650 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=11
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=650 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=682
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=519 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=119 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=12
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=549 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=12
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=549 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=581
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=532 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9576
+[WINDOW] Dropped windows=121 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=13
+[PROCESSING-DIAG] pending_full held count=539 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=773 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=13
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=773 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=799
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=123 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=14
+[PROCESSING-DIAG] pending_full held count=542 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=532 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=14
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=532 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=574
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=124 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=15
+[PROCESSING-DIAG] pending_full held count=545 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=794 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=15
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=794 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=841
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=548 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=126 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=16
+[PROCESSING-DIAG] pending_full held count=551 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=1113 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=16
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=1113 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=1169
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=129 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=17
+[PROCESSING-DIAG] pending_full held count=555 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=638 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=17
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=638 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=680
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=131 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=18
+[PROCESSING-DIAG] pending_full held count=559 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=706 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=18
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=706 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=750
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=133 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=19
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=563 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=640 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=19
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=640 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=680
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=135 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=20
+[PROCESSING-DIAG] pending_full held count=567 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1976 / 24999 | physical slots=25000 | dropped=0
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=582 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=20
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=582 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=613
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=136 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=21
+[PROCESSING-DIAG] pending_full held count=579 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=755 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=21
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=755 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=786
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=592 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=138 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=22
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=535 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=22
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=535 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=567
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9577
+[WINDOW] Dropped windows=140 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=23
+[PROCESSING-DIAG] pending_full held count=605 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=868 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=23
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=868 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=905
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=609 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=142 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=24
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=488 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=24
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=488 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=526
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=144 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=25
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=613 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=598 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=25
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=598 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=628
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=616 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=146 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=26
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=621 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=26
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=621 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=655
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=620 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=147 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=27
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=717 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=27
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=717 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=759
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=623 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=149 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=28
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=518 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=28
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=518 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=575
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=627 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=151 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=29
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=827 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=29
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=827 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=857
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=631 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=153 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=30
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=634 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=840 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=30
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=840 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=871
+[WINDOW] HTTP 200; batch retained
+[BUFFER] Queue : 1977 / 24999 | physical slots=25000 | dropped=0
+[WINDOW] Dropped windows=155 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=31
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=644 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=523 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=31
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=523 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=554
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=157 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=32
+[PROCESSING-DIAG] pending_full held count=657 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=641 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=32
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=641 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=673
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=670 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=159 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=33
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9578
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=460 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=33
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=460 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=491
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=160 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=34
+[PROCESSING-DIAG] pending_full held count=675 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=611 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=34
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=611 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=650
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=678 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=162 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=35
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=712 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=35
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=712 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=756
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=682 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=164 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=36
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=518 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=36
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=518 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=556
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=685 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=166 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=37
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=747 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=37
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=747 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=791
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=689 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=168 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=38
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=496 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=38
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=496 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=522
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=693 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=169 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=39
+[PROCESSING-DIAG] pending_full held count=696 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=923 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=39
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=923 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=978
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=172 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=40
+[PROCESSING-DIAG] pending_full held count=700 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=933 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=40
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=933 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=976
+[WINDOW] HTTP 200; batch retained
+[BUFFER] Queue : 1978 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=174 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=41
+[PROCESSING-DIAG] pending_full held count=706 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=742 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=41
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=742 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=774
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=719 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=176 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=42
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=448 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=42
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=448 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=479
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=732 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=178 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=43
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9579
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=650 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=43
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=650 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=677
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=741 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=179 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=44
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=656 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=44
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=656 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=700
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=744 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=181 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=45
+[PROCESSING-DIAG] pending_full held count=747 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=695 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=45
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=695 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=747
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=183 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=46
+[PROCESSING-DIAG] pending_full held count=750 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=629 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=46
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=629 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=676
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=185 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=47
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=753 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=729 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=47
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=729 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=772
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=756 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=187 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=48
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=520 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=48
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=520 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=569
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=759 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=189 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=49
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=833 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=49
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=833 body_read_ms=2 status=200 response_bytes=762 fail_stage=none total_ms=873
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=763 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=191 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=50
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=515 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=50
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=515 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=558
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=767 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=193 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=51
+[BUFFER] Queue : 1979 / 24999 | physical slots=25000 | dropped=0
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=613 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=51
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=613 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=645
+[PROCESSING-DIAG] pending_full held count=771 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=195 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=52
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=784 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=533 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=52
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=533 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=563
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=196 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=53
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=797 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=661 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=53
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=661 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=693
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[WINDOW] Dropped windows=198 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=54
+[PACKET] Created Sequence 9580
+[PROCESSING-DIAG] pending_full held count=808 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=547 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=54
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=547 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=582
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=200 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=55
+[PROCESSING-DIAG] pending_full held count=812 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=1747 status=-11 fail_stage=post pending_before=8 pending_after=8 retry_count=55
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=1747 body_read_ms=0 status=-11 response_bytes=0 fail_stage=post total_ms=1769
+[PROCESSING-DIAG] pending_full held count=816 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] HTTP -11; batch retained
+[WINDOW] Dropped windows=203 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=56
+[PROCESSING-DIAG] pending_full held count=820 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=826 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=833 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=842 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=850 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=857 windowIndex=8 raw_queue=8 pending=8
+[156088][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=6151 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=56
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=6151 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=6188
+[WINDOW] HTTP -1; batch retained
+[WINDOW] Dropped windows=213 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=57
+[PROCESSING-DIAG] pending_full held count=861 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=868 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=875 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1980 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=883 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=896 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[162120][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5411 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=57
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5411 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=5434
+[WINDOW] HTTP -1; batch retained
+[PROCESSING-DIAG] pending_full held count=909 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=223 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=58
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9581
+[PROCESSING-DIAG] pending_full held count=921 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=925 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=929 windowIndex=8 raw_queue=8 pending=8
+[166579][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=3892 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=58
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=3892 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=3926
+[WINDOW] HTTP -1; batch retained
+[WINDOW] Dropped windows=229 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=59
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=933 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=941 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=949 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=958 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=965 windowIndex=8 raw_queue=8 pending=8
+[172399][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5214 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=59
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5214 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=5255
+[WINDOW] HTTP -1; batch retained
+[PROCESSING-DIAG] pending_full held count=971 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=238 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=60
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=977 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=984 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=991 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=999 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[BUFFER] Queue : 1981 / 24999 | physical slots=25000 | dropped=0
+[PROCESSING-DIAG] pending_full held count=1011 windowIndex=8 raw_queue=8 pending=8
+[178042][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5042 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=60
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5042 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=5064
+[WINDOW] HTTP -1; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=247 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=61
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1024 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1037 windowIndex=8 raw_queue=8 pending=8
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9582
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1048 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1055 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1063 windowIndex=8 raw_queue=8 pending=8
+[183560][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=4952 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=61
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=4952 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=4993
+[WINDOW] HTTP -1; batch retained
+[WINDOW] Dropped windows=255 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=62
+[PROCESSING-DIAG] pending_full held count=1067 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1074 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1081 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1088 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1095 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1102 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[189839][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5686 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=62
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5686 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=5718
+[WINDOW] HTTP -1; batch retained
+[WINDOW] Dropped windows=264 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=63
+[BUFFER-CANARY] phase=raw_post_before rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=1107 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1111 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1115 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1982 / 24999 | physical slots=25000 | dropped=0
+[PROCESSING-DIAG] pending_full held count=1121 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[STORAGE-DIAG] phase=raw_post_before task=WindowHTTPS stack_hw=6300 internal_free=189028 internal_min_free=124784 internal_heap_ok=true psram_free=8209007 psram_min_free=8135983 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1133 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1146 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9583
+[PROCESSING-DIAG] pending_full held count=1158 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1166 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1173 windowIndex=8 raw_queue=8 pending=8
+[199681][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[BUFFER-CANARY] phase=raw_post_after rawHold=ok rawBytes=ok encodedRaw=ok audioRing=ok
+[PROCESSING-DIAG] pending_full held count=1177 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1181 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1185 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1189 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1193 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1197 windowIndex=8 raw_queue=8 pending=8
+[BUFFER] Queue : 1983 / 24999 | physical slots=25000 | dropped=0
+[PROCESSING-DIAG] pending_full held count=1201 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[STORAGE-DIAG] phase=raw_post_after task=WindowHTTPS stack_hw=6300 internal_free=189028 internal_min_free=124784 internal_heap_ok=true psram_free=8209007 psram_min_free=8135983 psram_heap_ok=true all_8bit_heap_ok=true littlefs_mounted=true total=2752512 used=1220608 free=1531904
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=4957 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=63
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=4957 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=18358
+[WINDOW] HTTP -1; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1214 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=293 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=64
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1227 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9584
+[PROCESSING-DIAG] pending_full held count=1240 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1249 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1257 windowIndex=8 raw_queue=8 pending=8
+[214241][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=4865 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=64
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=4865 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=4899
+[WINDOW] HTTP -1; batch retained
+[WINDOW] Dropped windows=301 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=65
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1263 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1270 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1278 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1286 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1294 windowIndex=8 raw_queue=8 pending=8
+[220238][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5380 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=65
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5380 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=5415
+[WINDOW] HTTP -1; batch retained
+[PROCESSING-DIAG] pending_full held count=1301 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=310 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=66
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1306 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1313 windowIndex=8 raw_queue=8 pending=8
+[PROCESSING-DIAG] pending_full held count=1320 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1327 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1334 windowIndex=8 raw_queue=8 pending=8
+[226578][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=5731 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=66
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=5731 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=5753
+[WINDOW] HTTP -1; batch retained
+[PROCESSING-DIAG] pending_full held count=1341 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=320 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=67
+[BUFFER] Queue : 1984 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1351 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1364 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1377 windowIndex=8 raw_queue=8 pending=8
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9585
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1388 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[231997][E][WiFiClientSecure.cpp:144] connect(): start_ssl_client: -1
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=4818 status=-1 fail_stage=post pending_before=8 pending_after=8 retry_count=67
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=4818 body_read_ms=0 status=-1 response_bytes=0 fail_stage=post total_ms=4848
+[WINDOW] HTTP -1; batch retained
+[PROCESSING-DIAG] pending_full held count=1395 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=328 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=68
+[PROCESSING-DIAG] pending_full held count=1402 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1415 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1427 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=no begin_result=ok gate_wait_ms=0 request_ms=3603 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=68
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=3603 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=3647
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1430 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=334 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=69
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=623 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=69
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=623 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=666
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1433 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=336 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=70
+[PROCESSING-DIAG] pending_full held count=1436 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=616 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=70
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=616 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=667
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=338 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=71
+[PROCESSING-DIAG] pending_full held count=1439 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=621 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=71
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=621 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=647
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=340 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=72
+[HTTP-GATE] wait_ms=1 result=acquired
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1443 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=1 request_ms=707 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=72
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=707 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=740
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=342 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=73
+[PROCESSING-DIAG] pending_full held count=1447 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=517 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=73
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=517 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=556
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=343 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=74
+[PROCESSING-DIAG] pending_full held count=1450 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=696 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=74
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=696 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=748
+[WINDOW] HTTP 200; batch retained
+[BUFFER] Queue : 1985 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=345 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=75
+[PROCESSING-DIAG] pending_full held count=1459 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=624 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=75
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=624 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=655
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1472 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=347 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=76
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=546 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=76
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=546 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=578
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1485 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=349 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=77
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9586
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=772 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=77
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=772 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=814
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1491 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=351 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=78
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1494 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=812 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=78
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=812 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=853
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=353 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=79
+[PROCESSING-DIAG] pending_full held count=1498 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=615 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=79
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=615 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=652
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=355 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=80
+[PROCESSING-DIAG] pending_full held count=1502 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=521 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=80
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=521 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=565
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=356 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=81
+[PROCESSING-DIAG] pending_full held count=1505 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=622 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=81
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=622 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=652
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=358 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=82
+[PROCESSING-DIAG] pending_full held count=1509 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=526 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=82
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=526 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=578
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=360 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=83
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1513 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=690 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=83
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=690 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=740
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=362 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=84
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=525 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=84
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=525 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=579
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1517 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=363 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=85
+[BUFFER] Queue : 1986 / 24999 | physical slots=25000 | dropped=0
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1524 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=615 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=85
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=615 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=648
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=365 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=86
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1537 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=752 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=86
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=752 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=785
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=367 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=87
+[PROCESSING-DIAG] pending_full held count=1550 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9587
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=648 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=87
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=648 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=675
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=369 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=88
+[PROCESSING-DIAG] pending_full held count=1558 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=745 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=88
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=745 body_read_ms=4 status=200 response_bytes=762 fail_stage=none total_ms=801
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1562 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=371 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=89
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=798 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=89
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=798 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=841
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1565 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=373 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=90
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=748 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=90
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=748 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=791
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1569 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=375 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=91
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=636 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=91
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=636 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=681
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1573 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=377 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=92
+[PROCESSING-DIAG] pending_full held count=1576 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=795 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=92
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=795 body_read_ms=7 status=200 response_bytes=762 fail_stage=none total_ms=837
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=379 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=93
+[PROCESSING-DIAG] pending_full held count=1580 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=728 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=93
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=728 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=778
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=381 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=94
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1584 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=717 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=94
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=717 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=747
+[WINDOW] HTTP 200; batch retained
+[BUFFER] Queue : 1987 / 24999 | physical slots=25000 | dropped=0
+[WINDOW] Dropped windows=383 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=95
+[PROCESSING-DIAG] pending_full held count=1591 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=621 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=95
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=621 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=652
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[WINDOW] Dropped windows=385 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=96
+[PROCESSING-DIAG] pending_full held count=1604 windowIndex=8 raw_queue=8 pending=8
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=851 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=96
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=851 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=881
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1617 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=387 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=97
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[MEASUREMENT] elapsed=0 ms
+[PACKET] Created Sequence 9588
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=674 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=97
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=674 body_read_ms=6 status=200 response_bytes=762 fail_stage=none total_ms=722
+[WINDOW] HTTP 200; batch retained
+[PROCESSING-DIAG] pending_full held count=1625 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=389 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=98
+[PROCESSING-DIAG] pending_full held count=1629 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=891 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=98
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=891 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=922
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=391 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=99
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=624 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=99
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=624 body_read_ms=3 status=200 response_bytes=762 fail_stage=none total_ms=660
+[WINDOW] HTTP 200; batch retained
+[RAW-DEBUG] samples=512 quality=valid X[min=-260 max=-229 mean=-246.3 rms=246.3] Y[min=15 max=45 mean=30.1 rms=30.2] Z[min=-112 max=-20 mean=-50.7 rms=51.1]
+[PROCESSING-DIAG] pending_full held count=1633 windowIndex=8 raw_queue=8 pending=8
+[WINDOW] Dropped windows=393 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=100
+[PROCESSING-DIAG] pending_full held count=1636 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=759 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=100
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=759 body_read_ms=5 status=200 response_bytes=762 fail_stage=none total_ms=788
+[WINDOW] HTTP 200; batch retained
+[WINDOW] Dropped windows=395 (queue overflow; sequence gaps retained)
+[RAW-ATTEMPT] raw_attempt=1 begin_result=pending gate_wait_ms=0 request_ms=0 status=pending fail_stage=none pending_before=8 pending_after=8 retry_count=101
+[PROCESSING-DIAG] pending_full held count=1640 windowIndex=8 raw_queue=8 pending=8
+[RAW-ATTEMPT] raw_attempt=1 reuse_candidate=yes begin_result=ok gate_wait_ms=0 request_ms=609 status=200 fail_stage=ack pending_before=8 pending_after=8 retry_count=101
+[HTTP-DIAG] op=raw endpoint=https://motordiagnosis-api.duckdns.org/api/devices/DEV-01-MOT-02/raw-vibration-windows begin=ok request_ms=609 body_read_ms=23 status=200 response_bytes=762 fail_stage=none total_ms=656
+[WINDOW] HTTP 200; batch retained
+
+# capture_end_utc=2026-09-10T16:15:01.525159+00:00
+# elapsed_seconds=300.046
