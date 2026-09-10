@@ -62,3 +62,11 @@
 - 10~15 차단: 09 선행 차단 및 ACK metadata·baseline·OTA/파티션·백업 게이트 미확정.
 - 직접 검증: `git diff --check` 통과, PATH에 MSYS2 UCRT64 GCC를 추가한 `pio test -e native` 162/162 통과, `pio run -e esp32-s3-devkitc-1-n8` 통과.
 - 업로드 보류: evaluator 런타임 연결 누락, 이전 boot spool 복원 불가, N8 자동 LittleFS 포맷 플래그 유지가 코드 리뷰에서 확인됨.
+
+## 2026-09-11 IoT policy retry 09R-15R final gate
+
+- Retry chain managed sequentially through Luna agent1: 09R `task_f5807311e231`, 10R `task_dca82e863937`, 11R `task_5c402ae79909`, 12R `task_ca3f6166be49`, 13R `task_06f959966ce7`, 14R `task_14be4df965ab`, 15R `task_797c9eb3f541`.
+- Corrective follow-ups: 14R-C1 `task_e3750aaf04ff` fixed Unity native test harness and persisted spool boot identity; 14R-C2 `task_f1cbef98cc0b` guarded auxiliary HTTP work when priority raw backlog exists.
+- Direct verification in `D:\github\MotorDiagnosis\firmware\esp32_edge_node`: `pio test -e native` with `C:\msys64\ucrt64\bin` prefixed to PATH = 164/164 passed; `pio run -e esp32-s3-devkitc-1-n8` passed; `git diff --check` passed with existing LF/CRLF warnings.
+- Policy status: 09R source implementation plus spool-priority guard is present but hardware reboot/priority ordering is unverified; 10R metadata is present but no real server fixture; 11R blocked because the current profile proves 16 slots, not 600; 12R adaptive partition is not applied and OTA/backup/restore approval is absent; 13R diagnostics are source/build verified; 14R native/N8 verified; 15R rollout gate says `coordinator may upload = NO`.
+- Upload/log gate: no COM7 upload, reset, format, partition change, or 3-minute log run. Missing real 202/200 ACK fixture, baseline ID/values, LittleFS backup/hash/restore evidence, and hardware serial validation keep rollout blocked.
