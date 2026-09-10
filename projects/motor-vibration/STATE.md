@@ -47,3 +47,18 @@
 - 단일 Network Task/persistent client 수정안은 N8 빌드·업로드까지 확인했으나, 실장비에서 전송 병목이 해결됐다고 판단할 수 없음.
 - `accepted: false/0` Raw ACK를 거부하도록 로컬 검증을 보강했으나, 해당 변경의 실장비 재검증은 남아 있음.
 - 변경은 `D:\github\MotorDiagnosis` 로컬 작업본에만 남아 있으며, 공용 저장소 commit/push/PR은 수행하지 않음.
+
+## 2026-09-11 IoT 전송정책 번호별 검증
+
+- 01 부분: 코드 기준선·N8 빌드·native 143/143 확인. 장치 5분 기준선 로그는 없음.
+- 02 완료: Raw ACK 202/200 전체 식별자 일치 및 부분 ACK 보존, native/N8 통과.
+- 03 완료(소스 기준): TLS 단일 networkTask 소유권·HTTP 종료 순서 보강. 전원차단 실측 미검증.
+- 04 완료: adaptive example/local ignore·임계값 검증·`baseline_missing` safe mode 추가.
+- 05 완료(순수 로직): priority evaluator 테스트 통과. 런타임 호출 연결은 미완료.
+- 06 부분: 전송 전 RawSpool 저장·CRC/read-back·ACK 후 제거 연결. 16 슬롯·재부팅 복원 실측 미검증.
+- 07 완료(소스 기준): raw 우선과 bounded auxiliary 턴 추가. 장비 지연 상한 미검증.
+- 08 부분: 5분 cutoff·최대 4개·post-cutoff 제외 구현.
+- 09 차단: Raw/spool에 priority·trigger·recovery 필드와 서버 payload 계약이 없어 임의 구현 금지.
+- 10~15 차단: 09 선행 차단 및 ACK metadata·baseline·OTA/파티션·백업 게이트 미확정.
+- 직접 검증: `git diff --check` 통과, PATH에 MSYS2 UCRT64 GCC를 추가한 `pio test -e native` 162/162 통과, `pio run -e esp32-s3-devkitc-1-n8` 통과.
+- 업로드 보류: evaluator 런타임 연결 누락, 이전 boot spool 복원 불가, N8 자동 LittleFS 포맷 플래그 유지가 코드 리뷰에서 확인됨.
