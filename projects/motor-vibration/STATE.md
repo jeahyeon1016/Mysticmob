@@ -102,3 +102,12 @@
 - Confirmed only the direct Drop failure boundary: capture/processing queue overflow increments `processingDrops`; the dominant LittleFS substage is not yet measured.
 - TLS `-1` remains an HTTP-pre-response transport failure with an unknown lower-level cause. Intermittent 202 success rules out treating URL/auth/certificate configuration as a proven permanent fault.
 - Next gate starts with numbered instrumentation (`DROP-01/02`, `TLS-01`) before selecting a storage or TLS behavior change.
+
+## 2026-09-11 paused checkpoint after 09 plan implementation
+
+- Added `10_ESP32_DroppedWindows_TLS-1_진행상태_중단지점_2026-09-11.md` with numbered task status, exact hardware evidence, and the next safe resume order.
+- Integrated the two agent reports and applied the minimum evidence-based changes: spool write cursor, per-file LittleFS locks, removal of the ACK hot-path full spool scan, raw-priority guards, and DROP/TLS diagnostics.
+- N8 build and COM7 firmware-only upload succeeded. No format, erase, partition change, or MotorDiagnosis commit/push was performed.
+- The latest 3-minute observation failed: raw queue saturated at 8, `capture_queue_full` increased, the first raw spool write took about 11.0 seconds, TLS `-1` recurred, and `IntegerDivideByZero` rebooted the device repeatedly.
+- Current strongest direct evidence is `writeRawSpool()` line 406 (`LittleFS.open(temp, "w")`) entering LittleFS allocation/metadata code while the filesystem had only 4,096 bytes free. This is a hypothesis to verify with a safe capacity-admission guard, not permission to delete or format data.
+- Work is intentionally paused here. The uploaded firmware is **not rollout-healthy** and the dirty `D:\github\MotorDiagnosis` worktree remains uncommitted.
