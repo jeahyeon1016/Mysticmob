@@ -78,3 +78,10 @@
 - Raw transport initially failed with TLS `status=-1`, retained batches, `pending=8`, and queue overflow. `WINDOW Dropped windows` rose to 295 during observation.
 - HTTP `202` ACK paths succeeded for batches 1-3 (`expected=3/4`, `matched=3/4`) and corresponding records were deleted. Later retries for batch 4 returned HTTP `409 WINDOW_SEQUENCE_CONFLICT` (`Expired/out-of-order window`) and remained retained.
 - `baseline_missing` safe mode remained active. Repeated LittleFS open errors reported `raw-spool-v2-*.bin does not exist, no permits for creation` while spool records were stored. Final hardware result: upload succeeded, but runtime communication/data-loss criteria failed; do not declare rollout healthy or close the issue.
+
+## 2026-09-11 post-upload root-cause and repair guide
+
+- Added `08_ESP32_업로드후_오류_원인분석_수정지침_2026-09-11.md` with evidence-ranked causes and sequential `FIX-01` through `FIX-11` agent tasks.
+- Confirmed failure chain: unlimited `baseline_missing` priority selection skipped older indexes, the server later rejected those indexes with `WINDOW_SEQUENCE_CONFLICT`, 500 ms-capped retry kept the rejected batch active, and non-durable RAM queues overflowed.
+- The guide treats initial TLS `-1` as a contributing transient failure pending underlying TLS diagnostics, and treats LittleFS `no permits for creation` as likely existence-probe noise because the following spool write succeeded.
+- Full policy compliance requires an explicit server-order decision: allow unseen out-of-order identities, or accept that firmware-only monotonic sending cannot satisfy priority-before-backlog.
