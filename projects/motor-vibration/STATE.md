@@ -119,3 +119,12 @@
 - Confirmed the panic call path ends at `writeRawSpool()` calling `LittleFS.open(temp, "w")` with only 4,096 bytes free, but did not claim near-full storage as the sole divide-by-zero cause. The exact bundled `lfs.c:689`, allocator state, and safe reserve are still unknown.
 - Preserved the existing two-agent structure: Agent 1 owns Drop/LittleFS runtime, Agent 2 owns TLS diagnostics, and the coordinator alone integrates/uploads/monitors.
 - The next run is deliberately bounded at deterministic fixes, fail-closed diagnostics, build/test, one COM7 upload, one 3-minute log, and a stop/report decision. Fixed-ring work, partition/format/erase, queue inflation, TLS behavior changes, and MotorDiagnosis commit/push remain outside scope.
+
+## 2026-09-11 evidence-only repair upload and 3-minute result
+
+- Supervised run `run_877a40df0035` used the existing two-agent structure: Agent 1 completed A1-01 through A1-07 in `continuous_vibration_runtime.h`; Agent 2 completed A2-01 through A2-04 in `backend_http.h`.
+- Coordinator verification passed: `pio test -e native` = 171/171, `pio run -e esp32-s3-devkitc-1-n8` succeeded, and target-file `git diff --check` had only the existing LF/CRLF warning.
+- Firmware-only upload to COM7 succeeded with flash hash verification. Uploaded ELF SHA256: `EA18B0AA0929D3A7D64C0243718FDE7AAA70723B21DD111910FA40E019E83467`.
+- Three-minute serial observation: LittleFS reported total 2,752,512, used 2,748,416, free 4,096; boot admission latched `suspended=yes`; boot cursor reported `scanned=350`, `next=349`; no IntegerDivideByZero, panic, watchdog, reboot, or TLS `-1` was observed during this window.
+- The fail-closed gate worked as designed: new spool writes were rejected before `LittleFS.open()`, storage timing buckets remained zero, and the existing backlog was retained. The restored ring backlog and RAM queues saturated; `processing_pending_full` and `capture_queue_full` increased, so this is a diagnostic stabilization result, not a rollout-health pass.
+- No HTTP attempt was sufficiently observed in this window to prove TLS resolution. Do not expand the scope to fixed-ring, reserve-threshold tuning, partition/format/erase, or TLS behavior changes. MotorDiagnosis remains dirty and uncommitted/unpushed.
