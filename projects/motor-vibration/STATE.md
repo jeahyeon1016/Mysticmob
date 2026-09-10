@@ -128,3 +128,13 @@
 - Three-minute serial observation: LittleFS reported total 2,752,512, used 2,748,416, free 4,096; boot admission latched `suspended=yes`; boot cursor reported `scanned=350`, `next=349`; no IntegerDivideByZero, panic, watchdog, reboot, or TLS `-1` was observed during this window.
 - The fail-closed gate worked as designed: new spool writes were rejected before `LittleFS.open()`, storage timing buckets remained zero, and the existing backlog was retained. The restored ring backlog and RAM queues saturated; `processing_pending_full` and `capture_queue_full` increased, so this is a diagnostic stabilization result, not a rollout-health pass.
 - No HTTP attempt was sufficiently observed in this window to prove TLS resolution. Do not expand the scope to fixed-ring, reserve-threshold tuning, partition/format/erase, or TLS behavior changes. MotorDiagnosis remains dirty and uncommitted/unpushed.
+
+## 2026-09-11 transmission-stall diagnosis and debug-first next plan
+
+- Added `12_ESP32_전송정체_Drop_확정원인_디버그우선_수정지침_2026-09-11.md` after comparing the latest hardware state with the current runtime and scheduler code.
+- Confirmed that the prior three-minute observation could not exercise ordinary periodic selection because the scheduler cutoff is five minutes and remains zero before then.
+- Confirmed that fail-closed spool admission prevents the unsafe LittleFS write path but also prevents new RAM batches from passing durable-before-send persistence; this is a safety result, not a transmission fix.
+- Confirmed that comparing a restored record's boot-relative `startUs` with the current boot's cutoff crosses incompatible monotonic time domains. Immediate restored-record transmission remains blocked because the raw spool does not prove a mapping to its original UTC anchor.
+- Clarified that `processing_pending_full` counts repeated pressure events, while `capture_queue_full` is a direct loss boundary; the next diagnostic build must separate event, unique-window, and actual-drop counts.
+- Preserved the existing two-agent structure. Agent 1 owns selector/scheduler/Drop instrumentation, Agent 2 owns HTTP/TLS event correlation, and the coordinator alone integrates, verifies, uploads firmware, and runs an active three-minute observation after selector completion or HTTP entry.
+- Current direction assessment: safety and evidence discipline are improving, but rollout health is still blocked because transmission progress and actual loss have not been resolved and TLS has not been exercised sufficiently.
