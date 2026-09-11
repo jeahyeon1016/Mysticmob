@@ -149,3 +149,29 @@ ADXL345 SPI FIFO
 5. 약 85초 만에 actual drop 59가 발생했다. 다음 수정 경계는 네트워크가 아니라 catalog 기반 circular empty-slot 선택이다.
 
 이 문서는 리팩토링 후 코드 구조와 아직 실장비에서 확인하지 못한 경계를 함께 기록한다.
+
+## 11. cursor 충돌 수정 후 실장비 결과
+
+2026-09-11 COM7 재검증에서 `RawSpoolIndex::nextEmpty()`가 현재 cursor부터 512개 catalog를 원형 순회해 빈 슬롯을 선택하는 경계를 확인했다.
+
+| 관측 | 결과 | 의미 |
+|---|---|---|
+| boot catalog | `scanned=512`, `present=269`, `readable=269`, `next=62`, `full=no` | 기존 복구·cursor 초기화 정상 |
+| 신규 spool 저장 | 79회, slot 62부터 충돌 슬롯 건너뜀 | `slot=512` false-full 제거 |
+| `spool_capacity_full` | 실제 `free=0` 이후에만 증가 | 논리 cursor와 물리 용량 판정 분리 |
+| queue/drop | `raw_queue=8`, `pending=8`, `actual_drop_total=233` | 동기 LittleFS writer가 capture 경계를 압박 |
+| network | `http_begin=0`, ACK/delete=0 | 저장공간 고갈과 pre-send durability가 전송을 차단 |
+
+문제 전파는 다음처럼 분리된다.
+
+```text
+RawSpoolIndex.nextEmpty()  -- PASS -->  LittleFS 실제 free=0  -- BLOCK -->  pre-send persistence
+                                                                          |
+                                                                          +--> HTTP/ACK 미진입
+
+동기 LittleFS write  -- 1.28초 초과 --> pending/raw queue 포화 --> actual_drop_total 증가
+```
+
+부팅 catalog 복구 자체도 `32.644 s`로 길며, TLS `start_ssl_client: -1`은 3회였지만 Raw HTTP가 시작되지 않아 독립 원인으로 확정하지 않았다. 원본 serial 로그는 장치 식별정보를 포함하므로 로컬에만 두고, 구조도와 정제 보고서에는 수치만 반영했다.
+
+따라서 현재 사용자에게 표시할 결론은 “cursor 충돌 구간은 녹색 PASS, LittleFS 동기 저장·실제 용량 고갈·HTTP 미진입은 붉은 BLOCKED”이다.

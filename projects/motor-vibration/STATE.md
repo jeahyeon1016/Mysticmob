@@ -150,6 +150,16 @@
 - No panic, watchdog, reboot, or unsafe LittleFS allocation failure appeared in this run. Cross-boot timestamp mapping remains unproven. The pre-existing `BackendHttp::end()` worktree difference was not changed by plan 12.
 - Final gate: **BLOCKED**. The diagnostic changes and fail-closed behavior are useful, but transmission progress and lossless capture are not resolved. Do not declare rollout healthy and do not make speculative TLS behavior, queue-capacity, partition, format, or erase changes. `D:\github\MotorDiagnosis` remains intentionally dirty and uncommitted/unpushed.
 
+## 2026-09-11 cursor collision fix agent run and hardware result
+
+- Agent 1 implemented `RawSpoolIndex::nextEmpty()` with circular search from the current cursor and an `Unreadable` quarantine state. The coordinator received the result, reviewed the diff, and kept the change limited to catalog selection plus its runtime call site and native tests.
+- Native tests passed `178/178`; N8 build and target diff check passed. Firmware-only upload to COM7 succeeded with flash hash verification. No filesystem image, format, erase, or partition change was used, and MotorDiagnosis was not committed or pushed.
+- The sanitized retest log is documented in `evidence/serial/MotorDiagnosis_COM7_N8_20260911_cursor_fix_retest_report.md`; the raw monitor file remains local because it contains device/network identifiers.
+- Boot catalog reported `512 scanned / 269 present / 269 readable / next=62 / full=no` in `32.644 s`. During about 246 seconds, 79 durable writes skipped occupied slots and no `slot=512` false-full marker appeared.
+- The run then reached genuine LittleFS exhaustion (`2,752,512 total / 2,752,512 used / 0 free`). Final counters were `actual_drop_total=233`, `capture_queue_full=233`, `processing_pending_full_events=11`, `raw_queue=8`, `pending=8`, and `spool_capacity_full=31`.
+- HTTP entry/result, ACK, and delete markers were not observed. TLS `start_ssl_client: -1` appeared three times but cannot be assigned to the Raw path because Raw HTTP was never reached. No panic, watchdog, Guru Meditation, or reboot occurred.
+- Current gate: cursor collision fix **PASS**; firmware rollout health **BLOCKED**. Next numbered task is to isolate slow LittleFS persistence from capture/processing without changing the external API, ACK durability, or storage destructive policy.
+
 ## 2026-09-11 reboot 후 5분 실장비 로그
 
 - COM7을 GPIO0 high 유지 후 EN pulse 방식으로 재부팅하여 정상 애플리케이션 부팅을 확인했다. 로그는 `evidence/serial/MotorDiagnosis_COM7_N8_20260911_reboot_5min.log`에 저장했다.
