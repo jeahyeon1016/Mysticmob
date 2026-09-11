@@ -207,3 +207,14 @@
 - 약 3분 관찰에서 capture_queue_full=0, raw_queue_high_water=1로 전용 writer에 의한 capture 직접 압력은 완화됐다. 그러나 LittleFS가 total=2752512 used=2752512 free=0으로 가득 차 pending=8, rawHold=8, actual_drop_total=201이 발생했고 HTTP/ACK/delete는 0회였다.
 - 최종 판정: cursor 충돌 및 false-full PASS, 현재 firmware rollout health BLOCKED. 남은 문제는 파티션 이동이나 포맷으로 처리하지 않고, 백업·복구 검증을 포함한 저장공간 마이그레이션을 별도 승인한 뒤 진행한다.
 - 문서는 이번 업로드·로그 확인 후에만 최신화했다. MotorDiagnosis는 commit/push/PR하지 않았고, 민감한 원본 serial 로그도 push하지 않는다.
+
+## 2026-09-11 LittleFS 초기화 후 Wi-Fi 연결 비교 및 13-15E 원인분석
+
+- test data만 있는 LittleFS `0x540000-0x7E0000`을 scoped erase한 뒤 빈 image의 readback SHA-256과 mount를 검증했다. firmware/source/partition은 변경하지 않았다.
+- Wi-Fi 오프라인 190초 실행은 storage 57건 중 56건이 1.28초를 초과했고 최대 6.09초, `actual_drop_total=187`, HTTP/ACK/delete 0이었다.
+- Wi-Fi 연결 리부팅 190초 실행은 IP `172.20.10.2`, RSSI `-47 dBm`, NTP 성공을 확인했다. storage 16건 전부 1.28초를 초과했고 최대 25.52초, `actual_drop_total=215`, HTTP/ACK/delete 0이었다.
+- 연결 실행은 LittleFS catalog 196건, used/free 2,072,576/679,936 bytes로 오프라인 실행의 77건, 1,552,384/1,200,128 bytes와 달라 Wi-Fi가 저장시간을 악화시켰다고 단정하지 않는다.
+- 코드상 periodic cutoff는 300초이므로 190초 로그의 HTTP 0건은 서버/TLS 장애를 증명하지 않는다. LittleFS storage timer는 HTTP 이전의 로컬 write/flush/close/rename 구간이다.
+- 전용 writer 분리로 두 실행 모두 `capture_queue_full=0`이었지만 pending/rawHold가 capacity 8에 도달해 실제 처리 결과 유실이 계속됐다.
+- 상세 계획은 `14_ESP32_WiFi정상_HTTP미진입_LittleFS병목_원인분석_해결계획_2026-09-11.md`에 기록했다. 다음은 8분 이상 end-to-end 로그와 N16R8 저장 수용량 계산이며 rollout은 계속 **BLOCKED**다.
+- 이번 단계에서 MotorDiagnosis source 수정·upload·format·erase·partition 변경·commit/push/PR은 수행하지 않았다.
