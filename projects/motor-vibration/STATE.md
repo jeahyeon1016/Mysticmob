@@ -218,3 +218,13 @@
 - 전용 writer 분리로 두 실행 모두 `capture_queue_full=0`이었지만 pending/rawHold가 capacity 8에 도달해 실제 처리 결과 유실이 계속됐다.
 - 상세 계획은 `14_ESP32_WiFi정상_HTTP미진입_LittleFS병목_원인분석_해결계획_2026-09-11.md`에 기록했다. 다음은 8분 이상 end-to-end 로그와 N16R8 저장 수용량 계산이며 rollout은 계속 **BLOCKED**다.
 - 이번 단계에서 MotorDiagnosis source 수정·upload·format·erase·partition 변경·commit/push/PR은 수행하지 않았다.
+
+## 2026-09-11 N16R8 PSRAM transport diagnostic 업로드 및 로그 판정
+
+- 14-09A~14-09C 에이전트가 통신 분리 설계, HTTP 계약, 저장량을 병렬 검토했다. 14-10~14-13 에이전트가 no-spool diagnostic 경로를 구현·수정·검토했고 native `178/178`, N16R8 및 조합별 build를 통과했다.
+- 14-14에서 COM7 N16R8 diagnostic firmware를 업로드하고 RTS-only reset 후 90.125초 로그를 확보했다. LittleFS upload/format/erase/partition 변경은 없었다.
+- Wi-Fi `172.20.10.2`, RSSI `-32~-35 dBm`, NTP 동기화, PSRAM source depth 7에서 4개 선택, JSON 18,065B, `no_spool_write=1`, storage samples/timers 0을 확인했다.
+- HTTPS POST는 총 약 25.621초 후 `status=-1`, `connection refused`로 실패했다. ACK 0, matched 0, retry 1, handoff retained 1이다. HTTP 200/202는 확인하지 못했다.
+- POST 대기 동안 pending capacity 8이 포화되어 `processing_pending_full_events=53`, `actual_drop_total=45`, `raw_hold_full=45`가 됐다. `capture_queue_full=0`이며 panic/watchdog/assert/heap corruption은 없었다.
+- 최종 판정: **PSRAM→no-spool 진단 경로 PASS, HTTP/TLS end-to-end NO-GO, rollout BLOCKED**. `connection refused`는 HTTP status 이전이므로 서버 443 listener/방화벽/endpoint reachability를 먼저 read-only 확인한다.
+- 원본 serial log `MotorDiagnosis_COM7_N16R8_transport_diag_20260911_raw.log`는 로컬 증거로만 유지하며 민감정보 보호를 위해 push하지 않는다. MotorDiagnosis는 계속 dirty/uncommitted/unpushed다.

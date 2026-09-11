@@ -179,3 +179,53 @@ networkTask
 - partition 변경
 - MotorDiagnosis commit/push/PR
 - 서버/TLS 원인 확정
+
+## 14-09 병렬 분석·진단 구현·N16R8 실장비 결과
+
+### 14-09A 설계 에이전트 보고
+
+- LittleFS 선저장 계약과 통신 경로를 compile-time 진단 모드로 분리했다.
+- 진단 모드는 PSRAM handoff에서 정확히 4개 Raw window를 읽고 기존 JSON/TLS/HTTP/strict ACK를 재사용한다.
+- 성공한 ACK에서만 handoff를 pop하고 실패하면 원본을 유지한다.
+
+### 14-09B HTTP 계약 검토 보고
+
+- Raw payload는 backend 계약에 맞춰 top-level `windows` 배열로 전송하도록 확인했다.
+- backend가 반환하는 200/202와 device/boot/window identity를 ACK 기준으로 사용한다.
+- 이번 실장비에서는 HTTP 응답 자체에 도달하지 못해 payload/API 계약의 실응답 검증은 미완료다.
+
+### 14-09C 저장량 검토 보고
+
+- Raw payload 3,072B와 header를 고려하면 0.64초 주기에서 하루 약 415MB가 필요하다.
+- 2.75MB LittleFS는 24시간 Raw 보존 장치가 아니며, 외부 저장 또는 서버 보존이 필요하다.
+
+### 14-10 구현 및 14-11 검토
+
+- `RAW_TRANSPORT_DIAGNOSTIC` 분기, PSRAM 4-window handoff, no-spool 전송, ACK 후 pop을 구현했다.
+- normal mode의 기존 spool/write/ACK/delete 경로는 유지했다.
+- RAW=0/continuous 조합의 writer guard, 비연속 모드 auxiliary 호출, 진단 로그 rate limit을 보완했다.
+- native `178/178`, N16R8 기본 build, diagnostic build, RAW=0/CONTINUOUS=1 build를 통과했다.
+
+### 14-12 수정 및 14-13 최종 gate
+
+- non-continuous loop에서 network auxiliary가 호출되도록 보완했다.
+- 최종 gate에서 target 경로와 production spool 계약이 유지됨을 확인했다.
+- 진단 모드 실장비 검증만 남기고 production rollout은 보류했다.
+
+### 14-14 N16R8 실장비 업로드 및 로그 결과
+
+- COM7에 N16R8 diagnostic firmware를 업로드했다. process 환경으로 `-DRAW_TRANSPORT_DIAGNOSTIC=1`만 주입했으며 LittleFS upload/format/erase/partition 변경은 하지 않았다.
+- RTS-only 1회 리셋 후 90.125초 수집했다. Wi-Fi IP `172.20.10.2`, RSSI 약 `-32~-35 dBm`, NTP `2026-09-11T15:01:15Z` 동기화는 PASS다.
+- `source=psram depth=7 count=4`, indexes `0,1,2,3`, JSON `18,065B`, `pre_send_persist_bypassed`를 확인해 PSRAM→payload→no-spool 경로는 PASS다.
+- `storage_samples=0`, storage timer 전부 0, `no_spool_write=1`로 저장 경로가 이번 통신 실험을 막지 않았음은 확인했다.
+- 그러나 HTTPS POST가 약 `5.344s` 요청 구간, 총 약 `25.621s` 후 `status=-1`, `connection refused`로 끝났다. ACK `0`, matched `0`, `accepted=no`, handoff `retained=1`, retry `1`이다.
+- POST 대기 중 pending capacity 8이 차서 `processing_pending_full_events=53`, `actual_drop_total=45`, `raw_hold_full=45`까지 증가했다. `capture_queue_full=0`이고 PSRAM free 약 8.18MB는 유지됐다.
+- panic/watchdog/assert/heap corruption 표시는 없었다. LittleFS는 mount됐지만 기존 상태에서 `used=total=2,752,512`, `free=0`이었다.
+
+## 14-10 최종 해석 및 다음 번호
+
+- **진단 분리 경로:** PASS. LittleFS 선저장 없이 PSRAM에서 4개를 선택하고 payload를 구성했다.
+- **통신 end-to-end:** **NO-GO/BLOCKED**. Wi-Fi·NTP·DNS(`TLS-DNS rc=1`) 이후 TLS/서버 연결 단계에서 거절되어 200/202 및 ACK를 확인하지 못했다.
+- 이번 결과만으로 firmware payload 오류와 서버 포트/방화벽/백엔드 가용성 중 하나를 단정하지 않는다. `connection refused`는 HTTP status 이전 실패다.
+- **다음 14-15:** firmware를 더 수정하지 않고 동일 endpoint에 대한 host/server 측 443 reachability와 backend listener를 read-only로 확인한다. 그 결과가 정상일 때만 TLS client 설정 또는 endpoint 설정을 별도 번호로 검토한다.
+- 저장 구조는 별도 트랙으로 유지한다. 현재는 24시간 내부 Flash 보존을 목표로 하지 않고, 전송 실패 시 bounded fallback 정책을 결정할 때까지 production rollout을 승인하지 않는다.
