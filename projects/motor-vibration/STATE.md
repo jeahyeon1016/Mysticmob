@@ -178,3 +178,12 @@
 - 검증은 native `175/175`, N8 build 성공, diff check 통과다. RAM은 107,732 / 327,680 bytes(32.9%), Flash는 1,093,437 / 3,342,336 bytes(32.7%)다.
 - `MotorDiagnosis_main_architecture.html`을 architecture-diagram-generator v1.1 스타일로 갱신했다. 동기 LittleFS 쓰기와 TLS `-1`은 미해결 문제로, selector→HTTP 진행은 코드 수정 후 실장비 확인 대기로 표시했다.
 - 실장비 upload/log는 수행하지 않았다. 처리 task의 동기 LittleFS 쓰기, restored/current boot 시간축 매핑, TLS 하위 원인은 변경하지 않았으며 rollout 판정은 계속 **BLOCKED**다. `MotorDiagnosis` 변경은 사용자 요청 전 commit/push/PR하지 않는다.
+
+## 2026-09-11 spool index 리팩토링 실장비 재검증
+
+- 사용자 요청으로 N8 firmware를 COM7에 업로드했고 모든 flash hash가 검증됐다. filesystem image, LittleFS format, erase-all은 수행하지 않았다.
+- 약 85초 관측에서 persisted selector는 stat/header filesystem 조회 없이 84 us, pending selector는 283~397 us로 완료되어 기존 selector 정체 제거를 확인했다.
+- 부팅 index 복구는 265개 header에서 32.54초가 걸렸다. 첫 빈 slot 42에 1건 저장한 뒤 cursor 43이 사용 중이자 앞쪽 빈 slot을 순환 탐색하지 않아, 266/512개만 사용하고 free 335,872 bytes인 상태에서 `slot=512` false-full을 반복했다.
+- pre-send persistence 9회 실패로 Raw `http_begin`, ACK, delete는 0회였다. 최종 `actual_drop_total=59`, `spool_capacity_full=29`, raw/pending queue 8/8이었다.
+- TLS `-1`은 health 요청에서 1회 재현됐고 panic/watchdog/reboot는 없었다. selector는 PASS지만 end-to-end는 FAIL이며 rollout은 계속 **BLOCKED**다.
+- 원본 serial 로그에는 네트워크·장치 식별자가 있어 로컬에만 유지하고, 비식별 결과 보고서만 push한다. 제품 코드는 이번 검증에서 추가 수정하지 않았고 `MotorDiagnosis` commit/push/PR도 수행하지 않았다.

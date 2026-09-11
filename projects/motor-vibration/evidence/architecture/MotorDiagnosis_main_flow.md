@@ -140,4 +140,12 @@ ADXL345 SPI FIFO
 4. LittleFS 쓰기가 관측상 1.28~2.463초인 반면 Raw window는 0.64초마다 생성되므로, 지속 오프라인에서 무손실을 요구하면 파일 배치 형식 또는 별도 저장 파이프라인을 별도 설계해야 한다.
 5. TLS `-1`은 selector와 분리해 HTTP 하위 진단으로 계속 추적한다.
 
+## 10. 실장비 재검증 결과
+
+1. runtime selector는 filesystem 재조회 없이 84~397 us에 완료되어 기존 selector 정체가 해소됐다.
+2. 부팅 catalog 복구는 265개 header에서 32.54초가 걸려 startup 지연으로 남았다.
+3. `writeRawSpool()` cursor는 다음 slot 하나만 검사한다. 첫 빈 slot 42 저장 후 43이 사용 중이자 다른 빈 slot을 찾지 않고 false-full을 반환했다.
+4. 이 때문에 pre-send durability가 HTTP보다 먼저 9회 실패했고 Raw HTTP/ACK/delete는 실행되지 않았다.
+5. 약 85초 만에 actual drop 59가 발생했다. 다음 수정 경계는 네트워크가 아니라 catalog 기반 circular empty-slot 선택이다.
+
 이 문서는 리팩토링 후 코드 구조와 아직 실장비에서 확인하지 못한 경계를 함께 기록한다.
