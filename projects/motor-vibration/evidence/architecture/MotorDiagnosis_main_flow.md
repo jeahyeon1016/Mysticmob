@@ -175,3 +175,31 @@ RawSpoolIndex.nextEmpty()  -- PASS -->  LittleFS 실제 free=0  -- BLOCK -->  pr
 부팅 catalog 복구 자체도 `32.644 s`로 길며, TLS `start_ssl_client: -1`은 3회였지만 Raw HTTP가 시작되지 않아 독립 원인으로 확정하지 않았다. 원본 serial 로그는 장치 식별정보를 포함하므로 로컬에만 두고, 구조도와 정제 보고서에는 수치만 반영했다.
 
 따라서 현재 사용자에게 표시할 결론은 “cursor 충돌 구간은 녹색 PASS, LittleFS 동기 저장·실제 용량 고갈·HTTP 미진입은 붉은 BLOCKED”이다.
+
+## 12. N16R8 legacy 파티션 복구 후 실장비 결과
+
+2026-09-11 N16R8 환경으로 재업로드하기 전에 기존 n8_raw_8MB.csv의 파티션 주소를 유지하는 n16r8_legacy_spiffs_16MB.csv를 적용했다. 일반 firmware upload만 수행했고 filesystem image upload, format, erase는 수행하지 않았다.
+
+| 관측 | 결과 | 의미 |
+|---|---|---|
+| LittleFS mount | 성공, 기존 binary ring 2,747건 복원 | 파티션 이동으로 인한 Corrupted dir pair 해소 |
+| PSRAM | found=yes, 약 8MB | N16R8 런타임 프로파일 확인 |
+| boot catalog | scanned=512, present=348, readable=348, next=348, full=no | slot=512 false-full 미재현 |
+| queue 경계 | capture_queue_full=0, raw_queue high-water=1 | 전용 writer가 capture 직접 정지를 줄임 |
+| 저장공간 | total=2,752,512, used=2,752,512, free=0 | 실제 LittleFS full은 별도 차단 |
+| 최종 압력 | pending=8, rawHold=8, actual_drop_total=201 | 저장공간 고갈 후 bounded 보류 큐 소진 |
+| 네트워크 | http/ACK/delete 0회 | pre-send persistence가 용량 게이트에서 중단 |
+
+문제 구간은 다음과 같이 분리된다.
+
+    RawSpoolIndex.nextEmpty()
+      -- PASS --> occupied slot 충돌을 원형 탐색으로 회피
+      -- PASS --> scanned=512 ... full=no
+
+    LittleFS legacy spiffs
+      -- BLOCKED --> free=0
+      -- BLOCKED --> pre-send persistence
+      -- BLOCKED --> HTTP/ACK/delete 미진입
+      -- PRESSURE --> pending/rawHold 포화 --> actual_drop_total 증가
+
+최종 사용자 표시용 구조도는 Cocoon-AI architecture-diagram-generator의 standalone HTML/SVG 스타일을 유지하고, cursor 구간은 녹색 PASS, 실제 저장공간 고갈과 동기 저장/보류 큐 경계는 붉은 BLOCKED로 표시한다.

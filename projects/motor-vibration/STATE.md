@@ -197,3 +197,13 @@
 - pre-send persistence 9회 실패로 Raw `http_begin`, ACK, delete는 0회였다. 최종 `actual_drop_total=59`, `spool_capacity_full=29`, raw/pending queue 8/8이었다.
 - TLS `-1`은 health 요청에서 1회 재현됐고 panic/watchdog/reboot는 없었다. selector는 PASS지만 end-to-end는 FAIL이며 rollout은 계속 **BLOCKED**다.
 - 원본 serial 로그에는 네트워크·장치 식별자가 있어 로컬에만 유지하고, 비식별 결과 보고서만 push한다. 제품 코드는 이번 검증에서 추가 수정하지 않았고 `MotorDiagnosis` commit/push/PR도 수행하지 않았다.
+
+## 2026-09-11 N16R8 legacy LittleFS 파티션 복구 후 업로드 및 로그
+
+- 13-14K~N 에이전트 보고를 순서대로 수신하고 coordinator가 각 결과를 검토했다. K는 기존 spiffs 영역을 유지하는 custom CSV, L은 파티션·라벨·앱 크기 독립 검토, M은 custom CSV 추적을 위한 .gitignore 정확한 예외, N은 최종 업로드 게이트를 완료했다.
+- platformio.ini의 N16R8 환경은 n16r8_legacy_spiffs_16MB.csv를 사용한다. 기존 spiffs 0x540000/0x2A0000 영역을 이동하지 않고 16MB flash 상위 영역은 사용하지 않는다.
+- COM7 일반 firmware upload와 flash hash 검증에 성공했다. filesystem image upload, LittleFS format, erase-all은 수행하지 않았다. esptool은 실제 ESP32-S3와 Embedded PSRAM 8MB를 확인했다.
+- 부팅 시 LittleFS mount 성공, 기존 binary ring 2747건 복원, PSRAM found=yes, raw spool scanned=512 present=348 readable=348 next=348 full=no를 확인했다. slot=512 false-full은 재현되지 않았고 panic/watchdog/reboot도 없었다.
+- 약 3분 관찰에서 capture_queue_full=0, raw_queue_high_water=1로 전용 writer에 의한 capture 직접 압력은 완화됐다. 그러나 LittleFS가 total=2752512 used=2752512 free=0으로 가득 차 pending=8, rawHold=8, actual_drop_total=201이 발생했고 HTTP/ACK/delete는 0회였다.
+- 최종 판정: cursor 충돌 및 false-full PASS, 현재 firmware rollout health BLOCKED. 남은 문제는 파티션 이동이나 포맷으로 처리하지 않고, 백업·복구 검증을 포함한 저장공간 마이그레이션을 별도 승인한 뒤 진행한다.
+- 문서는 이번 업로드·로그 확인 후에만 최신화했다. MotorDiagnosis는 commit/push/PR하지 않았고, 민감한 원본 serial 로그도 push하지 않는다.
