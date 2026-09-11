@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MotorDiagnosis Current System Flow</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
+  <style>
+    *{box-sizing:border-box;margin:0}
+    body{font-family:'JetBrains Mono',monospace;background:#020617;color:#fff;padding:28px}
+    .container{max-width:1540px;margin:auto}
+    .header{margin-bottom:20px}.header-row{display:flex;align-items:center;gap:12px}
+    .pulse{width:12px;height:12px;border-radius:50%;background:#22d3ee;animation:pulse 2s infinite}
+    @keyframes pulse{50%{opacity:.45}}
+    h1{font-size:22px}.sub{color:#94a3b8;font-size:12px;margin:8px 0 0 24px}
+    .toolbar{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .toolbar-toggle,.toolbar-actions button{background:#0f172a;border:1px solid #334155;color:#cbd5e1;border-radius:6px;padding:7px 10px;font:inherit;font-size:11px;cursor:pointer}
+    .toolbar-actions{display:none;gap:8px}.toolbar.expanded .toolbar-actions{display:flex}
+    .diagram{background:rgba(15,23,42,.55);border:1px solid #1e293b;border-radius:14px;padding:16px;overflow:auto}
+    svg{display:block;width:100%;min-width:1250px}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+    .card{background:rgba(15,23,42,.55);border:1px solid #1e293b;border-radius:10px;padding:14px}
+    .card h3{font-size:12px;margin-bottom:10px}.card p,.card li{font-size:10px;color:#94a3b8;line-height:1.6}.card ul{padding-left:16px}
+    .footer{text-align:center;color:#475569;font-size:10px;margin-top:14px}
+    @media(max-width:900px){body{padding:14px}.cards{grid-template-columns:1fr}}
+    @media print{.toolbar{display:none!important}body{background:#020617}}
+  </style>
+</head>
+<body>
+<div id="report-container" class="container">
+  <div class="header">
+    <div class="header-row">
+      <span class="pulse"></span>
+      <h1>MotorDiagnosis · Current System Flow</h1>
+      <div class="toolbar">
+        <div class="toolbar-actions"><button onclick="copyAsImage(this)">Copy</button><button onclick="downloadPNG(this)">PNG</button><button onclick="downloadPDF(this)">PDF</button></div>
+        <button class="toolbar-toggle" onclick="this.parentElement.classList.toggle('expanded')">☰</button>
+      </div>
+    </div>
+    <p class="sub">현재 코드·프로젝트 문서·2026-09-11 실장비 증거 기준 · 담당 범위: IoT / ESP32-S3</p>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1500 930" role="img" aria-label="MotorDiagnosis current system flow diagram">
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0L0 0 0 40" fill="none" stroke="#1e293b" stroke-width=".5"/></pattern>
+        <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#64748b"/></marker>
+        <marker id="greenArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#34d399"/></marker>
+        <marker id="roseArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#fb7185"/></marker>
+        <marker id="amberArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#fbbf24"/></marker>
+      </defs>
+      <rect width="1500" height="930" fill="url(#grid)"/>
+
+      <!-- connections are deliberately drawn before component boxes -->
+      <path d="M220 270H300V190H330" stroke="#22d3ee" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="263" y="258" fill="#94a3b8" font-size="10">SPI · 800 Hz</text>
+      <path d="M220 465H300V365H330" stroke="#22d3ee" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="245" y="452" fill="#94a3b8" font-size="10">I2S · DMA</text>
+      <path d="M520 190H555" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#greenArrow)"/><text x="538" y="180" fill="#94a3b8" font-size="9" text-anchor="middle">Raw window</text>
+      <path d="M520 365H555V340" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#greenArrow)"/><text x="536" y="385" fill="#94a3b8" font-size="9" text-anchor="middle">audio ring</text>
+      <path d="M680 210V285" stroke="#fb923c" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="694" y="255" fill="#94a3b8" font-size="9">queue read</text>
+      <path d="M680 385V440" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#greenArrow)"/><text x="695" y="420" fill="#94a3b8" font-size="9">features</text>
+      <path d="M790 490H825V190H850" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#greenArrow)"/><text x="806" y="475" fill="#94a3b8" font-size="9">pending / rawHold</text>
+      <path d="M955 235V295" stroke="#a78bfa" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="970" y="270" fill="#94a3b8" font-size="9">write + verify</text>
+      <path d="M955 385V610" stroke="#a78bfa" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="970" y="470" fill="#94a3b8" font-size="9">durable batch</text>
+      <path d="M1050 650H1120V290H1180" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#amberArrow)"/><text x="1090" y="635" fill="#fbbf24" font-size="9">Wi-Fi · HTTPS</text>
+      <path d="M790 680H810V730H1120V480H1180" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#amberArrow)"/><text x="925" y="720" fill="#fbbf24" font-size="9">summary / health / config</text>
+      <path d="M1180 350H1125V650H1050" stroke="#fb7185" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#roseArrow)"/><text x="1140" y="500" fill="#fb7185" font-size="9" text-anchor="middle">ACK → delete / retry</text>
+      <path d="M790 540C735 585 675 605 570 635" stroke="#22d3ee" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="700" y="590" fill="#94a3b8" font-size="9">latest snapshot</text>
+      <path d="M570 680H600" stroke="#a78bfa" stroke-width="2" fill="none" marker-end="url(#arrow)"/><text x="585" y="670" fill="#94a3b8" font-size="9" text-anchor="middle">offline / backlog</text>
+      <path d="M790 680H850" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#greenArrow)"/><text x="820" y="670" fill="#94a3b8" font-size="9" text-anchor="middle">online queue</text>
+      <path d="M445 705V800H1120V520H1180" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 5" fill="none" marker-end="url(#arrow)"/><text x="900" y="790" fill="#94a3b8" font-size="9">auxiliary service loop</text>
+
+      <!-- boundaries -->
+      <rect x="25" y="55" width="220" height="675" rx="14" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8 4"/><text x="45" y="82" fill="#94a3b8" font-size="13" font-weight="600">FIELD HARDWARE</text>
+      <rect x="275" y="35" width="825" height="715" rx="14" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="9 5"/><text x="300" y="63" fill="#fbbf24" font-size="13" font-weight="600">ESP32-S3 · Arduino / FreeRTOS</text>
+      <rect x="1135" y="35" width="335" height="715" rx="14" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="9 5"/><text x="1160" y="63" fill="#fbbf24" font-size="13" font-weight="600">NETWORK / BACKEND</text>
+
+      <!-- hardware -->
+      <rect x="50" y="145" width="170" height="70" rx="6" fill="#0f172a"/><rect x="50" y="145" width="170" height="70" rx="6" fill="rgba(30,41,59,.5)" stroke="#94a3b8" stroke-width="1.5"/>
+      <text x="135" y="174" fill="white" font-size="12" text-anchor="middle" font-weight="600">Motor</text><text x="135" y="194" fill="#94a3b8" font-size="10" text-anchor="middle">회전 설비 · 현장 대상</text>
+      <rect x="50" y="235" width="170" height="85" rx="6" fill="#0f172a"/><rect x="50" y="235" width="170" height="85" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="135" y="265" fill="white" font-size="12" text-anchor="middle" font-weight="600">ADXL345</text><text x="135" y="285" fill="#94a3b8" font-size="10" text-anchor="middle">SPI · XYZ · 800 Hz</text><text x="135" y="303" fill="#22d3ee" font-size="9" text-anchor="middle">512 samples / 640 ms</text>
+      <rect x="50" y="430" width="170" height="85" rx="6" fill="#0f172a"/><rect x="50" y="430" width="170" height="85" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="135" y="460" fill="white" font-size="12" text-anchor="middle" font-weight="600">INMP441</text><text x="135" y="480" fill="#94a3b8" font-size="10" text-anchor="middle">I2S · 16 kHz PCM</text><text x="135" y="498" fill="#22d3ee" font-size="9" text-anchor="middle">common 640 ms window</text>
+      <text x="135" y="590" fill="#94a3b8" font-size="10" text-anchor="middle">센서 관측</text><text x="135" y="610" fill="#94a3b8" font-size="10" text-anchor="middle">→ 진동 + 음향 특징</text>
+
+      <!-- acquisition -->
+      <rect x="300" y="95" width="220" height="450" rx="10" fill="rgba(8,51,68,.18)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4 4"/><text x="320" y="122" fill="#22d3ee" font-size="12">ACQUISITION</text>
+      <rect x="330" y="145" width="160" height="90" rx="6" fill="#0f172a"/><rect x="330" y="145" width="160" height="90" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+      <text x="410" y="174" fill="white" font-size="11" text-anchor="middle" font-weight="600">VibrationFIFO</text><text x="410" y="194" fill="#94a3b8" font-size="9" text-anchor="middle">captureTask · core 0</text><text x="410" y="213" fill="#34d399" font-size="9" text-anchor="middle">Raw window · non-blocking</text>
+      <rect x="330" y="320" width="160" height="90" rx="6" fill="#0f172a"/><rect x="330" y="320" width="160" height="90" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+      <text x="410" y="349" fill="white" font-size="11" text-anchor="middle" font-weight="600">AudioCaptureTask</text><text x="410" y="369" fill="#94a3b8" font-size="9" text-anchor="middle">I2S DMA · core 1</text><text x="410" y="388" fill="#34d399" font-size="9" text-anchor="middle">audio ring 유지</text>
+      <text x="410" y="485" fill="#94a3b8" font-size="9" text-anchor="middle">센서 수집은 네트워크와 분리</text>
+
+      <!-- processing -->
+      <rect x="555" y="95" width="235" height="465" rx="10" fill="rgba(6,78,59,.18)" stroke="#34d399" stroke-width="1" stroke-dasharray="4 4"/><text x="575" y="122" fill="#34d399" font-size="12">PROCESSING / QUEUES</text>
+      <rect x="585" y="145" width="190" height="65" rx="6" fill="#0f172a"/><rect x="585" y="145" width="190" height="65" rx="6" fill="rgba(251,146,60,.3)" stroke="#fb923c" stroke-width="1.5"/>
+      <text x="680" y="172" fill="white" font-size="11" text-anchor="middle" font-weight="600">rawQueue</text><text x="680" y="192" fill="#fb923c" font-size="9" text-anchor="middle">FreeRTOS · capacity 8</text>
+      <rect x="585" y="285" width="190" height="100" rx="6" fill="#0f172a"/><rect x="585" y="285" width="190" height="100" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+      <text x="680" y="315" fill="white" font-size="11" text-anchor="middle" font-weight="600">WindowFeatures</text><text x="680" y="335" fill="#94a3b8" font-size="9" text-anchor="middle">processingTask · core 0</text><text x="680" y="354" fill="#94a3b8" font-size="9" text-anchor="middle">RMS + vibration/audio FFT</text><text x="680" y="373" fill="#34d399" font-size="9" text-anchor="middle">synchronized 640 ms</text>
+      <rect x="585" y="440" width="190" height="100" rx="6" fill="#0f172a"/><rect x="585" y="440" width="190" height="100" rx="6" fill="rgba(251,146,60,.3)" stroke="#fb923c" stroke-width="1.5"/>
+      <text x="680" y="470" fill="white" font-size="11" text-anchor="middle" font-weight="600">pending / rawHold</text><text x="680" y="490" fill="#94a3b8" font-size="9" text-anchor="middle">bounded RAM backlog</text><text x="680" y="509" fill="#fb923c" font-size="9" text-anchor="middle">8 + 8 slots</text><text x="680" y="528" fill="#fb7185" font-size="9" text-anchor="middle">full → bounded drop</text>
+
+      <!-- durability and dispatch -->
+      <rect x="825" y="95" width="250" height="620" rx="10" fill="rgba(76,29,149,.14)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4 4"/><text x="845" y="122" fill="#a78bfa" font-size="12">DURABILITY / DISPATCH</text>
+      <rect x="850" y="145" width="200" height="90" rx="6" fill="#0f172a"/><rect x="850" y="145" width="200" height="90" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="950" y="174" fill="white" font-size="11" text-anchor="middle" font-weight="600">Raw pre-send gate</text><text x="950" y="194" fill="#94a3b8" font-size="9" text-anchor="middle">write · flush · read-back · CRC</text><text x="950" y="213" fill="#a78bfa" font-size="9" text-anchor="middle">durable before HTTP</text>
+      <rect x="850" y="295" width="200" height="90" rx="6" fill="#0f172a"/><rect x="850" y="295" width="200" height="90" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="950" y="324" fill="white" font-size="11" text-anchor="middle" font-weight="600">RawSpoolIndex</text><text x="950" y="344" fill="#94a3b8" font-size="9" text-anchor="middle">512-slot RAM catalog</text><text x="950" y="363" fill="#34d399" font-size="9" text-anchor="middle">cursor collision: PASS</text>
+      <rect x="850" y="455" width="200" height="105" rx="6" fill="#0f172a"/><rect x="850" y="455" width="200" height="105" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="950" y="484" fill="white" font-size="11" text-anchor="middle" font-weight="600">LittleFS + NVS</text><text x="950" y="504" fill="#94a3b8" font-size="9" text-anchor="middle">raw spool + summary ring</text><text x="950" y="523" fill="#94a3b8" font-size="9" text-anchor="middle">sequence · time anchor</text><text x="950" y="542" fill="#fb7185" font-size="9" text-anchor="middle">raw storage: free=0</text>
+      <rect x="850" y="610" width="200" height="80" rx="6" fill="#0f172a"/><rect x="850" y="610" width="200" height="80" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+      <text x="950" y="638" fill="white" font-size="11" text-anchor="middle" font-weight="600">WindowHTTPS</text><text x="950" y="658" fill="#94a3b8" font-size="9" text-anchor="middle">networkTask · JSON/base64</text><text x="950" y="677" fill="#fb7185" font-size="9" text-anchor="middle">HTTP/ACK not entered</text>
+
+      <!-- loop / summary path -->
+      <rect x="320" y="610" width="250" height="95" rx="6" fill="#0f172a"/><rect x="320" y="610" width="250" height="95" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="445" y="640" fill="white" font-size="11" text-anchor="middle" font-weight="600">Arduino loop()</text><text x="445" y="660" fill="#94a3b8" font-size="9" text-anchor="middle">Wi-Fi · time · health · config</text><text x="445" y="679" fill="#94a3b8" font-size="9" text-anchor="middle">quality · snapshot · summary</text>
+      <rect x="600" y="610" width="190" height="95" rx="6" fill="#0f172a"/><rect x="600" y="610" width="190" height="95" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="695" y="640" fill="white" font-size="11" text-anchor="middle" font-weight="600">Telemetry ring / outbox</text><text x="695" y="660" fill="#94a3b8" font-size="9" text-anchor="middle">offline · invalid UTC</text><text x="695" y="679" fill="#a78bfa" font-size="9" text-anchor="middle">ACK 전까지 보존</text>
+      <rect x="850" y="760" width="200" height="55" rx="6" fill="#0f172a"/><rect x="850" y="760" width="200" height="55" rx="6" fill="rgba(251,113,133,.18)" stroke="#fb7185" stroke-width="1.5"/>
+      <text x="950" y="783" fill="#fb7185" font-size="10" text-anchor="middle" font-weight="600">OBSERVED BLOCK</text><text x="950" y="801" fill="#94a3b8" font-size="9" text-anchor="middle">free=0 → pre-send persistence</text>
+
+      <!-- network / backend -->
+      <rect x="1160" y="120" width="285" height="80" rx="6" fill="#0f172a"/><rect x="1160" y="120" width="285" height="80" rx="6" fill="rgba(120,53,15,.3)" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="1302" y="150" fill="white" font-size="11" text-anchor="middle" font-weight="600">Wi-Fi STA / NTP</text><text x="1302" y="170" fill="#94a3b8" font-size="9" text-anchor="middle">non-blocking reconnect · UTC anchor</text><text x="1302" y="188" fill="#fbbf24" font-size="9" text-anchor="middle">운영 HTTPS + CA 검증</text>
+      <rect x="1160" y="250" width="285" height="105" rx="6" fill="#0f172a"/><rect x="1160" y="250" width="285" height="105" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+      <text x="1302" y="280" fill="white" font-size="11" text-anchor="middle" font-weight="600">Raw ingest API</text><text x="1302" y="300" fill="#94a3b8" font-size="9" text-anchor="middle">POST /raw-vibration-windows</text><text x="1302" y="319" fill="#94a3b8" font-size="9" text-anchor="middle">strict ACK · retry / delete</text><text x="1302" y="338" fill="#fb7185" font-size="9" text-anchor="middle">현재 관측: request 0회</text>
+      <rect x="1160" y="430" width="285" height="105" rx="6" fill="#0f172a"/><rect x="1160" y="430" width="285" height="105" rx="6" fill="rgba(30,41,59,.5)" stroke="#94a3b8" stroke-width="1.5"/>
+      <text x="1302" y="460" fill="white" font-size="11" text-anchor="middle" font-weight="600">Summary / auxiliary APIs</text><text x="1302" y="480" fill="#94a3b8" font-size="9" text-anchor="middle">vibration · health · config</text><text x="1302" y="499" fill="#94a3b8" font-size="9" text-anchor="middle">quality · connectivity</text><text x="1302" y="518" fill="#94a3b8" font-size="9" text-anchor="middle">API v1.3 경계</text>
+      <rect x="1160" y="610" width="285" height="90" rx="6" fill="#0f172a"/><rect x="1160" y="610" width="285" height="90" rx="6" fill="rgba(30,41,59,.5)" stroke="#94a3b8" stroke-width="1.5"/>
+      <text x="1302" y="640" fill="white" font-size="11" text-anchor="middle" font-weight="600">Backend downstream</text><text x="1302" y="660" fill="#94a3b8" font-size="9" text-anchor="middle">telemetry storage → AI analysis</text><text x="1302" y="679" fill="#94a3b8" font-size="9" text-anchor="middle">→ frontend dashboard (외부 구현)</text>
+
+      <!-- boundary status / legend -->
+      <text x="30" y="855" fill="white" font-size="11" font-weight="600">Legend</text>
+      <rect x="30" y="870" width="15" height="10" fill="rgba(8,51,68,.4)" stroke="#22d3ee"/><text x="52" y="879" fill="#94a3b8" font-size="9">sensor / edge</text>
+      <rect x="150" y="870" width="15" height="10" fill="rgba(6,78,59,.4)" stroke="#34d399"/><text x="172" y="879" fill="#94a3b8" font-size="9">runtime / API</text>
+      <rect x="275" y="870" width="15" height="10" fill="rgba(76,29,149,.4)" stroke="#a78bfa"/><text x="297" y="879" fill="#94a3b8" font-size="9">durability</text>
+      <line x1="400" y1="875" x2="425" y2="875" stroke="#fb7185" stroke-width="2" stroke-dasharray="5 4"/><text x="435" y="879" fill="#94a3b8" font-size="9">observed block / error</text>
+      <line x1="620" y1="875" x2="645" y2="875" stroke="#34d399" stroke-width="2"/><text x="655" y="879" fill="#94a3b8" font-size="9">verified pass</text>
+      <text x="1150" y="855" fill="#fbbf24" font-size="10">주의: Backend·AI·Frontend 내부 구현은 이 로컬 IoT 미러에 없음</text>
+    </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card"><h3 style="color:#22d3ee">CURRENT PATH</h3><ul><li>ADXL345 + INMP441 동시 640 ms window</li><li>ESP32-S3에서 RMS / FFT feature 추출</li><li>Raw와 summary 전송 경로 분리</li></ul></div>
+    <div class="card"><h3 style="color:#a78bfa">PERSISTENCE CONTRACT</h3><ul><li>LittleFS/NVS에 ACK 전 상태 보존</li><li>Raw spool 512-slot catalog selector</li><li>at-least-once + backend idempotency</li></ul></div>
+    <div class="card"><h3 style="color:#fb7185">CURRENT OBSERVATION</h3><ul><li>cursor 충돌 회피: PASS</li><li>LittleFS free=0: BLOCKED</li><li>pending=8 · rawHold=8 · drop 증가</li></ul></div>
+  </div>
+  <p class="footer">Generated with the Cocoon-AI architecture-diagram-generator design system · source baseline: 2026-09-11 · no credentials included</p>
+</div>
+<script>
+async function capture(){const el=document.getElementById('report-container'),r=el.getBoundingClientRect(),p=32;return html2canvas(document.body,{backgroundColor:'#020617',scale:2,useCORS:true,ignoreElements:e=>e.classList&&e.classList.contains('toolbar'),x:r.left+scrollX-p,y:r.top+scrollY-p,width:r.width+p*2,height:r.height+p*2})}
+async function copyAsImage(b){const o=b.textContent;try{const c=await capture(),blob=await new Promise(r=>c.toBlob(r,'image/png'));await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);b.textContent='Copied'}catch(e){b.textContent='Failed'}setTimeout(()=>b.textContent=o,1500)}
+async function downloadPNG(b){const o=b.textContent;b.textContent='...';try{const c=await capture(),a=document.createElement('a');a.download='MotorDiagnosis_current_system_flow.png';a.href=c.toDataURL('image/png');a.click();b.textContent='Done'}catch(e){b.textContent='Failed'}setTimeout(()=>b.textContent=o,1500)}
+async function downloadPDF(b){const o=b.textContent;b.textContent='...';try{const c=await capture(),{jsPDF}=window.jspdf,p=new jsPDF({orientation:c.width>c.height?'landscape':'portrait',unit:'px',format:[c.width,c.height],hotfixes:['px_scaling']});p.addImage(c.toDataURL('image/png'),'PNG',0,0,c.width,c.height);p.save('MotorDiagnosis_current_system_flow.pdf');b.textContent='Done'}catch(e){b.textContent='Failed'}setTimeout(()=>b.textContent=o,1500)}
+</script>
+</body>
+</html>
