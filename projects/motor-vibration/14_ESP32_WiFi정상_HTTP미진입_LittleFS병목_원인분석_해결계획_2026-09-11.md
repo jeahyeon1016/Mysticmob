@@ -245,3 +245,17 @@ networkTask
 - 첫 두 attempt의 `status=-1/response=0B`는 시간 문제와 별도의 네트워크/TLS 재시도 문제로 남는다. 서버 202와 ACK 계약은 세 번째 attempt에서 확인됐다.
 - actual_drop/queue를 먼저 수정하지 않는다. 다음 번호는 **14-17: 진단 우회 상태에서 연결 재사용·TLS/POST 지연 및 재시도 원인을 한정 측정**한다. 그 전까지 LittleFS 구조·queue 용량·partition은 변경하지 않는다.
 - 원본 A/B serial 로그는 `D:\ai agent\tmp\MotorDiagnosis-14-16C\`에만 유지한다. MotorDiagnosis는 commit/push/PR하지 않았다.
+
+## 14-17 연결 수명·서버 증거·반복 장비 측정 결론
+
+- 14-17A 소스 대조 결과, `networkTask`가 `WiFiClientSecure`/`BackendHttp` 객체를 task 수명 동안 보유하지만 매 attempt 후 `http.end()`를 호출한다. 실패 attempt는 socket을 닫으므로 다음 retry에서 실제 TCP/TLS 재사용이 일어나지 않는다. 성공 후 `socket_connected=yes`는 확인됐지만 다음 attempt의 keep-alive 재사용은 미측정이다.
+- 실패 간격은 source의 retry backoff `2s → 4s`와 일치한다. B 로그의 첫 오류 시각 차이 `7.241s`는 POST 약 `5.049s` + `2s` backoff와 부합한다.
+- 14-17B는 서버 access/audit/ingest 로그와 독립 raw 조회 권한이 없어 수신 저장 여부를 확인하지 못했다. 다만 health `200`, DNS/TCP 443 도달, 14-16 B의 장비 `202 + strict ACK 4/4`는 확인했다.
+- 14-17C는 기존 B variant를 재업로드하지 않고 COM7 N16R8에서 RTS-only reset 후 180초를 측정했다. 7회 완료 attempt 모두 `status=-1`, `fail_stage=post`, `connection refused`, response `0B`, ACK `expected=4/matched=0/accepted=no`였다. POST `4.963~5.478s`, 마지막 `actual_drop=179`, `pending_depth=8`, `capture_queue_full=0`이었다.
+
+### 14-17 최종 판정 및 다음 gate
+
+- 14-16에서 진단 우회 후 3번째 attempt가 성공한 것은 사실이지만 14-17 반복에서 7회 연속 실패하여 통신 경로는 **간헐적·재현 불안정**으로 판정한다.
+- LittleFS storage diagnostic의 20초 지연 원인은 확정됐고, queue를 먼저 수정할 근거는 없다. 현재 drop은 networkTask가 POST/retry 동안 pending/rawHold를 소비하지 못한 결과다.
+- 다음 번호는 **14-18: firmware 수정 전 외부 endpoint에 대한 반복 TLS/POST 안정성 검증 및 실패 시점 계측 설계**다. 서버 access log 권한이 없으므로, 필요한 경우 서버 운영 측 로그를 받아야 한다.
+- 14-17C 결과 artifact는 `D:\ai agent\tmp\MotorDiagnosis-14-17C\17-compare.md`와 원본 로그이며 repo에 넣지 않았다.

@@ -236,3 +236,11 @@
 - B는 진단 호출을 0~1us로 우회했다. 첫 두 POST는 약 5초 후 실패했지만 세 번째는 `total=3.455880s`, POST `3.268684s`, `status=202`, response `762B`, strict ACK `4/4 accepted=yes`였다. 마지막 `actual_drop=56`, `capture_queue_full=0`이다.
 - 판정: 20초 지연 원인은 storage diagnostic으로 확정했지만, 성공 처리량 `3.456s`가 4 Raw 생성주기 `2.56s`보다 느리고 초기 연결 실패/재시도가 남아 rollout은 **BLOCKED**다. 다음 번호는 14-17 연결 재사용·TLS/POST 재시도 측정이다.
 - 원본 A/B 로그는 `D:\ai agent\tmp\MotorDiagnosis-14-16C\`에만 두며 MotorDiagnosis commit/push/PR은 하지 않는다.
+
+## 2026-09-11 14-17 연결 수명·서버 증거·반복 장비 결과
+
+- 소스상 client 객체는 task 수명 동안 유지되지만 실패 후 `http.end()`가 socket을 닫아 retry 간 TCP/TLS 재사용은 없었다. 성공 후 keep-alive 가능성만 남았다.
+- 서버 access/audit/ingest 로그는 권한 부족으로 독립 확인하지 못했다. health 200, DNS/TCP 443, 14-16 B 장비의 202 및 strict ACK 4/4는 확인했다.
+- 14-17C는 기존 B variant를 추가 업로드하지 않고 COM7 N16R8에서 180초 RTS-only 측정을 완료했다. 7회 모두 status=-1/connection refused/ACK 4/0/no, POST 4.963~5.478초, 마지막 actual_drop=179, pending=8, capture_queue_full=0이었다.
+- 판정: 14-16 성공은 재현되지 않아 통신 경로는 간헐적·불안정하다. storage diagnostic 20초 원인은 확정했지만 처리량·통신 안정성·rollout은 **BLOCKED**다. 다음 번호는 14-18 반복 TLS/POST 검증 및 실패 시점 계측 설계다.
+- 14-17C artifact는 `D:\ai agent\tmp\MotorDiagnosis-14-17C\17-compare.md`와 raw log이며 repo에 넣지 않는다. MotorDiagnosis commit/push/PR은 하지 않는다.
