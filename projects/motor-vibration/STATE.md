@@ -169,3 +169,12 @@
 - Raw spool은 2건 저장 후 slot `512` full을 반복했다. 최종 `raw_queue=8`, `pending=8`, `capture_queue_full=419`, `actual_drop_total=419`, `processing_pending_full_events=174`, `spool_capacity_full=182`였다.
 - storage timing 184건은 모두 `>1280ms`, 최대 `2,463,322us`였다. Audio overwrite, panic, watchdog, assert, 추가 reboot는 관측되지 않았다.
 - 결론은 **Wi-Fi/NTP는 통과했지만 TLS health 실패, Raw selector 정체, queue/storage backpressure 및 실제 window loss로 rollout BLOCKED**다. TLS 하위 원인은 Raw HTTP 미진입으로 확정하지 않는다.
+
+## 2026-09-11 구조 최적화 및 selector 리팩토링
+
+- `13_ESP32_구조최적화_리팩토링_관리대장_2026-09-11.md`에 13-01~13-08 번호로 기준선, 오류 전파, 변경, 검증, 구조도를 기록했다.
+- `raw_spool_index.h`를 추가해 부팅 시 raw spool header를 1회 복구하고, 런타임 batch/priority/state/oldest 조회는 512-entry RAM catalog에서 처리한다. 기존 selector의 batch당 최대 2,048회 filesystem 조회는 RAM 512항목 1회 순회와 선택 파일 최대 4개 읽기로 축소됐다.
+- `main.cpp`에서 telemetry queue 처리 뒤 도달 불가능했던 legacy 직접 HTTP 분기 164줄을 삭제해 summary 전송 경로를 하나로 유지했다.
+- 검증은 native `175/175`, N8 build 성공, diff check 통과다. RAM은 107,732 / 327,680 bytes(32.9%), Flash는 1,093,437 / 3,342,336 bytes(32.7%)다.
+- `MotorDiagnosis_main_architecture.html`을 architecture-diagram-generator v1.1 스타일로 갱신했다. 동기 LittleFS 쓰기와 TLS `-1`은 미해결 문제로, selector→HTTP 진행은 코드 수정 후 실장비 확인 대기로 표시했다.
+- 실장비 upload/log는 수행하지 않았다. 처리 task의 동기 LittleFS 쓰기, restored/current boot 시간축 매핑, TLS 하위 원인은 변경하지 않았으며 rollout 판정은 계속 **BLOCKED**다. `MotorDiagnosis` 변경은 사용자 요청 전 commit/push/PR하지 않는다.

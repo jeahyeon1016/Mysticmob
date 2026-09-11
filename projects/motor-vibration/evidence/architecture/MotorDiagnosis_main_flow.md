@@ -14,7 +14,7 @@
 - `remote_config.h/.cpp`
 - `vibration_window.h/.cpp`
 
-따라서 이 문서와 다이어그램의 “실행 기준”은 완전한 `D:\github\MotorDiagnosis`이며, `ai-agent` 쪽은 문서/증거 저장소이자 불완전한 미러로 표시했다. `MotorDiagnosis`에는 소스 변경을 하지 않았다.
+따라서 이 문서와 다이어그램의 “실행 기준”은 완전한 `D:\github\MotorDiagnosis`이며, `ai-agent` 쪽은 문서/증거 저장소이자 불완전한 미러로 표시했다. 이번 리팩토링 소스 변경은 `MotorDiagnosis` 작업 트리에만 있으며 commit/push하지 않았다.
 
 ## 2. 빌드 모드
 
@@ -65,6 +65,9 @@ ADXL345 SPI FIFO
        ├─ 여유 있음: pending에 저장
        ├─ pending full: rawHold(8)에 보류, 불가하면 drop
        └─ WindowHTTPS가 가져감
+  -> LittleFS raw spool + RawSpoolIndex(RAM metadata)
+       ├─ 부팅 때 512 slot header 1회 복구
+       └─ 이후 선택은 RAM 512항목 1회 순회 + 선택 파일 최대 4개 읽기
   -> raw JSON/base64 encode
   -> WiFiClientSecure + BackendHttp
   -> /api/devices/{DEVICE_ID}/raw-vibration-windows
@@ -77,7 +80,8 @@ ADXL345 SPI FIFO
 ## 5. 저장소와 복구
 
 - 일반 telemetry: LittleFS의 고정 binary ring, 25,000 physical slots / 24,999 logical capacity
-- Raw overload: `/raw-spool-v2-{slot}.bin`, 현재 설정은 16 slots
+- Raw overload: `/raw-spool-v2-{slot}.bin`, 현재 설정은 512 slots
+- Raw spool metadata: `raw_spool_index.h`의 512-entry RAM catalog; file 존재·header 반복 scan 대신 mode/cutoff/index/quarantine 선택을 담당
 - NVS: sequence, boot session, time anchor, health journal, remote config, quality outbox
 - 모든 주요 파일 쓰기는 flush/close/read-back/CRC 검증을 거친다.
 - 부팅 시 `restoreQueueFromFlash()`가 ring 전체를 검사하고 committed watermark 이후의 record를 복원한다.
@@ -96,7 +100,7 @@ ADXL345 SPI FIFO
 - 정상 online + backlog 없음: `telemetryTransmitQueue(4)`에 pointer enqueue
 - 다음 service pass에서 `serviceTelemetryNetworkOnce()`가 `postPacket()` 호출
 
-현재 continuous 모드에서는 `serviceEdgeAnalysis()`가 즉시 return한다. 또한 `loop()`의 `telemetryTransmitQueue` enqueue 성공 뒤에는 return하므로, 그 아래에 남은 legacy 직접 `postPacket()` 분기는 도달 불가능한 dead branch다. 이는 정리 후보이지 이번 작업에서 수정하지 않았다.
+현재 continuous 모드에서는 `serviceEdgeAnalysis()`가 즉시 return한다. `loop()`의 `telemetryTransmitQueue` enqueue/fallback 뒤 무조건 return하던 아래쪽 legacy 직접 `postPacket()` 분기 164줄은 삭제해 summary 전송 소유자를 `serviceTelemetryNetworkOnce()` 하나로 고정했다.
 
 ## 7. 외부 API 경계
 
@@ -116,7 +120,7 @@ ADXL345 SPI FIFO
 
 ## 8. 실장비 로그와 코드의 접점
 
-핫스팟 5분 로그(`MotorDiagnosis_COM7_N8_20260911_hotspot_reboot_5min.log`)는 다음을 확인했다.
+리팩토링 전 핫스팟 5분 로그(`MotorDiagnosis_COM7_N8_20260911_hotspot_reboot_5min.log`)는 다음을 확인했다.
 
 - Wi-Fi/NTP: 성공
 - `rawQueue=8`, `pending=8`
@@ -126,14 +130,14 @@ ADXL345 SPI FIFO
 - Raw TX stage: `priority_scan_begin` 이후 HTTP/ACK 없음
 - crash/watchdog/assert/additional reboot: 없음
 
-즉 현재 가장 먼저 분리해서 볼 문제는 “센서 취득”이 아니라 `LittleFS` 장시간 저장과 Raw network selector/HTTPS 진입 경계다. 다이어그램의 붉은 표시는 이 관측값을 뜻한다.
+리팩토링은 selector의 반복 파일 조회를 RAM 인덱스로 격리했다. 따라서 다음 실장비 검증에서는 `RAW-SELECT-DIAG` 종료와 `http_begin`이 나타나는지 먼저 확인한다. 처리 task의 동기 LittleFS 쓰기와 TLS `-1`은 변경하지 않았으므로 다이어그램의 붉은 위험 구간으로 남긴다.
 
-## 9. 정리 순서 제안
+## 9. 리팩토링 결과와 다음 검증
 
-1. `ai-agent`와 `MotorDiagnosis` 중 firmware source-of-truth를 하나로 결정
-2. `main.cpp` 7,961줄의 책임을 부팅/센서/저장/전송/보조 서비스 단위로 분리하기 전에 현재 호출·큐·락 계약을 테스트로 고정
-3. continuous Raw 경로에서 LittleFS spool을 동기 호출하는 구간과 `WindowHTTPS` selector 정체를 각각 계측
-4. `loop()`의 legacy unreachable direct-post branch와 continuous 모드에서 영구 return하는 legacy analysis path를 별도 삭제 후보로 검증
-5. 작은 leaf 모듈(`firmware_logic`, `vibration_window`, `edge_analysis`, `device_health`, `remote_config`, `communication_quality`)부터 bottom-up 테스트/문서화
+1. 추가 파일시스템 scan 없이 인덱스 선택 순서, cutoff, mode, quarantine, erase를 native 테스트 3개로 고정했다.
+2. 전체 native 175/175와 N8 빌드가 통과했다. RAM은 인덱스 때문에 8,192 bytes 증가해 32.9%다.
+3. 실장비에서 selector 종료→HTTP→ACK/delete 진행을 확인해야 한다.
+4. LittleFS 쓰기가 관측상 1.28~2.463초인 반면 Raw window는 0.64초마다 생성되므로, 지속 오프라인에서 무손실을 요구하면 파일 배치 형식 또는 별도 저장 파이프라인을 별도 설계해야 한다.
+5. TLS `-1`은 selector와 분리해 HTTP 하위 진단으로 계속 추적한다.
 
-이 문서는 구조 파악용이며 리팩터링이나 source 이동은 수행하지 않았다.
+이 문서는 리팩토링 후 코드 구조와 아직 실장비에서 확인하지 못한 경계를 함께 기록한다.
