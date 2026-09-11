@@ -253,6 +253,24 @@ networkTask
 - 14-17B는 서버 access/audit/ingest 로그와 독립 raw 조회 권한이 없어 수신 저장 여부를 확인하지 못했다. 다만 health `200`, DNS/TCP 443 도달, 14-16 B의 장비 `202 + strict ACK 4/4`는 확인했다.
 - 14-17C는 기존 B variant를 재업로드하지 않고 COM7 N16R8에서 RTS-only reset 후 180초를 측정했다. 7회 완료 attempt 모두 `status=-1`, `fail_stage=post`, `connection refused`, response `0B`, ACK `expected=4/matched=0/accepted=no`였다. POST `4.963~5.478s`, 마지막 `actual_drop=179`, `pending_depth=8`, `capture_queue_full=0`이었다.
 
+## 14-18 ESP 네트워크 계측 3회 결과 및 종료 판정
+
+- ESP 측 진단 빌드에 `begin/post/body/ack/end` 경계 로그와 소켓/TLS/Wi-Fi 상태를 추가했다. 기능 동작, queue, LittleFS, retry, payload, ACK 계약은 변경하지 않았다.
+- 1차는 7회 연속 `status=-1/connection refused/response 0B`, POST `5.065~5.486s`, DNS `rc=1`, `actual_drop=182`, `raw_hold_full=182`, `capture_queue_full=0`이었다.
+- 2차는 1회 `202 + response 762B + strict ACK 4/4`, POST `3.232s`, body `2.796ms`, ACK `0.816ms`로 성공했다. 성공 시 출력된 `tls_code=48/PADLOCK`은 `lastError()`를 무조건 읽은 진단 표기 오류이며 실제 TLS 실패가 아니다.
+- 3차는 4회 연속 `status=-1/connection refused/response 0B`, POST `5.125~5.154s`, DNS `rc=1`, resolved IP `3.34.124.89`, `actual_drop=48`, `raw_hold_full=48`, `capture_queue_full=0`이었다.
+- Wi-Fi는 `status=3`, IP `172.20.10.2`, RSSI 약 `-41~-49dBm`으로 유지됐고 실패는 HTTP 응답 이전의 `start_ssl_client()` 단계였다. DNS 성공만으로 서버 수신 여부를 확정할 수 없으므로 서버 access/load-balancer/TLS 로그가 필요하다.
+- 진단 로그의 `body_bytes=4`는 Raw 개수 오표기였고 `18065`로 보정했다. 성공 시 stale TLS 표기는 실패 시에만 `lastError()`를 읽도록 보정했다. 본체 문제와 진단 도구 문제를 분리한 뒤 추가 장비 검증은 중단한다.
+
+### 14-18 최종 판정
+
+- Wi-Fi/DNS: **PASS**
+- HTTP/TLS 안정성: **간헐적 FAIL/원인 미확정**
+- drop/queue: 네트워크 정체의 결과로 판단하며 queue 수정 보류
+- rollout: **BLOCKED**
+- 다음 판단에는 서버 측에서 장치 ID/요청 시각/대상 `3.34.124.89:443` 기준 TCP·TLS·HTTP 수신 및 종료 원인을 대조한다. 그 자료 전에는 ESP 또는 서버 단독 원인을 확정하지 않는다.
+- 14-18 추가 ESP 수정·빌드·업로드·재측정은 종료한다. 원본 로그는 `D:\ai agent\tmp\MotorDiagnosis-14-18\`에만 보관한다.
+
 ### 14-17 최종 판정 및 다음 gate
 
 - 14-16에서 진단 우회 후 3번째 attempt가 성공한 것은 사실이지만 14-17 반복에서 7회 연속 실패하여 통신 경로는 **간헐적·재현 불안정**으로 판정한다.

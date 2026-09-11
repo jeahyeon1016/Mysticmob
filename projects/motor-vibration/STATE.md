@@ -244,3 +244,14 @@
 - 14-17C는 기존 B variant를 추가 업로드하지 않고 COM7 N16R8에서 180초 RTS-only 측정을 완료했다. 7회 모두 status=-1/connection refused/ACK 4/0/no, POST 4.963~5.478초, 마지막 actual_drop=179, pending=8, capture_queue_full=0이었다.
 - 판정: 14-16 성공은 재현되지 않아 통신 경로는 간헐적·불안정하다. storage diagnostic 20초 원인은 확정했지만 처리량·통신 안정성·rollout은 **BLOCKED**다. 다음 번호는 14-18 반복 TLS/POST 검증 및 실패 시점 계측 설계다.
 - 14-17C artifact는 `D:\ai agent\tmp\MotorDiagnosis-14-17C\17-compare.md`와 raw log이며 repo에 넣지 않는다. MotorDiagnosis commit/push/PR은 하지 않는다.
+
+## 2026-09-11 14-18 ESP 네트워크 계측 최종 결과
+
+- 진단 빌드에서 `begin/post/body/ack/end` 경계, 소켓/TLS/Wi-Fi 상태를 기록했다. queue, LittleFS, retry, payload, ACK 계약은 건드리지 않았다.
+- 1차 7회는 모두 `status=-1/connection refused/response 0B`, POST `5.065~5.486s`, DNS `rc=1`, `actual_drop=182`, `raw_hold_full=182`, `capture_queue_full=0`이었다.
+- 2차는 `status=202`, response `762B`, strict ACK `4/4`, POST `3.232s`, body `2.796ms`, ACK `0.816ms`로 성공했다. 성공 시 `tls_code=48/PADLOCK`은 unconditional `lastError()` 호출에 의한 stale 진단 표기였다.
+- 3차 4회는 모두 `status=-1/connection refused/response 0B`, POST `5.125~5.154s`, DNS `rc=1`, resolved IP `3.34.124.89`, `actual_drop=48`, `raw_hold_full=48`, `capture_queue_full=0`이었다.
+- Wi-Fi `status=3`, IP `172.20.10.2`, RSSI 약 `-41~-49dBm`은 유지됐다. 실패는 HTTP 응답 이전 `start_ssl_client()` 단계로 좁혔지만 서버 수신 여부는 서버 로그 없이는 확정할 수 없다.
+- `body_bytes=4`는 Raw 개수 오표기였고 `18065`로 보정했다. stale TLS 표기도 실패 때만 `lastError()`를 읽도록 보정했다. 본체 문제와 진단 도구 문제를 분리했으며 추가 ESP 검증은 종료한다.
+- 최종 판정: Wi-Fi/DNS **PASS**, HTTP/TLS **간헐적 FAIL/원인 미확정**, queue 수정 **보류**, rollout **BLOCKED**. 다음 자료는 서버 access/load-balancer/TLS 로그이며, 자료 확보 전 단독 원인 판정은 금지한다.
+- 원본 로그는 `D:\ai agent\tmp\MotorDiagnosis-14-18\`에만 두고, MotorDiagnosis는 commit/push/PR하지 않는다.
