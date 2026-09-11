@@ -149,3 +149,13 @@
 - Final observed counters: `capture_queue_full=604`, `processing_pending_full_events=215`, `processing_pending_full_unique=1`, `actual_drop_total=604`, `raw_queue_depth=8`, `pending_depth=8`, `raw_hold_depth=0`, `spool_capacity_full=223`, and `spool_write_fail=0`. This confirms queue saturation and actual capture loss while the transmission selector was not progressing; it does not prove the lower-level cause of TLS `-1`.
 - No panic, watchdog, reboot, or unsafe LittleFS allocation failure appeared in this run. Cross-boot timestamp mapping remains unproven. The pre-existing `BackendHttp::end()` worktree difference was not changed by plan 12.
 - Final gate: **BLOCKED**. The diagnostic changes and fail-closed behavior are useful, but transmission progress and lossless capture are not resolved. Do not declare rollout healthy and do not make speculative TLS behavior, queue-capacity, partition, format, or erase changes. `D:\github\MotorDiagnosis` remains intentionally dirty and uncommitted/unpushed.
+
+## 2026-09-11 reboot 후 5분 실장비 로그
+
+- COM7을 GPIO0 high 유지 후 EN pulse 방식으로 재부팅하여 정상 애플리케이션 부팅을 확인했다. 로그는 `evidence/serial/MotorDiagnosis_COM7_N8_20260911_reboot_5min.log`에 저장했다.
+- Boot session `1946`, LittleFS mount 성공, `2747 / 24999` backlog 복구, CRC/schema-invalid `0`, legacy v1 `0`, ADXL345 `0xE5`, Raw `samples=512 quality=valid`를 확인했다.
+- 부팅 시 LittleFS는 total `2,752,512`, used `2,363,392`, free `389,120`이었다. Raw spool은 신규 1건 저장 후 slot `512`에서 `RAW-SPOOL-FULL`이 반복됐다.
+- Wi-Fi startup이 offline으로 남았고 reconnect timeout `27`회가 발생했다. NTP, HTTP, TLS, ACK 이벤트는 관측되지 않아 전송/TLS 판정은 보류한다.
+- 최종 `raw_queue=8`, `pending=8`, `capture_queue_full=331`, `actual_drop_total=331`, `Dropped windows=332`, `processing_pending_full_events=178`, audio overwrite `76`회였다. storage timing 187건은 모두 `>1280ms`, 최대 `1,945,610us`였다.
+- 해당 실행에서 panic, watchdog, assert, 추가 reboot는 없었다. 결론은 **정상 부팅·복구는 통과했지만 Wi-Fi 미연결 상태에서 queue/storage backpressure와 실제 window loss가 재현되어 rollout은 BLOCKED**다.
+- 기존 루트의 `MotorDiagnosis_COM7_N8_20260911_115200_5min.log`와 report는 과거 기준선으로 `evidence/serial/archive/`에 이동했다. 프로젝트 밖 원본은 제거했다.
