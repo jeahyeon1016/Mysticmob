@@ -159,3 +159,13 @@
 - 최종 `raw_queue=8`, `pending=8`, `capture_queue_full=331`, `actual_drop_total=331`, `Dropped windows=332`, `processing_pending_full_events=178`, audio overwrite `76`회였다. storage timing 187건은 모두 `>1280ms`, 최대 `1,945,610us`였다.
 - 해당 실행에서 panic, watchdog, assert, 추가 reboot는 없었다. 결론은 **정상 부팅·복구는 통과했지만 Wi-Fi 미연결 상태에서 queue/storage backpressure와 실제 window loss가 재현되어 rollout은 BLOCKED**다.
 - 기존 루트의 `MotorDiagnosis_COM7_N8_20260911_115200_5min.log`와 report는 과거 기준선으로 `evidence/serial/archive/`에 이동했다. 프로젝트 밖 원본은 제거했다.
+
+## 2026-09-11 핫스팟 재부팅 후 5분 실장비 로그
+
+- 핫스팟을 켠 뒤 COM7을 GPIO0 high 유지 후 EN pulse 방식으로 재부팅했고, `evidence/serial/MotorDiagnosis_COM7_N8_20260911_hotspot_reboot_5min.log`에 cmd 화면 출력과 원본 로그를 함께 저장했다.
+- 정상 앱 부팅, Boot session `1947`, LittleFS mount, backlog `2747 / 24999` 복구, CRC/schema-invalid `0`, legacy v1 `0`, ADXL345 `0xE5`를 확인했다.
+- Wi-Fi 연결 성공(IP `172.20.10.2`, RSSI `-41 dBm`) 및 NTP 동기화 성공으로 이전 실행의 offline 원인은 제거됐다.
+- Backend health HTTPS는 `start_ssl_client: -1`로 실패했다. Raw TX는 `loop_ready → time_ready → priority_scan_begin`까지 도달했지만 HTTP/ACK/delete 이벤트는 없었다.
+- Raw spool은 2건 저장 후 slot `512` full을 반복했다. 최종 `raw_queue=8`, `pending=8`, `capture_queue_full=419`, `actual_drop_total=419`, `processing_pending_full_events=174`, `spool_capacity_full=182`였다.
+- storage timing 184건은 모두 `>1280ms`, 최대 `2,463,322us`였다. Audio overwrite, panic, watchdog, assert, 추가 reboot는 관측되지 않았다.
+- 결론은 **Wi-Fi/NTP는 통과했지만 TLS health 실패, Raw selector 정체, queue/storage backpressure 및 실제 window loss로 rollout BLOCKED**다. TLS 하위 원인은 Raw HTTP 미진입으로 확정하지 않는다.
