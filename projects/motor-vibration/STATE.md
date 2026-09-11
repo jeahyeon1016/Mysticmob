@@ -228,3 +228,11 @@
 - POST 대기 동안 pending capacity 8이 포화되어 `processing_pending_full_events=53`, `actual_drop_total=45`, `raw_hold_full=45`가 됐다. `capture_queue_full=0`이며 panic/watchdog/assert/heap corruption은 없었다.
 - 최종 판정: **PSRAM→no-spool 진단 경로 PASS, HTTP/TLS end-to-end NO-GO, rollout BLOCKED**. `connection refused`는 HTTP status 이전이므로 서버 443 listener/방화벽/endpoint reachability를 먼저 read-only 확인한다.
 - 원본 serial log `MotorDiagnosis_COM7_N16R8_transport_diag_20260911_raw.log`는 로컬 증거로만 유지하며 민감정보 보호를 위해 push하지 않는다. MotorDiagnosis는 계속 dirty/uncommitted/unpushed다.
+
+## 2026-09-11 14-16 raw-post storage diagnostic A/B 결과
+
+- N16R8/COM7에서 A/B variant build·upload 및 100초 로그를 완료했다. LittleFS upload/format/erase/partition과 queue 변경은 없었다.
+- A는 `raw_post_before=9.953987s`, `raw_post_after=10.079944s`, `total=25.627061s`, POST `5.238682s`, `status=-1`, ACK `0/4`, `actual_drop=60`, `capture_queue_full=0`이었다. 내부 원인은 `totalBytes()`/`usedBytes()` 각 약 4.98초로 확인됐다.
+- B는 진단 호출을 0~1us로 우회했다. 첫 두 POST는 약 5초 후 실패했지만 세 번째는 `total=3.455880s`, POST `3.268684s`, `status=202`, response `762B`, strict ACK `4/4 accepted=yes`였다. 마지막 `actual_drop=56`, `capture_queue_full=0`이다.
+- 판정: 20초 지연 원인은 storage diagnostic으로 확정했지만, 성공 처리량 `3.456s`가 4 Raw 생성주기 `2.56s`보다 느리고 초기 연결 실패/재시도가 남아 rollout은 **BLOCKED**다. 다음 번호는 14-17 연결 재사용·TLS/POST 재시도 측정이다.
+- 원본 A/B 로그는 `D:\ai agent\tmp\MotorDiagnosis-14-16C\`에만 두며 MotorDiagnosis commit/push/PR은 하지 않는다.

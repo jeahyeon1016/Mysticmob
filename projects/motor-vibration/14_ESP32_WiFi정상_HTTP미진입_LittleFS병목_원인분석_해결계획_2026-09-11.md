@@ -229,3 +229,19 @@ networkTask
 - 이번 결과만으로 firmware payload 오류와 서버 포트/방화벽/백엔드 가용성 중 하나를 단정하지 않는다. `connection refused`는 HTTP status 이전 실패다.
 - **다음 14-15:** firmware를 더 수정하지 않고 동일 endpoint에 대한 host/server 측 443 reachability와 backend listener를 read-only로 확인한다. 그 결과가 정상일 때만 TLS client 설정 또는 endpoint 설정을 별도 번호로 검토한다.
 - 저장 구조는 별도 트랙으로 유지한다. 현재는 24시간 내부 Flash 보존을 목표로 하지 않고, 전송 실패 시 bounded fallback 정책을 결정할 때까지 production rollout을 승인하지 않는다.
+
+## 14-16 raw-post 저장 진단 A/B 업로드 및 로그 결론
+
+- N16R8/COM7에서 두 variant를 각각 build·upload하고 RTS-only reset 후 100초 UART 로그를 수집했다. LittleFS upload/format/erase/partition 변경과 queue/HTTP 정책 변경은 없었다.
+- A(`RAW_TRANSPORT_DIAGNOSTIC_SKIP_RAW_POST_STORAGE=0`)에서 `raw_post_before`는 `9.953987s`, `raw_post_after`는 `10.079944s`였다. 내부 측정상 LittleFsLock wait는 `6us`, heap check들은 각 `0.3~0.5ms`였고 `totalBytes()`/`usedBytes()`가 각각 약 `4.98s`를 차지했다.
+- A의 첫 전송은 `total=25.627061s`, POST `5.238682s`, `status=-1`, response `0B`, strict ACK `matched=0/accepted=no`였다. pending capacity 8이 포화되어 마지막 `rawHold=60`, `actual_drop=60`, `capture_queue_full=0`이었다.
+- B(`...SKIP_RAW_POST_STORAGE=1`)에서 두 진단 호출은 모두 `bypass=1`, `0~1us`였다. 첫 두 attempt는 POST 약 `5.049s`/`5.037s`와 `status=-1`, response `0B`였지만, 세 번째 attempt는 POST `3.269s`, `status=202`, response `762B`, strict ACK `expected=4/matched=4/accepted=yes`, 전체 `3.455880s`로 성공했다.
+- B의 100초 관찰 마지막 수치는 `pending_depth=8`, `rawHold=56`, `actual_drop=56`, `capture_queue_full=0`이었다. 진단 오버헤드 제거만으로 25.6초 블로킹은 제거됐지만 전송 실패·재시도와 downstream backlog는 남았다.
+
+### 14-16 판정 및 다음 gate
+
+- `raw_post_before/after`의 약 20초 지연 원인은 **LittleFS `totalBytes()`/`usedBytes()`를 포함한 storage memory diagnostic으로 확정**한다. lock 자체나 heap integrity check가 주원인은 아니다.
+- 진단 우회 후 strict ACK 성공 사례는 확보했으나 전체 성공 시간이 `3.455880s`로 Raw 4개 생성 주기 `0.64×4=2.56s`보다 길다. 따라서 장기 처리량은 아직 **FAIL**이다.
+- 첫 두 attempt의 `status=-1/response=0B`는 시간 문제와 별도의 네트워크/TLS 재시도 문제로 남는다. 서버 202와 ACK 계약은 세 번째 attempt에서 확인됐다.
+- actual_drop/queue를 먼저 수정하지 않는다. 다음 번호는 **14-17: 진단 우회 상태에서 연결 재사용·TLS/POST 지연 및 재시도 원인을 한정 측정**한다. 그 전까지 LittleFS 구조·queue 용량·partition은 변경하지 않는다.
+- 원본 A/B serial 로그는 `D:\ai agent\tmp\MotorDiagnosis-14-16C\`에만 유지한다. MotorDiagnosis는 commit/push/PR하지 않았다.
