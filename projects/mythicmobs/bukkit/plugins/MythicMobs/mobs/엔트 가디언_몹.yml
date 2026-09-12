@@ -45,3 +45,5 @@ EntGuardianRoot:
   Skills:
     - skill{s=EGR_Init} @self ~onSpawn
     - skill{s=EGR_Strike} @self ~onTimer:12
+    # Parent cleanup is the fallback when the guardian death event misses a child.
+    - skill{s=EGR_Cleanup} @self ~onTimer:20

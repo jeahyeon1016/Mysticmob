@@ -75,35 +75,36 @@ EG_Smash:
     - setspeed{speed=1} @self
     - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=1}
 
-EG_RootWarning:
+EG_RootQuake:
   Skills:
-    - sound{s=entity.evoker.prepare_attack;v=1.1;p=0.65;r=20} @self
-    - particlering{p=redstone;points=48;radius=2;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - sound{s=entity.ender_dragon.growl;v=1.2;p=0.65;r=24} @self
+    - particlering{p=redstone;points=48;radius=4;color=#43B05C;a=1;y=0.3;repeat=20;repeatInterval=1} @self
+    - delay 20
+    - sound{s=block.stone.break;v=1.3;p=0.65;r=24} @self
+    - particles{p=block_crack;m=BONE_BLOCK;a=32;hS=4;vS=0.35;s=0.08;y=0.3} @self
+    - particlering{p=block_crack;m=BONE_BLOCK;points=48;radius=4;a=2;y=0.3} @self
+    - damage{a=10} @PlayersInRadius{r=4}
     - delay 10
-    - sound{s=block.note_block.chime;v=1.0;p=0.75;r=20} @self
-    - particlering{p=redstone;points=48;radius=3;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
-    - delay 10
-    - particlering{p=redstone;points=48;radius=4;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
-    - delay 10
-    - sound{s=block.note_block.chime;v=1.1;p=0.9;r=20} @self
-    - particlering{p=redstone;points=48;radius=5;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
-    - delay 10
-    - particlering{p=redstone;points=48;radius=6;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
-    - delay 10
-    - sound{s=block.note_block.chime;v=1.2;p=1.05;r=20} @self
-    - particlering{p=redstone;points=48;radius=7;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
-    - delay 10
-    - particlering{p=redstone;points=64;radius=8;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
-    - sound{s=entity.generic.explode;v=1.5;p=0.55;r=24} @self
-    - particlesphere{p=redstone;color=#43B05C;size=1;amount=40;radius=8} @self
+    - particlering{p=redstone;points=64;radius=8;color=#43B05C;a=1;y=0.3;repeat=20;repeatInterval=1} @self
+    - delay 20
+    - sound{s=entity.generic.explode;v=1.5;p=0.7;r=24} @self
+    - particles{p=block_crack;m=BONE_BLOCK;a=64;hS=8;vS=0.5;s=0.12;y=0.3} @self
+    - particlering{p=block_crack;m=BONE_BLOCK;points=64;radius=8;a=3;y=0.3} @self
     - damage{a=10} @PlayersInRadius{r=8}
+    - delay 10
+    - particlering{p=redstone;points=80;radius=10;color=#43B05C;a=1;y=0.3;repeat=20;repeatInterval=1} @self
+    - delay 20
+    - sound{s=entity.generic.explode;v=1.8;p=0.5;r=28} @self
+    - particles{p=block_crack;m=BONE_BLOCK;a=96;hS=10;vS=0.65;s=0.16;y=0.3} @self
+    - particlering{p=block_crack;m=BONE_BLOCK;points=80;radius=10;a=4;y=0.3} @self
+    - damage{a=10} @PlayersInRadius{r=10}
 
 EG_RootPhase:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - skill{s=EG_RootWarning} @self
+    - skill{s=EG_RootQuake} @self
     - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=0}
     - delay 25
     - setspeed{speed=1} @self
@@ -114,7 +115,7 @@ EG_RootPhase60:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - skill{s=EG_RootWarning} @self
+    - skill{s=EG_RootQuake} @self
     - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=5}
     - delay 25
     - setspeed{speed=1} @self
@@ -125,7 +126,7 @@ EG_RootPhase40:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - skill{s=EG_RootWarning} @self
+    - skill{s=EG_RootQuake} @self
     - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=10}
     - delay 25
     - setspeed{speed=1} @self
@@ -136,7 +137,7 @@ EG_RootPhase20:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - skill{s=EG_RootWarning} @self
+    - skill{s=EG_RootQuake} @self
     - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=15}
     - delay 25
     - setspeed{speed=1} @self
@@ -174,3 +175,10 @@ EGR_Strike:
   Skills:
     - particlesphere{p=redstone;color=#43B05C;size=0.9;amount=20;radius=2} @self
     - damage{a=10} @PlayersInRadius{r=2}
+
+EGR_Cleanup:
+  Conditions:
+    - hasparent true
+    - isparentalive false
+  Skills:
+    - remove @self
