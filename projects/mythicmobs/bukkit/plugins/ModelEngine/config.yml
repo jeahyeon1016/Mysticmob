@@ -36,7 +36,7 @@ Model-Engine:
     SPAWN: spawn
     DEATH: death
 Model-Generator:
-  Delete-Old: true
+  Delete-Old: false
   Register-Post-Server: true
   Assets-Post-Server: true
   Compile-Post-Server: true
