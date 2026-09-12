@@ -25,6 +25,7 @@
 - [x] 엔트 가디언 소환 패턴 범위 연출 반영: 지상 범위 파티클과 종료 시 반경 피해·효과음
 - [x] 엔트 가디언 소환 패턴을 지진 3연타로 변경: 반경 4→8→10칸 순차 피해·잔해 연출, 각 단계 회피 간격 추가
 - [x] 뿌리 자체의 부모 생존 감지 정리(`hasparent` + `isparentalive`) 추가
+- [x] 엔트 가디언 지진 범위 표시를 타격 전 선명한 지상 링으로 보강하고 4칸 첫 타격 폭발음 추가
 
 ## 현재 판단
 
@@ -42,6 +43,7 @@
 | 2026-09-10 | 엔트 가디언 뿌리 누적 및 패턴 정리 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml` |
 | 2026-09-13 | 엔트 가디언 뿌리 수명·피해 루프 및 소환 경고 범위 보강 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml`, `bukkit/plugins/MythicMobs/mobs/엔트 가디언_몹.yml` |
 | 2026-09-13 | 엔트 가디언 지진 3연타 및 뿌리 자가 정리 보강 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml`, `bukkit/plugins/MythicMobs/mobs/엔트 가디언_몹.yml` |
+| 2026-09-13 | 엔트 가디언 지진 범위 표시·첫 타격음 보강 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml` |
 
 ## 다음 업데이트 규칙
 
