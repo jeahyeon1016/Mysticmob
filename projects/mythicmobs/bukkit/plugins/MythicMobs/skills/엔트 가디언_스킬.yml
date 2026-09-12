@@ -75,13 +75,36 @@ EG_Smash:
     - setspeed{speed=1} @self
     - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=1}
 
+EG_RootWarning:
+  Skills:
+    - sound{s=entity.evoker.prepare_attack;v=1.1;p=0.65;r=20} @self
+    - particlering{p=redstone;points=48;radius=2;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - delay 10
+    - sound{s=block.note_block.chime;v=1.0;p=0.75;r=20} @self
+    - particlering{p=redstone;points=48;radius=3;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - delay 10
+    - particlering{p=redstone;points=48;radius=4;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - delay 10
+    - sound{s=block.note_block.chime;v=1.1;p=0.9;r=20} @self
+    - particlering{p=redstone;points=48;radius=5;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - delay 10
+    - particlering{p=redstone;points=48;radius=6;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - delay 10
+    - sound{s=block.note_block.chime;v=1.2;p=1.05;r=20} @self
+    - particlering{p=redstone;points=48;radius=7;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - delay 10
+    - particlering{p=redstone;points=64;radius=8;color=#43B05C;a=1;y=0.3;repeat=10;repeatInterval=1} @self
+    - sound{s=entity.generic.explode;v=1.5;p=0.55;r=24} @self
+    - particlesphere{p=redstone;color=#43B05C;size=1;amount=40;radius=8} @self
+    - damage{a=10} @PlayersInRadius{r=8}
+
 EG_RootPhase:
   Skills:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - delay 25
-    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=0}
+    - skill{s=EG_RootWarning} @self
+    - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=0}
     - delay 25
     - setspeed{speed=1} @self
     - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
@@ -91,8 +114,8 @@ EG_RootPhase60:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - delay 25
-    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=5}
+    - skill{s=EG_RootWarning} @self
+    - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=5}
     - delay 25
     - setspeed{speed=1} @self
     - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
@@ -102,8 +125,8 @@ EG_RootPhase40:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - delay 25
-    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=10}
+    - skill{s=EG_RootWarning} @self
+    - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=10}
     - delay 25
     - setspeed{speed=1} @self
     - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
@@ -113,8 +136,8 @@ EG_RootPhase20:
     - setvariable{var=caster.count;type=INTEGER;value=2} @self
     - setspeed{speed=0} @self
     - meg:state{mid=ent_guardian;s=arm_inground;priority=4;li=0;lo=0} @self
-    - delay 25
-    - summon{type=EntGuardianRoot;amount=1;radius=0} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=15}
+    - skill{s=EG_RootWarning} @self
+    - summon{type=EntGuardianRoot;amount=1;radius=0;summonerisparent=true} @BlocksInRadius{r=12;blocktypes=BONE_BLOCK;blockcentered=true;upoffset=0.5;limit=5;sort=NEAREST;stuti=15}
     - delay 25
     - setspeed{speed=1} @self
     - setvariable{var=caster.count;type=INTEGER;value=0} @self ?variableEquals{var=caster.count;value=2}
@@ -146,7 +169,6 @@ EGR_Init:
   Skills:
     - meg:model{mid=ent_branch;d=false;i=true;lpitch=true;usm=true;save=false} @self
     - meg:state{mid=ent_branch;s=skill;priority=3;loop=LOOP;force=true;li=0;lo=0} @self
-    - skill{s=EGR_Strike;repeat=11;repeatInterval=33;delay=12} @self
 
 EGR_Strike:
   Skills:

@@ -44,3 +44,4 @@ EntGuardianRoot:
     PreventOtherDrops: true
   Skills:
     - skill{s=EGR_Init} @self ~onSpawn
+    - skill{s=EGR_Strike} @self ~onTimer:12
