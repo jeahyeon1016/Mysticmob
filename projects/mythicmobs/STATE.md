@@ -26,6 +26,8 @@
 - [x] 엔트 가디언 소환 패턴을 지진 3연타로 변경: 반경 4→8→10칸 순차 피해·잔해 연출, 각 단계 회피 간격 추가
 - [x] 뿌리 자체의 부모 생존 감지 정리(`hasparent` + `isparentalive`) 추가
 - [x] 엔트 가디언 지진 범위 표시를 타격 전 선명한 지상 링으로 보강하고 4칸 첫 타격 폭발음 추가
+- [x] 엔트 가디언 지진 범위 파티클을 `@Ring` 좌표 직접 출력 방식으로 변경해 플레이어 적중 여부와 무관하게 시각화
+- [x] 엔트 가디언 지진 범위 표시를 별도 반복 스킬과 `happy_villager` 원주 파티클로 분리해 타격 잔해와 구분
 
 ## 현재 판단
 
@@ -44,6 +46,8 @@
 | 2026-09-13 | 엔트 가디언 뿌리 수명·피해 루프 및 소환 경고 범위 보강 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml`, `bukkit/plugins/MythicMobs/mobs/엔트 가디언_몹.yml` |
 | 2026-09-13 | 엔트 가디언 지진 3연타 및 뿌리 자가 정리 보강 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml`, `bukkit/plugins/MythicMobs/mobs/엔트 가디언_몹.yml` |
 | 2026-09-13 | 엔트 가디언 지진 범위 표시·첫 타격음 보강 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml` |
+| 2026-09-13 | 엔트 가디언 지진 범위 파티클 직접 출력 전환 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml` |
+| 2026-09-13 | 엔트 가디언 지진 범위 파티클을 별도 원주 스킬로 분리 | 완료 / `mm reload` 확인 | `bukkit/plugins/MythicMobs/skills/엔트 가디언_스킬.yml` |
 
 ## 다음 업데이트 규칙
 

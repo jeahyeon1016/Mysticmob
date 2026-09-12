@@ -78,7 +78,7 @@ EG_Smash:
 EG_RootQuake:
   Skills:
     - sound{s=entity.ender_dragon.growl;v=1.2;p=0.65;r=24} @self
-    - effect:particlering{p=redstone;points=48;radius=4;color=#8AFF80;a=2;y=0.3;repeat=20;repeatInterval=1} @self
+    - skill{s=EG_QuakeRange4;repeat=20;repeatInterval=1} @self
     - delay 20
     - sound{s=entity.generic.explode;v=1.3;p=0.9;r=24} @self
     - sound{s=block.stone.break;v=1.3;p=0.65;r=24} @self
@@ -86,19 +86,31 @@ EG_RootQuake:
     - particlering{p=block_crack;m=BONE_BLOCK;points=48;radius=4;a=2;y=0.3} @self
     - damage{a=10} @PlayersInRadius{r=4}
     - delay 10
-    - effect:particlering{p=redstone;points=64;radius=8;color=#8AFF80;a=2;y=0.3;repeat=20;repeatInterval=1} @self
+    - skill{s=EG_QuakeRange8;repeat=20;repeatInterval=1} @self
     - delay 20
     - sound{s=entity.generic.explode;v=1.5;p=0.7;r=24} @self
     - particles{p=block_crack;m=BONE_BLOCK;a=64;hS=8;vS=0.5;s=0.12;y=0.3} @self
     - particlering{p=block_crack;m=BONE_BLOCK;points=64;radius=8;a=3;y=0.3} @self
     - damage{a=10} @PlayersInRadius{r=8}
     - delay 10
-    - effect:particlering{p=redstone;points=80;radius=10;color=#8AFF80;a=2;y=0.3;repeat=20;repeatInterval=1} @self
+    - skill{s=EG_QuakeRange10;repeat=20;repeatInterval=1} @self
     - delay 20
     - sound{s=entity.generic.explode;v=1.8;p=0.5;r=28} @self
     - particles{p=block_crack;m=BONE_BLOCK;a=96;hS=10;vS=0.65;s=0.16;y=0.3} @self
     - particlering{p=block_crack;m=BONE_BLOCK;points=80;radius=10;a=4;y=0.3} @self
     - damage{a=10} @PlayersInRadius{r=10}
+
+EG_QuakeRange4:
+  Skills:
+    - particles{p=happy_villager;a=1;hS=0.02;vS=0.02;s=0} @Ring{r=4;p=48;oy=0.3}
+
+EG_QuakeRange8:
+  Skills:
+    - particles{p=happy_villager;a=1;hS=0.02;vS=0.02;s=0} @Ring{r=8;p=64;oy=0.3}
+
+EG_QuakeRange10:
+  Skills:
+    - particles{p=happy_villager;a=1;hS=0.02;vS=0.02;s=0} @Ring{r=10;p=80;oy=0.3}
 
 EG_RootPhase:
   Skills:
